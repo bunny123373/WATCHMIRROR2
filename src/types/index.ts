@@ -17,6 +17,12 @@ export interface Season {
   episodes: Episode[];
 }
 
+export interface ContentStream {
+  language: string;
+  hlsLink: string;
+  embedIframeLink: string;
+}
+
 export interface IContent {
   _id?: string;
   type: "movie" | "series";
@@ -40,6 +46,7 @@ export interface IContent {
   metaDescription: string;
   hlsLink?: string;
   embedIframeLink?: string;
+  streams?: ContentStream[];
   seasons?: Season[];
   createdAt?: Date;
   updatedAt?: Date;

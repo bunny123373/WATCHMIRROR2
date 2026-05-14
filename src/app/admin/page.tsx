@@ -39,6 +39,7 @@ export default function AdminPage() {
   const [selectedLanguage, setSelectedLanguage] = useState("English");
   const [selectedDubLanguages, setSelectedDubLanguages] = useState<string[]>([]);
   const [selectedAudio, setSelectedAudio] = useState<string[]>(["English"]);
+  const [streamInputs, setStreamInputs] = useState<{ language: string; hlsLink: string; embedIframeLink: string }[]>([]);
   const [importing, setImporting] = useState(false);
   const [step, setStep] = useState(1);
 
@@ -61,6 +62,17 @@ export default function AdminPage() {
   };
 
   useEffect(() => { fetchContent(); }, []);
+
+  // Sync stream inputs with language + dub selection
+  useEffect(() => {
+    const langs = new Set<string>();
+    if (selectedLanguage) langs.add(selectedLanguage);
+    selectedDubLanguages.forEach((l) => langs.add(l));
+    setStreamInputs((prev) => {
+      const existing = new Map(prev.map((s) => [s.language, s]));
+      return Array.from(langs).map((l) => existing.get(l) || { language: l, hlsLink: "", embedIframeLink: "" });
+    });
+  }, [selectedLanguage, selectedDubLanguages]);
 
   const stats = {
     total: content.length,
@@ -130,7 +142,7 @@ export default function AdminPage() {
       const res = await fetch("/api/admin/seed", {
         method: "POST",
         headers: { "Content-Type": "application/json", "x-admin-key": ADMIN_KEY },
-        body: JSON.stringify({ tmdbId: selectedItem.id, type: importType, hlsLink, embedIframeLink: embedLink, seasons: parsedSeasons, language: selectedLanguage, dubLanguages: selectedDubLanguages, audioAvailable: selectedAudio }),
+        body: JSON.stringify({ tmdbId: selectedItem.id, type: importType, hlsLink, embedIframeLink: embedLink, streams: streamInputs.filter((s) => s.hlsLink || s.embedIframeLink), seasons: parsedSeasons, language: selectedLanguage, dubLanguages: selectedDubLanguages, audioAvailable: selectedAudio }),
       });
       if (res.ok) {
         setShowAddModal(false); resetAddModal(); fetchContent();
@@ -146,7 +158,7 @@ export default function AdminPage() {
   const resetAddModal = () => {
     setTmdbQuery(""); setTmdbResults([]); setSearchError(""); setSearched(false);
     setSelectedItem(null); setSelectedDetails(null); setHlsLink(""); setEmbedLink(""); setSeasons("");
-    setSelectedLanguage("English"); setSelectedDubLanguages([]); setSelectedAudio(["English"]);
+    setSelectedLanguage("English"); setSelectedDubLanguages([]); setSelectedAudio(["English"]); setStreamInputs([]);
     setStep(1);
   };
 
@@ -499,12 +511,28 @@ export default function AdminPage() {
                       </div>
                     </div>
 
-                    {/* Movie streams */}
-                    {importType === "movie" && (
+                    {/* Stream Sources per Language */}
+                    {streamInputs.length > 0 && (
                       <div className="space-y-3 p-4 rounded-xl bg-[#050608] border border-[#1F232D]">
-                        <p className="text-xs font-medium text-[#F9FAFB]">Stream Sources</p>
-                        <input type="text" value={hlsLink} onChange={(e) => setHlsLink(e.target.value)} placeholder="HLS Stream URL (.m3u8)" className="w-full h-11 px-4 rounded-xl bg-[#0E1015] border border-[#1F232D] text-[#F9FAFB] placeholder-[#9CA3AF] text-sm focus:outline-none focus:border-[#F5C542]" />
-                        <input type="text" value={embedLink} onChange={(e) => setEmbedLink(e.target.value)} placeholder="Embed Iframe URL (fallback)" className="w-full h-11 px-4 rounded-xl bg-[#0E1015] border border-[#1F232D] text-[#F9FAFB] placeholder-[#9CA3AF] text-sm focus:outline-none focus:border-[#F5C542]" />
+                        <p className="text-xs font-medium text-[#F9FAFB]">Stream Sources per Language</p>
+                        <p className="text-[10px] text-[#9CA3AF]">Provide HLS or Embed URL for each language</p>
+                        {streamInputs.map((si, idx) => (
+                          <div key={si.language} className="p-3 rounded-lg bg-[#0E1015] border border-[#1F232D]">
+                            <p className="text-xs font-medium text-[#F5C542] mb-2">{si.language}</p>
+                            <div className="space-y-2">
+                              <input type="text" value={si.hlsLink} onChange={(e) => {
+                                const copy = [...streamInputs];
+                                copy[idx] = { ...copy[idx], hlsLink: e.target.value };
+                                setStreamInputs(copy);
+                              }} placeholder="HLS Stream URL (.m3u8)" className="w-full h-10 px-3 rounded-lg bg-[#050608] border border-[#1F232D] text-[#F9FAFB] placeholder-[#9CA3AF] text-xs focus:outline-none focus:border-[#F5C542]" />
+                              <input type="text" value={si.embedIframeLink} onChange={(e) => {
+                                const copy = [...streamInputs];
+                                copy[idx] = { ...copy[idx], embedIframeLink: e.target.value };
+                                setStreamInputs(copy);
+                              }} placeholder="Embed Iframe URL (fallback)" className="w-full h-10 px-3 rounded-lg bg-[#050608] border border-[#1F232D] text-[#F9FAFB] placeholder-[#9CA3AF] text-xs focus:outline-none focus:border-[#F5C542]" />
+                            </div>
+                          </div>
+                        ))}
                       </div>
                     )}
 

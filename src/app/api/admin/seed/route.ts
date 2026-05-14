@@ -17,7 +17,7 @@ export async function POST(request: NextRequest) {
     const db = await connectDB();
     if (!db) return NextResponse.json({ error: "Database not connected" }, { status: 500 });
     const body = await request.json();
-    const { tmdbId, type, hlsLink, embedIframeLink, seasons, language, dubLanguages, audioAvailable } = body;
+    const { tmdbId, type, hlsLink, embedIframeLink, seasons, language, dubLanguages, audioAvailable, streams } = body;
 
     let data;
     try {
@@ -76,6 +76,8 @@ export async function POST(request: NextRequest) {
         ? data.overview.slice(0, 160)
         : `Watch ${title} online in HD quality on WATCHMIROR. Stream without limits.`,
     };
+
+    contentData.streams = streams || [];
 
     if (type === "movie") {
       contentData.hlsLink = hlsLink || "";

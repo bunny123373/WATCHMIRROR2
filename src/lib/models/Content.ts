@@ -22,6 +22,7 @@ export interface IContentDocument extends Document {
   metaDescription: string;
   hlsLink?: string;
   embedIframeLink?: string;
+  streams?: { language: string; hlsLink: string; embedIframeLink: string }[];
   seasons?: {
     seasonNumber: number;
     episodes: {
@@ -77,6 +78,7 @@ const ContentSchema = new Schema({
   metaDescription: { type: String },
   hlsLink: { type: String },
   embedIframeLink: { type: String },
+  streams: [{ type: Object }],
   seasons: [SeasonSchema],
 }, {
   timestamps: true,

@@ -3,24 +3,31 @@
 import { useState } from "react";
 import Link from "next/link";
 import { Play } from "lucide-react";
+import { ContentStream } from "@/types";
 
 interface AudioSelectorProps {
   slug: string;
+  streams?: ContentStream[];
   audioAvailable?: string[];
   dubLanguage?: string[];
 }
 
-export default function AudioSelector({ slug, audioAvailable, dubLanguage }: AudioSelectorProps) {
-  const [selectedAudio, setSelectedAudio] = useState(audioAvailable?.[0] || "");
+export default function AudioSelector({ slug, streams, audioAvailable, dubLanguage }: AudioSelectorProps) {
+  const allLanguages = streams && streams.length > 0
+    ? streams.map((s) => s.language)
+    : (() => {
+        const list = [...(audioAvailable || [])];
+        if (dubLanguage) {
+          dubLanguage.forEach((dl) => {
+            if (!list.includes(dl)) list.push(dl);
+          });
+        }
+        return list;
+      })();
 
-  const allAudio = [...(audioAvailable || [])];
-  if (dubLanguage) {
-    dubLanguage.forEach((dl) => {
-      if (!allAudio.includes(dl)) allAudio.push(dl);
-    });
-  }
+  const [selectedAudio, setSelectedAudio] = useState(allLanguages[0] || "");
 
-  if (allAudio.length === 0) {
+  if (allLanguages.length === 0) {
     return (
       <Link
         href={`/watch/${slug}`}
@@ -35,17 +42,17 @@ export default function AudioSelector({ slug, audioAvailable, dubLanguage }: Aud
   return (
     <div className="space-y-3">
       <div className="flex flex-wrap gap-2">
-        {allAudio.map((audio) => (
+        {allLanguages.map((lang) => (
           <button
-            key={audio}
-            onClick={() => setSelectedAudio(audio)}
+            key={lang}
+            onClick={() => setSelectedAudio(lang)}
             className={`px-3 py-1.5 rounded-none text-xs font-medium border transition-all ${
-              selectedAudio === audio
+              selectedAudio === lang
                 ? "bg-[#F5C542] text-[#050608] border-[#F5C542]"
                 : "bg-[#050608] text-[#9CA3AF] border-[#1F232D] hover:border-[#F5C542]/50"
             }`}
           >
-            {audio}
+            {lang}
           </button>
         ))}
       </div>

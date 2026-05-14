@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback } from "react";
+import { useMemo, useCallback } from "react";
 import Link from "next/link";
 import { ArrowLeft, Film, Headphones } from "lucide-react";
 import { useDispatch } from "react-redux";
@@ -19,8 +19,17 @@ interface WatchClientProps {
 export default function WatchClient({ item, related, audio }: WatchClientProps) {
   const dispatch = useDispatch();
 
-  const hasHls = !!item.hlsLink?.trim();
-  const hasEmbed = !!item.embedIframeLink?.trim();
+  const stream = useMemo(() => {
+    if (audio && item.streams) {
+      return item.streams.find((s) => s.language === audio);
+    }
+    return null;
+  }, [audio, item.streams]);
+
+  const hlsSrc = stream?.hlsLink || item.hlsLink || "";
+  const embedSrc = stream?.embedIframeLink || item.embedIframeLink || "";
+  const hasHls = !!hlsSrc.trim();
+  const hasEmbed = !!embedSrc.trim();
   const canStream = hasHls || hasEmbed;
 
   const saveProgress = useCallback((currentTime: number, duration: number) => {
@@ -61,9 +70,9 @@ export default function WatchClient({ item, related, audio }: WatchClientProps) 
           )}
           {canStream ? (
             hasHls ? (
-              <HLSPlayer src={item.hlsLink!} poster={item.banner} onProgress={saveProgress} />
+              <HLSPlayer src={hlsSrc} poster={item.banner} onProgress={saveProgress} />
             ) : (
-              <IframePlayer src={item.embedIframeLink!} />
+              <IframePlayer src={embedSrc} />
             )
           ) : (
             <div className="w-full aspect-video rounded-2xl bg-[#0E1015] border border-[#1F232D] flex items-center justify-center">

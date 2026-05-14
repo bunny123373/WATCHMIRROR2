@@ -173,7 +173,7 @@ export default async function MovieDetailPage({ params }: Props) {
                 {item.description}
               </p>
 
-              <AudioSelector slug={item.slug} audioAvailable={item.audioAvailable} dubLanguage={item.dubLanguage} />
+              <AudioSelector slug={item.slug} streams={item.streams} audioAvailable={item.audioAvailable} dubLanguage={item.dubLanguage} />
 
               {/* Tags */}
               {item.tags && item.tags.length > 0 && (
