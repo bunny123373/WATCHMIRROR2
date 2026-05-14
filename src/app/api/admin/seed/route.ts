@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
 import { Content } from "@/lib/models/Content";
+import { getMovieDetails, getTvDetails } from "@/lib/tmdb";
 
 function validateAdmin(request: NextRequest) {
   const key = request.headers.get("x-admin-key");
@@ -18,18 +19,14 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { tmdbId, type, hlsLink, embedIframeLink, seasons } = body;
 
-    const tmdbRes = await fetch(
-      `${process.env.NEXT_PUBLIC_TMDB_IMAGE_BASE?.replace(
-        "https://image.tmdb.org/t/p/original",
-        ""
-      ) || ""}/3/${type === "movie" ? "movie" : "tv"}/${tmdbId}?api_key=${process.env.TMDB_API_KEY}&append_to_response=credits,videos`
-    );
-
-    if (!tmdbRes.ok) {
-      return NextResponse.json({ error: "Failed to fetch from TMDB" }, { status: 400 });
+    let data;
+    try {
+      data = type === "movie"
+        ? await getMovieDetails(tmdbId)
+        : await getTvDetails(tmdbId);
+    } catch {
+      return NextResponse.json({ error: "Failed to fetch from TMDB — check your API key and network" }, { status: 400 });
     }
-
-    const data = await tmdbRes.json();
 
     const title = data.title || data.name;
     const slug = title.toLowerCase().replace(/[^\w\s-]/g, "").replace(/\s+/g, "-").trim();

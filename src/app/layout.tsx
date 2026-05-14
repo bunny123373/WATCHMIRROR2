@@ -56,7 +56,7 @@ export default function RootLayout({
     >
       <head>
         <meta name="theme-color" content="#050608" />
-        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
       </head>
       <body className="min-h-screen bg-[#050608] text-[#F9FAFB] antialiased font-sans">
