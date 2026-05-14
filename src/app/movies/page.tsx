@@ -32,7 +32,7 @@ export default async function MoviesPage() {
   const movies = await getMovies();
 
   return (
-    <main className="min-h-screen pt-16 pb-20 md:pb-0">
+    <main className="min-h-screen pt-14 md:pt-16 pb-20 md:pb-0">
       <div className="max-w-[1800px] mx-auto px-4 md:px-8 py-8">
         <h1 className="text-3xl md:text-4xl font-bold text-[#F9FAFB] mb-8">Movies</h1>
         <ContentGrid items={movies} />

@@ -61,6 +61,16 @@ export default function Navbar() {
         </div>
       </nav>
 
+      {/* Mobile Top Navbar (brand only) */}
+      <nav className="md:hidden fixed top-0 left-0 right-0 z-50 glass border-b border-[#1F232D] safe-area-top">
+        <div className="flex items-center h-14 px-4">
+          <Link href="/" className="flex items-center gap-2">
+            <Monitor className="w-5 h-5 text-[#F5C542]" />
+            <span className="text-base font-bold text-gradient">WATCHMIRROR</span>
+          </Link>
+        </div>
+      </nav>
+
       {/* Mobile Bottom Nav */}
       <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 glass border-t border-[#1F232D] safe-area-bottom">
         <div className="flex items-center justify-around h-16 px-2">

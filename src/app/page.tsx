@@ -77,7 +77,7 @@ export default async function HomePage() {
 
   if (!data) {
     return (
-      <main className="min-h-screen pt-16 pb-20 md:pb-0">
+<main className="min-h-screen pt-14 md:pt-16 pb-20 md:pb-0">
         <div className="flex items-center justify-center h-[60vh]">
           <div className="text-center">
             <h1 className="text-4xl font-bold text-[#F9FAFB] mb-4">WATCHMIRROR</h1>

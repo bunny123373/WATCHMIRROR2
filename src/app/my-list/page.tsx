@@ -27,7 +27,7 @@ export default function MyListPage() {
   };
 
   return (
-    <main className="min-h-screen pt-16 pb-20 md:pb-0">
+    <main className="min-h-screen pt-14 md:pt-16 pb-20 md:pb-0">
       <div className="max-w-[1800px] mx-auto px-4 md:px-8 py-8">
         <div className="flex items-center gap-3 mb-8">
           <Bookmark className="w-6 h-6 text-[#F5C542]" />

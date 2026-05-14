@@ -27,13 +27,13 @@ export default function HeroBanner({ items }: HeroBannerProps) {
   const item = featured[current];
 
   return (
-    <div className="relative w-full h-[70vh] md:h-[90vh] lg:h-[100vh] min-h-[500px]">
-      {item.banner && (
+    <div className="relative w-full aspect-video md:h-[90vh] lg:h-[100vh] min-h-[220px] md:min-h-[500px]">
+      {item.poster && (
         <Image
-          src={item.banner}
+          src={item.poster}
           alt={item.title}
           fill
-          className="object-contain bg-[#050608]"
+          className="object-cover bg-[#050608]"
           priority
           sizes="100vw"
         />
@@ -45,7 +45,7 @@ export default function HeroBanner({ items }: HeroBannerProps) {
         <div className="max-w-[1800px] mx-auto">
           <div className="max-w-2xl">
             <div className="flex items-center gap-3 mb-3">
-              <span className="px-2 py-1 text-xs font-semibold rounded-full bg-[#F5C542] text-[#050608]">
+              <span className="px-2 py-1 text-xs font-semibold bg-[#F5C542] text-[#050608]">
                 {item.quality}
               </span>
               <span className="text-sm text-[#F5C542]">★ {item.rating?.toFixed(1)}</span>

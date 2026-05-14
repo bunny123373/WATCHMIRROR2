@@ -99,7 +99,7 @@ export default async function MovieDetailPage({ params }: Props) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <main className="min-h-screen pt-16 pb-20 md:pb-0">
+      <main className="min-h-screen pt-14 md:pt-16 pb-20 md:pb-0">
         {/* Banner */}
         <div className="relative w-full h-[40vh] md:h-[60vh]">
           <Image
