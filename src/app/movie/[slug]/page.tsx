@@ -174,7 +174,7 @@ export default async function MovieDetailPage({ params }: Props) {
 
               <Link
                 href={`/watch/${item.slug}`}
-                className="inline-flex items-center gap-2 px-8 py-3 rounded-xl gold-gradient text-[#050608] font-semibold hover:opacity-90 transition-opacity text-lg"
+                className="inline-flex items-center gap-2 px-8 py-3 rounded-none gold-gradient text-[#050608] font-semibold hover:opacity-90 transition-opacity text-lg"
               >
                 <Play className="w-5 h-5" />
                 Watch Now

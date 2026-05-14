@@ -32,6 +32,30 @@ export const LANGUAGES = [
   "Japanese", "Chinese", "German", "Italian", "Portuguese",
   "Russian", "Arabic", "Turkish", "Tamil", "Telugu",
   "Bengali", "Punjabi", "Marathi", "Gujarati", "Malayalam",
+  "Kannada", "Urdu", "Thai", "Vietnamese", "Dutch",
+  "Polish", "Swedish", "Greek", "Persian", "Hebrew",
+  "Indonesian", "Filipino", "Mandarin", "Cantonese", "Romanian",
+  "Hungarian", "Czech", "Ukrainian", "Danish", "Norwegian",
+  "Finnish", "Odia", "Assamese", "Nepali", "Sinhala",
+];
+
+export const LANGUAGES_GROUPED = [
+  {
+    label: "Indian Languages",
+    languages: ["Hindi", "Tamil", "Telugu", "Bengali", "Punjabi", "Marathi", "Gujarati", "Malayalam", "Kannada", "Urdu", "Odia", "Assamese", "Nepali", "Sinhala"],
+  },
+  {
+    label: "Asian Languages",
+    languages: ["Korean", "Japanese", "Mandarin", "Cantonese", "Thai", "Vietnamese", "Indonesian", "Filipino"],
+  },
+  {
+    label: "European Languages",
+    languages: ["English", "Spanish", "French", "German", "Italian", "Portuguese", "Russian", "Dutch", "Polish", "Swedish", "Greek", "Romanian", "Hungarian", "Czech", "Ukrainian", "Danish", "Norwegian", "Finnish"],
+  },
+  {
+    label: "Middle Eastern Languages",
+    languages: ["Arabic", "Turkish", "Persian", "Hebrew"],
+  },
 ];
 
 export const CATEGORIES = [

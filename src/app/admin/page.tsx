@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { Monitor, Plus, Search, Trash2, Edit3, Film, Tv, Loader2, X, Save, Eye, Hash, Star, Globe, Calendar, Check, ChevronRight, ChevronLeft } from "lucide-react";
 import AdminGuard from "@/components/AdminGuard";
 import { IContent, SearchResult } from "@/types";
-import { TMDB_IMAGE_W500, LANGUAGES } from "@/lib/constants";
+import { TMDB_IMAGE_W500, LANGUAGES, LANGUAGES_GROUPED } from "@/lib/constants";
 
 const ADMIN_KEY = "WATCHMIRROR123";
 
@@ -37,6 +37,7 @@ export default function AdminPage() {
   const [embedLink, setEmbedLink] = useState("");
   const [seasons, setSeasons] = useState("");
   const [selectedLanguage, setSelectedLanguage] = useState("English");
+  const [dubLanguage, setDubLanguage] = useState("");
   const [selectedAudio, setSelectedAudio] = useState<string[]>(["English"]);
   const [importing, setImporting] = useState(false);
   const [step, setStep] = useState(1);
@@ -129,7 +130,7 @@ export default function AdminPage() {
       const res = await fetch("/api/admin/seed", {
         method: "POST",
         headers: { "Content-Type": "application/json", "x-admin-key": ADMIN_KEY },
-        body: JSON.stringify({ tmdbId: selectedItem.id, type: importType, hlsLink, embedIframeLink: embedLink, seasons: parsedSeasons, language: selectedLanguage, audioAvailable: selectedAudio }),
+        body: JSON.stringify({ tmdbId: selectedItem.id, type: importType, hlsLink, embedIframeLink: embedLink, seasons: parsedSeasons, language: selectedLanguage, dubLanguage, audioAvailable: selectedAudio }),
       });
       if (res.ok) {
         setShowAddModal(false); resetAddModal(); fetchContent();
@@ -145,7 +146,7 @@ export default function AdminPage() {
   const resetAddModal = () => {
     setTmdbQuery(""); setTmdbResults([]); setSearchError(""); setSearched(false);
     setSelectedItem(null); setSelectedDetails(null); setHlsLink(""); setEmbedLink(""); setSeasons("");
-    setSelectedLanguage("English"); setSelectedAudio(["English"]);
+    setSelectedLanguage("English"); setDubLanguage(""); setSelectedAudio(["English"]);
     setStep(1);
   };
 
@@ -154,6 +155,7 @@ export default function AdminPage() {
     setEditItem(item);
     const d = JSON.parse(JSON.stringify(item));
     if (!d.audioAvailable) d.audioAvailable = [];
+    if (!d.dubLanguage) d.dubLanguage = "";
     setEditData(d);
   };
 
@@ -440,8 +442,28 @@ export default function AdminPage() {
                     <div>
                       <label className="block text-xs text-[#9CA3AF] mb-2 font-medium">Language</label>
                       <select value={selectedLanguage} onChange={(e) => setSelectedLanguage(e.target.value)} className="w-full h-12 px-4 rounded-xl bg-[#050608] border border-[#1F232D] text-[#F9FAFB] text-sm focus:outline-none focus:border-[#F5C542] focus:ring-1 focus:ring-[#F5C542]/30 appearance-none cursor-pointer">
-                        {LANGUAGES.map((l) => (
-                          <option key={l} value={l} className="bg-[#0E1015]">{l}</option>
+                        <option value="" className="bg-[#0E1015]">Select language</option>
+                        {LANGUAGES_GROUPED.map((group) => (
+                          <optgroup key={group.label} label={group.label}>
+                            {group.languages.map((l) => (
+                              <option key={l} value={l} className="bg-[#0E1015]">{l}</option>
+                            ))}
+                          </optgroup>
+                        ))}
+                      </select>
+                    </div>
+
+                    {/* Dub Language */}
+                    <div>
+                      <label className="block text-xs text-[#9CA3AF] mb-2 font-medium">Dub Language <span className="text-[#9CA3AF]/50">(optional)</span></label>
+                      <select value={dubLanguage} onChange={(e) => setDubLanguage(e.target.value)} className="w-full h-12 px-4 rounded-xl bg-[#050608] border border-[#1F232D] text-[#F9FAFB] text-sm focus:outline-none focus:border-[#F5C542] focus:ring-1 focus:ring-[#F5C542]/30 appearance-none cursor-pointer">
+                        <option value="" className="bg-[#0E1015]">No dubbing</option>
+                        {LANGUAGES_GROUPED.map((group) => (
+                          <optgroup key={group.label} label={group.label}>
+                            {group.languages.map((l) => (
+                              <option key={l} value={l} className="bg-[#0E1015]">{l}</option>
+                            ))}
+                          </optgroup>
                         ))}
                       </select>
                     </div>
@@ -602,8 +624,26 @@ export default function AdminPage() {
                   <div>
                     <label className="block text-xs text-[#9CA3AF] mb-1">Language</label>
                     <select value={editData.language || "English"} onChange={(e) => setEditData({ ...editData, language: e.target.value })} className="w-full h-10 px-3 rounded-xl bg-[#050608] border border-[#1F232D] text-[#F9FAFB] text-sm focus:outline-none focus:border-[#F5C542] appearance-none cursor-pointer">
-                      {LANGUAGES.map((l) => (
-                        <option key={l} value={l} className="bg-[#0E1015]">{l}</option>
+                      <option value="" className="bg-[#0E1015]">Select language</option>
+                      {LANGUAGES_GROUPED.map((group) => (
+                        <optgroup key={group.label} label={group.label}>
+                          {group.languages.map((l) => (
+                            <option key={l} value={l} className="bg-[#0E1015]">{l}</option>
+                          ))}
+                        </optgroup>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-xs text-[#9CA3AF] mb-1">Dub Language <span className="text-[#9CA3AF]/50">(optional)</span></label>
+                    <select value={editData.dubLanguage || ""} onChange={(e) => setEditData({ ...editData, dubLanguage: e.target.value })} className="w-full h-10 px-3 rounded-xl bg-[#050608] border border-[#1F232D] text-[#F9FAFB] text-sm focus:outline-none focus:border-[#F5C542] appearance-none cursor-pointer">
+                      <option value="" className="bg-[#0E1015]">No dubbing</option>
+                      {LANGUAGES_GROUPED.map((group) => (
+                        <optgroup key={group.label} label={group.label}>
+                          {group.languages.map((l) => (
+                            <option key={l} value={l} className="bg-[#0E1015]">{l}</option>
+                          ))}
+                        </optgroup>
                       ))}
                     </select>
                   </div>

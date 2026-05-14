@@ -17,7 +17,7 @@ export async function POST(request: NextRequest) {
     const db = await connectDB();
     if (!db) return NextResponse.json({ error: "Database not connected" }, { status: 500 });
     const body = await request.json();
-    const { tmdbId, type, hlsLink, embedIframeLink, seasons, language, audioAvailable } = body;
+    const { tmdbId, type, hlsLink, embedIframeLink, seasons, language, dubLanguage, audioAvailable } = body;
 
     let data;
     try {
@@ -60,6 +60,7 @@ export async function POST(request: NextRequest) {
       description: data.overview || "",
       year,
       language: language || "English",
+      dubLanguage: dubLanguage || "",
       audioAvailable: audioAvailable || ["English"],
       category,
       quality: "1080p",
