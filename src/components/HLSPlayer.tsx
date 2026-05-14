@@ -5,10 +5,12 @@ import MuxPlayer from "@mux/mux-player-react";
 interface HLSPlayerProps {
   src: string;
   poster?: string;
+  subtitleUrl?: string;
+  subtitleLang?: string;
   onProgress?: (currentTime: number, duration: number) => void;
 }
 
-export default function HLSPlayer({ src, poster, onProgress }: HLSPlayerProps) {
+export default function HLSPlayer({ src, poster, subtitleUrl, subtitleLang, onProgress }: HLSPlayerProps) {
   if (!src?.trim()) {
     return (
       <div className="w-full aspect-video rounded-2xl bg-[#0E1015] border border-[#1F232D] flex items-center justify-center">
@@ -33,7 +35,17 @@ export default function HLSPlayer({ src, poster, onProgress }: HLSPlayerProps) {
             onProgress(evt.target.currentTime, evt.target.duration);
           }
         }}
-      />
+      >
+        {subtitleUrl && (
+          <track
+            kind="subtitles"
+            src={subtitleUrl}
+            srcLang={subtitleLang || "en"}
+            label={subtitleLang || "Subtitles"}
+            default
+          />
+        )}
+      </MuxPlayer>
     </div>
   );
 }

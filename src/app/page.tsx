@@ -6,6 +6,7 @@ import HeroBanner from "@/components/HeroBanner";
 import ContinueWatchingRow from "@/components/ContinueWatchingRow";
 import ContentRow from "@/components/ContentRow";
 import TrendingRow from "@/components/TrendingRow";
+import MyListRow from "@/components/MyListRow";
 
 export const dynamic = "force-dynamic";
 
@@ -121,6 +122,7 @@ export default async function HomePage() {
 
       <div className="mt-4 md:mt-8 space-y-8 md:space-y-12">
         <ContinueWatchingRow />
+        <MyListRow />
 
         {sections.map((section) =>
           section.trending ? (

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Search, Monitor, Film, TrendingUp, Clapperboard } from "lucide-react";
+import { Search, Monitor, Film, TrendingUp, Clapperboard, Bookmark } from "lucide-react";
 import { useDispatch } from "react-redux";
 import { openSearch } from "@/store/slices/searchSlice";
 
@@ -11,6 +11,7 @@ const navLinks = [
   { href: "/movies", label: "Movies" },
   { href: "/series", label: "Series" },
   { href: "/trending", label: "Trending" },
+  { href: "/my-list", label: "My List" },
 ];
 
 export default function Navbar() {

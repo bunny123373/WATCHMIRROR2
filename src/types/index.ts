@@ -21,6 +21,7 @@ export interface ContentStream {
   language: string;
   hlsLink: string;
   embedIframeLink: string;
+  subtitles?: { language: string; url: string }[];
 }
 
 export interface IContent {

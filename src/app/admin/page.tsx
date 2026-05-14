@@ -39,7 +39,7 @@ export default function AdminPage() {
   const [selectedLanguage, setSelectedLanguage] = useState("English");
   const [selectedDubLanguages, setSelectedDubLanguages] = useState<string[]>([]);
   const [selectedAudio, setSelectedAudio] = useState<string[]>(["English"]);
-  const [streamInputs, setStreamInputs] = useState<{ language: string; hlsLink: string; embedIframeLink: string }[]>([]);
+  const [streamInputs, setStreamInputs] = useState<{ language: string; hlsLink: string; embedIframeLink: string; subtitles: { language: string; url: string }[] }[]>([]);
   const [importing, setImporting] = useState(false);
   const [step, setStep] = useState(1);
 
@@ -70,7 +70,7 @@ export default function AdminPage() {
     selectedDubLanguages.forEach((l) => langs.add(l));
     setStreamInputs((prev) => {
       const existing = new Map(prev.map((s) => [s.language, s]));
-      return Array.from(langs).map((l) => existing.get(l) || { language: l, hlsLink: "", embedIframeLink: "" });
+      return Array.from(langs).map((l) => existing.get(l) || { language: l, hlsLink: "", embedIframeLink: "", subtitles: [] });
     });
   }, [selectedLanguage, selectedDubLanguages]);
 
@@ -530,6 +530,25 @@ export default function AdminPage() {
                                 copy[idx] = { ...copy[idx], embedIframeLink: e.target.value };
                                 setStreamInputs(copy);
                               }} placeholder="Embed Iframe URL (fallback)" className="w-full h-10 px-3 rounded-lg bg-[#050608] border border-[#1F232D] text-[#F9FAFB] placeholder-[#9CA3AF] text-xs focus:outline-none focus:border-[#F5C542]" />
+                              <div className="flex gap-2">
+                                <select value={si.subtitles?.[0]?.language || ""} onChange={(e) => {
+                                  const copy = [...streamInputs];
+                                  const subs = e.target.value ? [{ language: e.target.value, url: copy[idx].subtitles?.[0]?.url || "" }] : [];
+                                  copy[idx] = { ...copy[idx], subtitles: subs };
+                                  setStreamInputs(copy);
+                                }} className="w-28 h-9 px-2 rounded-lg bg-[#050608] border border-[#1F232D] text-[#F9FAFB] text-[10px] focus:outline-none focus:border-[#F5C542] appearance-none cursor-pointer">
+                                  <option value="" className="bg-[#0E1015]">No subs</option>
+                                  {LANGUAGES.map((l) => (
+                                    <option key={l} value={l} className="bg-[#0E1015]">{l}</option>
+                                  ))}
+                                </select>
+                                <input type="text" value={si.subtitles?.[0]?.url || ""} onChange={(e) => {
+                                  const copy = [...streamInputs];
+                                  const current = copy[idx].subtitles?.[0];
+                                  copy[idx] = { ...copy[idx], subtitles: current ? [{ ...current, url: e.target.value }] : [] };
+                                  setStreamInputs(copy);
+                                }} placeholder="Subtitle URL (.vtt)" className="flex-1 h-9 px-3 rounded-lg bg-[#050608] border border-[#1F232D] text-[#F9FAFB] placeholder-[#9CA3AF] text-[10px] focus:outline-none focus:border-[#F5C542]" disabled={!si.subtitles?.[0]?.language} />
+                              </div>
                             </div>
                           </div>
                         ))}

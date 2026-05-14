@@ -1,11 +1,13 @@
 import { configureStore } from "@reduxjs/toolkit";
 import searchReducer from "./slices/searchSlice";
 import continueReducer from "./slices/continueSlice";
+import myListReducer from "./slices/myListSlice";
 
 export const store = configureStore({
   reducer: {
     search: searchReducer,
     continue: continueReducer,
+    myList: myListReducer,
   },
 });
 

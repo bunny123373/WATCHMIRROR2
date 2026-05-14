@@ -9,6 +9,7 @@ import { IContent } from "@/types";
 import CastCarousel from "@/components/CastCarousel";
 import ContentRow from "@/components/ContentRow";
 import AudioSelector from "@/components/AudioSelector";
+import SaveButton from "@/components/SaveButton";
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -173,7 +174,12 @@ export default async function MovieDetailPage({ params }: Props) {
                 {item.description}
               </p>
 
-              <AudioSelector slug={item.slug} streams={item.streams} audioAvailable={item.audioAvailable} dubLanguage={item.dubLanguage} />
+              <div className="flex items-start gap-3">
+                <div className="flex-1">
+                  <AudioSelector slug={item.slug} streams={item.streams} audioAvailable={item.audioAvailable} dubLanguage={item.dubLanguage} />
+                </div>
+                <SaveButton slug={item.slug} type="movie" title={item.title} poster={item.poster} year={item.year} quality={item.quality} className="mt-1" />
+              </div>
 
               {/* Tags */}
               {item.tags && item.tags.length > 0 && (

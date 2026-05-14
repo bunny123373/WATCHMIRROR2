@@ -1,8 +1,8 @@
 "use client";
 
-import { useMemo, useCallback } from "react";
+import { useMemo, useCallback, useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, Film, Headphones } from "lucide-react";
+import { ArrowLeft, Film, Headphones, Subtitles } from "lucide-react";
 import { useDispatch } from "react-redux";
 import { addContinueWatching } from "@/store/slices/continueSlice";
 import HLSPlayer from "@/components/HLSPlayer";
@@ -25,6 +25,10 @@ export default function WatchClient({ item, related, audio }: WatchClientProps) 
     }
     return null;
   }, [audio, item.streams]);
+
+  const [subLang, setSubLang] = useState("");
+  const subtitles = stream?.subtitles || [];
+  const subUrl = subtitles.find((s) => s.language === subLang)?.url || "";
 
   const hlsSrc = stream?.hlsLink || item.hlsLink || "";
   const embedSrc = stream?.embedIframeLink || item.embedIframeLink || "";
@@ -68,9 +72,20 @@ export default function WatchClient({ item, related, audio }: WatchClientProps) 
               Audio: {audio}
             </div>
           )}
+          {subtitles.length > 0 && (
+            <div className="flex items-center gap-2 mb-4">
+              <Subtitles className="w-4 h-4 text-[#9CA3AF]" />
+              <select value={subLang} onChange={(e) => setSubLang(e.target.value)} className="h-8 px-2 rounded bg-[#0E1015] border border-[#1F232D] text-[#F9FAFB] text-xs focus:outline-none focus:border-[#F5C542] appearance-none cursor-pointer">
+                <option value="" className="bg-[#0E1015]">No subtitles</option>
+                {subtitles.map((s) => (
+                  <option key={s.language} value={s.language} className="bg-[#0E1015]">{s.language}</option>
+                ))}
+              </select>
+            </div>
+          )}
           {canStream ? (
             hasHls ? (
-              <HLSPlayer src={hlsSrc} poster={item.banner} onProgress={saveProgress} />
+              <HLSPlayer src={hlsSrc} poster={item.banner} subtitleUrl={subUrl} subtitleLang={subLang} onProgress={saveProgress} />
             ) : (
               <IframePlayer src={embedSrc} />
             )
