@@ -12,7 +12,6 @@ export default function IframePlayer({ src }: IframePlayerProps) {
         className="absolute inset-0 w-full h-full"
         allowFullScreen
         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-        sandbox="allow-same-origin allow-scripts allow-forms allow-popups"
         loading="lazy"
         title="Video Player"
       />
