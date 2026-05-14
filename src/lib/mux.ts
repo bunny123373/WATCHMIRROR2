@@ -78,6 +78,28 @@ export async function addAudioTrack(assetId: string, url: string, languageCode: 
   }
 }
 
+export async function addTextTrack(assetId: string, url: string, languageCode: string, name: string): Promise<void> {
+  const res = await fetch(`${BASE}/assets/${assetId}/tracks`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Basic ${AUTH}`,
+    },
+    body: JSON.stringify({
+      url,
+      type: "text",
+      language_code: languageCode,
+      name,
+      closed_captions: false,
+      text_type: "subtitles",
+    }),
+  });
+  if (!res.ok) {
+    const err = await res.text();
+    throw new Error(`Mux add track failed (${res.status}): ${err}`);
+  }
+}
+
 export function playbackUrl(playbackId: string): string {
   return `https://stream.mux.com/${playbackId}.m3u8`;
 }

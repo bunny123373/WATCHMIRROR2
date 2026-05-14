@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef } from "react";
-import { Upload, Copy, Check, Loader2, Music, Link as LinkIcon, Monitor } from "lucide-react";
+import { Upload, Copy, Check, Loader2, Music, Subtitles, Monitor } from "lucide-react";
 
 export default function MuxUploadSection() {
   const [uploading, setUploading] = useState(false);
@@ -21,6 +21,14 @@ export default function MuxUploadSection() {
   const [trackName, setTrackName] = useState("");
   const [addingTrack, setAddingTrack] = useState(false);
   const [trackMsg, setTrackMsg] = useState("");
+
+  // Add subtitle form
+  const [subAssetId, setSubAssetId] = useState("");
+  const [subUrl, setSubUrl] = useState("");
+  const [subLang, setSubLang] = useState("");
+  const [subName, setSubName] = useState("");
+  const [addingSub, setAddingSub] = useState(false);
+  const [subMsg, setSubMsg] = useState("");
 
   const handleStartUpload = async () => {
     setError("");
@@ -119,6 +127,31 @@ export default function MuxUploadSection() {
     }
   };
 
+  const handleAddSubtitle = async () => {
+    if (!subAssetId || !subUrl || !subLang) return;
+    setAddingSub(true);
+    setSubMsg("");
+    try {
+      const res = await fetch("/api/mux/add-track", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ assetId: subAssetId, url: subUrl, languageCode: subLang, name: subName || subLang, type: "text" }),
+      });
+      if (!res.ok) {
+        const d = await res.json();
+        throw new Error(d.error || "Failed");
+      }
+      setSubMsg("Subtitle track added successfully!");
+      setSubUrl("");
+      setSubLang("");
+      setSubName("");
+    } catch (e: any) {
+      setSubMsg(e.message);
+    } finally {
+      setAddingSub(false);
+    }
+  };
+
   return (
     <div className="mt-8 p-5 rounded-none bg-[#0E1015] border border-[#1F232D]">
       <div className="flex items-center gap-2 mb-5">
@@ -177,6 +210,24 @@ export default function MuxUploadSection() {
         )}
         {playbackId && (
           <p className="text-[10px] text-[#9CA3AF]">Tip: After adding audio tracks, use Asset ID <span className="text-[#F5C542]">{assetId}</span> above to add more.</p>
+        )}
+      </div>
+
+      {/* Add Subtitles section */}
+      <div className="space-y-4 p-4 rounded-none bg-[#050608] border border-[#1F232D] mt-4">
+        <p className="text-xs text-[#9CA3AF]">Add subtitles to an existing Mux asset (VTT file URL).</p>
+        <input type="text" value={subAssetId} onChange={(e) => setSubAssetId(e.target.value)} placeholder="Mux Asset ID" className="w-full h-9 px-3 rounded-none bg-[#0E1015] border border-[#1F232D] text-[#F9FAFB] text-xs placeholder-[#9CA3AF] focus:outline-none focus:border-[#F5C542]" />
+        <input type="text" value={subUrl} onChange={(e) => setSubUrl(e.target.value)} placeholder="Subtitle file URL (.vtt)" className="w-full h-9 px-3 rounded-none bg-[#0E1015] border border-[#1F232D] text-[#F9FAFB] text-xs placeholder-[#9CA3AF] focus:outline-none focus:border-[#F5C542]" />
+        <div className="flex gap-2">
+          <input type="text" value={subLang} onChange={(e) => setSubLang(e.target.value)} placeholder="Language code (e.g. en, fr, es)" className="flex-1 h-9 px-3 rounded-none bg-[#0E1015] border border-[#1F232D] text-[#F9FAFB] text-xs placeholder-[#9CA3AF] focus:outline-none focus:border-[#F5C542]" />
+          <input type="text" value={subName} onChange={(e) => setSubName(e.target.value)} placeholder="Label (optional)" className="flex-1 h-9 px-3 rounded-none bg-[#0E1015] border border-[#1F232D] text-[#F9FAFB] text-xs placeholder-[#9CA3AF] focus:outline-none focus:border-[#F5C542]" />
+        </div>
+        <button onClick={handleAddSubtitle} disabled={addingSub || !subAssetId || !subUrl || !subLang} className="flex items-center gap-2 px-5 h-10 rounded-none bg-[#F5C542] text-[#050608] font-semibold disabled:opacity-50 hover:opacity-90 transition-opacity text-sm">
+          {addingSub ? <Loader2 className="w-4 h-4 animate-spin" /> : <Subtitles className="w-4 h-4" />}
+          {addingSub ? "Adding..." : "Add Subtitles"}
+        </button>
+        {subMsg && (
+          <p className={`text-xs ${subMsg.includes("success") ? "text-[#22C55E]" : "text-red-400"}`}>{subMsg}</p>
         )}
       </div>
     </div>
