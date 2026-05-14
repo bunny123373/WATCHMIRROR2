@@ -1,7 +1,17 @@
-const MUX_TOKEN_ID = process.env.MUX_TOKEN_ID || "";
-const MUX_TOKEN_SECRET = process.env.MUX_TOKEN_SECRET || "";
-const AUTH = Buffer.from(`${MUX_TOKEN_ID}:${MUX_TOKEN_SECRET}`).toString("base64");
 const BASE = "https://api.mux.com/video/v1";
+
+function auth(tokenId?: string, tokenSecret?: string): string {
+  const id = tokenId || process.env.MUX_TOKEN_ID || "";
+  const secret = tokenSecret || process.env.MUX_TOKEN_SECRET || "";
+  return Buffer.from(`${id}:${secret}`).toString("base64");
+}
+
+function headers(tokenId?: string, tokenSecret?: string): Record<string, string> {
+  return {
+    "Content-Type": "application/json",
+    Authorization: `Basic ${auth(tokenId, tokenSecret)}`,
+  };
+}
 
 interface MuxUploadResponse {
   id: string;
@@ -16,19 +26,13 @@ interface MuxAssetResponse {
   playback_ids?: { id: string; policy: string }[];
 }
 
-export async function createDirectUpload(): Promise<MuxUploadResponse> {
+export async function createDirectUpload(tokenId?: string, tokenSecret?: string): Promise<MuxUploadResponse> {
   const res = await fetch(`${BASE}/uploads`, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Basic ${AUTH}`,
-    },
+    headers: headers(tokenId, tokenSecret),
     body: JSON.stringify({
       cors_origin: "*",
-      new_asset_settings: {
-        playback_policy: ["public"],
-        video_quality: "basic",
-      },
+      new_asset_settings: { playback_policy: ["public"], video_quality: "basic" },
     }),
   });
   if (!res.ok) throw new Error(`Mux upload create failed: ${res.status}`);
@@ -36,41 +40,29 @@ export async function createDirectUpload(): Promise<MuxUploadResponse> {
   return { id: data.data.id, url: data.data.url, status: data.data.status };
 }
 
-export async function getAssetStatus(assetId: string): Promise<MuxAssetResponse> {
+export async function getAssetStatus(assetId: string, tokenId?: string, tokenSecret?: string): Promise<MuxAssetResponse> {
   const res = await fetch(`${BASE}/assets/${assetId}`, {
-    headers: { Authorization: `Basic ${AUTH}` },
+    headers: headers(tokenId, tokenSecret),
   });
   if (!res.ok) throw new Error(`Mux asset fetch failed: ${res.status}`);
   const data = await res.json();
-  return {
-    id: data.data.id,
-    status: data.data.status,
-    playback_ids: data.data.playback_ids,
-  };
+  return { id: data.data.id, status: data.data.status, playback_ids: data.data.playback_ids };
 }
 
-export async function getUploadStatus(uploadId: string): Promise<{ status: string; asset_id?: string }> {
+export async function getUploadStatus(uploadId: string, tokenId?: string, tokenSecret?: string): Promise<{ status: string; asset_id?: string }> {
   const res = await fetch(`${BASE}/uploads/${uploadId}`, {
-    headers: { Authorization: `Basic ${AUTH}` },
+    headers: headers(tokenId, tokenSecret),
   });
   if (!res.ok) throw new Error(`Mux upload fetch failed: ${res.status}`);
   const data = await res.json();
   return { status: data.data.status, asset_id: data.data.asset_id };
 }
 
-export async function addAudioTrack(assetId: string, url: string, languageCode: string, name: string): Promise<void> {
+export async function addAudioTrack(assetId: string, url: string, languageCode: string, name: string, tokenId?: string, tokenSecret?: string): Promise<void> {
   const res = await fetch(`${BASE}/assets/${assetId}/tracks`, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Basic ${AUTH}`,
-    },
-    body: JSON.stringify({
-      url,
-      type: "audio",
-      language_code: languageCode,
-      name,
-    }),
+    headers: headers(tokenId, tokenSecret),
+    body: JSON.stringify({ url, type: "audio", language_code: languageCode, name }),
   });
   if (!res.ok) {
     const err = await res.text();
@@ -78,21 +70,11 @@ export async function addAudioTrack(assetId: string, url: string, languageCode: 
   }
 }
 
-export async function addTextTrack(assetId: string, url: string, languageCode: string, name: string): Promise<void> {
+export async function addTextTrack(assetId: string, url: string, languageCode: string, name: string, tokenId?: string, tokenSecret?: string): Promise<void> {
   const res = await fetch(`${BASE}/assets/${assetId}/tracks`, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Basic ${AUTH}`,
-    },
-    body: JSON.stringify({
-      url,
-      type: "text",
-      language_code: languageCode,
-      name,
-      closed_captions: false,
-      text_type: "subtitles",
-    }),
+    headers: headers(tokenId, tokenSecret),
+    body: JSON.stringify({ url, type: "text", language_code: languageCode, name, closed_captions: false, text_type: "subtitles" }),
   });
   if (!res.ok) {
     const err = await res.text();

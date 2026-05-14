@@ -1,9 +1,63 @@
 "use client";
 
-import { useState, useRef } from "react";
-import { Upload, Copy, Check, Loader2, Music, Subtitles, Monitor } from "lucide-react";
+import { useState, useRef, useEffect } from "react";
+import { Upload, Copy, Check, Loader2, Music, Subtitles, Monitor, Plus, Trash2, Key } from "lucide-react";
+
+interface MuxToken {
+  id: string;
+  label: string;
+  tokenId: string;
+  tokenSecret: string;
+}
+
+const TOKENS_KEY = "mux_tokens";
+const SELECTED_KEY = "mux_selected_token";
+
+function loadTokens(): MuxToken[] {
+  if (typeof window === "undefined") return [];
+  try {
+    const raw = localStorage.getItem(TOKENS_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch {
+    return [];
+  }
+}
+
+function saveTokens(tokens: MuxToken[]) {
+  localStorage.setItem(TOKENS_KEY, JSON.stringify(tokens));
+}
+
+function loadSelected(): string | null {
+  if (typeof window === "undefined") return null;
+  return localStorage.getItem(SELECTED_KEY);
+}
+
+function saveSelected(id: string | null) {
+  if (id) localStorage.setItem(SELECTED_KEY, id);
+  else localStorage.removeItem(SELECTED_KEY);
+}
+
+function tokenHeaders(selected: MuxToken | null): Record<string, string> {
+  if (selected) {
+    return {
+      "x-mux-token-id": selected.tokenId,
+      "x-mux-token-secret": selected.tokenSecret,
+    };
+  }
+  return {};
+}
 
 export default function MuxUploadSection() {
+  const [tokens, setTokens] = useState<MuxToken[]>([]);
+  const [selectedTokenId, setSelectedTokenId] = useState<string | null>(null);
+
+  // Token form
+  const [showTokenForm, setShowTokenForm] = useState(false);
+  const [newLabel, setNewLabel] = useState("");
+  const [newTokenId, setNewTokenId] = useState("");
+  const [newTokenSecret, setNewTokenSecret] = useState("");
+
+  // Upload
   const [uploading, setUploading] = useState(false);
   const [status, setStatus] = useState<"idle" | "uploading" | "processing" | "done" | "error">("idle");
   const [uploadUrl, setUploadUrl] = useState("");
@@ -30,6 +84,41 @@ export default function MuxUploadSection() {
   const [addingSub, setAddingSub] = useState(false);
   const [subMsg, setSubMsg] = useState("");
 
+  useEffect(() => {
+    setTokens(loadTokens());
+    setSelectedTokenId(loadSelected());
+  }, []);
+
+  useEffect(() => {
+    saveTokens(tokens);
+  }, [tokens]);
+
+  useEffect(() => {
+    saveSelected(selectedTokenId);
+  }, [selectedTokenId]);
+
+  const selectedToken = tokens.find((t) => t.id === selectedTokenId) || null;
+
+  const addToken = () => {
+    if (!newLabel || !newTokenId || !newTokenSecret) return;
+    const token: MuxToken = {
+      id: crypto.randomUUID(),
+      label: newLabel,
+      tokenId: newTokenId,
+      tokenSecret: newTokenSecret,
+    };
+    setTokens((prev) => [...prev, token]);
+    setNewLabel("");
+    setNewTokenId("");
+    setNewTokenSecret("");
+    setShowTokenForm(false);
+  };
+
+  const deleteToken = (id: string) => {
+    setTokens((prev) => prev.filter((t) => t.id !== id));
+    if (selectedTokenId === id) setSelectedTokenId(null);
+  };
+
   const handleStartUpload = async () => {
     setError("");
     setUploadUrl("");
@@ -47,13 +136,16 @@ export default function MuxUploadSection() {
     setUploading(true);
     setStatus("uploading");
     try {
-      const res = await fetch("/api/mux/create-upload", { method: "POST" });
+      const tHeaders = tokenHeaders(selectedToken);
+      const res = await fetch("/api/mux/create-upload", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", ...tHeaders },
+      });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to create upload");
       setUploadUrl(data.url);
       setUploadId(data.id);
 
-      // Upload file to Mux
       const file = fileRef.current.files[0];
       const xhr = new XMLHttpRequest();
       xhr.upload.addEventListener("progress", (e) => {
@@ -69,16 +161,18 @@ export default function MuxUploadSection() {
 
       setStatus("processing");
 
-      // Poll for asset
       const poll = setInterval(async () => {
         try {
-          const statusRes = await fetch(`/api/mux/asset-status?uploadId=${data.id}`);
+          const statusRes = await fetch(`/api/mux/asset-status?uploadId=${data.id}`, {
+            headers: tHeaders,
+          });
           const statusData = await statusRes.json();
           if (statusData.asset_id) {
             clearInterval(poll);
             setAssetId(statusData.asset_id);
-            // Get asset details for playback ID
-            const assetRes = await fetch(`/api/mux/asset-status?assetId=${statusData.asset_id}`);
+            const assetRes = await fetch(`/api/mux/asset-status?assetId=${statusData.asset_id}`, {
+              headers: tHeaders,
+            });
             const assetData = await assetRes.json();
             if (assetData.playback_ids?.length) {
               setPlaybackId(assetData.playback_ids[0].id);
@@ -88,7 +182,6 @@ export default function MuxUploadSection() {
         } catch {}
       }, 3000);
 
-      // Safety timeout
       setTimeout(() => clearInterval(poll), 120000);
     } catch (e: any) {
       setError(e.message);
@@ -109,7 +202,7 @@ export default function MuxUploadSection() {
     try {
       const res = await fetch("/api/mux/add-track", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", ...tokenHeaders(selectedToken) },
         body: JSON.stringify({ assetId: trackAssetId, url: trackUrl, languageCode: trackLang, name: trackName || trackLang }),
       });
       if (!res.ok) {
@@ -134,7 +227,7 @@ export default function MuxUploadSection() {
     try {
       const res = await fetch("/api/mux/add-track", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", ...tokenHeaders(selectedToken) },
         body: JSON.stringify({ assetId: subAssetId, url: subUrl, languageCode: subLang, name: subName || subLang, type: "text" }),
       });
       if (!res.ok) {
@@ -157,6 +250,61 @@ export default function MuxUploadSection() {
       <div className="flex items-center gap-2 mb-5">
         <Monitor className="w-5 h-5 text-[#F5C542]" />
         <h2 className="text-base font-bold text-[#F9FAFB]">Mux Video Upload</h2>
+      </div>
+
+      {/* Token Management */}
+      <div className="space-y-3 mb-8 p-4 rounded-none bg-[#050608] border border-[#1F232D]">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Key className="w-4 h-4 text-[#F5C542]" />
+            <span className="text-xs font-semibold text-[#F9FAFB]">Mux Tokens</span>
+          </div>
+          <button onClick={() => setShowTokenForm((v) => !v)} className="flex items-center gap-1 px-3 h-7 rounded-none bg-[#1F232D] hover:bg-[#2a2f3a] transition-colors text-xs text-[#F5C542]">
+            <Plus className="w-3 h-3" /> Add Token
+          </button>
+        </div>
+
+        {showTokenForm && (
+          <div className="space-y-2 pt-2 border-t border-[#1F232D]">
+            <input type="text" value={newLabel} onChange={(e) => setNewLabel(e.target.value)} placeholder="Label (e.g. Production)" className="w-full h-8 px-3 rounded-none bg-[#0E1015] border border-[#1F232D] text-[#F9FAFB] text-xs placeholder-[#9CA3AF] focus:outline-none focus:border-[#F5C542]" />
+            <input type="text" value={newTokenId} onChange={(e) => setNewTokenId(e.target.value)} placeholder="Token ID" className="w-full h-8 px-3 rounded-none bg-[#0E1015] border border-[#1F232D] text-[#F9FAFB] text-xs placeholder-[#9CA3AF] focus:outline-none focus:border-[#F5C542]" />
+            <input type="password" value={newTokenSecret} onChange={(e) => setNewTokenSecret(e.target.value)} placeholder="Token Secret" className="w-full h-8 px-3 rounded-none bg-[#0E1015] border border-[#1F232D] text-[#F9FAFB] text-xs placeholder-[#9CA3AF] focus:outline-none focus:border-[#F5C542]" />
+            <button onClick={addToken} disabled={!newLabel || !newTokenId || !newTokenSecret} className="px-4 h-8 rounded-none bg-[#F5C542] text-[#050608] font-semibold text-xs disabled:opacity-50 hover:opacity-90 transition-opacity">
+              Save Token
+            </button>
+          </div>
+        )}
+
+        {tokens.length > 0 && (
+          <div className="space-y-1.5 pt-2 border-t border-[#1F232D]">
+            {tokens.map((t) => (
+              <div key={t.id} className="flex items-center gap-2">
+                <button
+                  onClick={() => setSelectedTokenId(t.id === selectedTokenId ? null : t.id)}
+                  className={`flex-1 flex items-center gap-2 px-3 h-8 rounded-none text-xs text-left transition-colors ${
+                    selectedTokenId === t.id
+                      ? "bg-[#F5C542]/10 border border-[#F5C542] text-[#F5C542]"
+                      : "bg-[#0E1015] border border-[#1F232D] text-[#9CA3AF] hover:text-[#F9FAFB]"
+                  }`}
+                >
+                  <Check className={`w-3 h-3 ${selectedTokenId === t.id ? "opacity-100" : "opacity-0"}`} />
+                  <span className="truncate">{t.label}</span>
+                  <span className="ml-auto text-[10px] opacity-50">{t.tokenId.slice(0, 8)}...</span>
+                </button>
+                <button onClick={() => deleteToken(t.id)} className="p-1.5 rounded-none hover:bg-red-500/10 text-red-400 transition-colors">
+                  <Trash2 className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {tokens.length === 0 && !showTokenForm && (
+          <p className="text-[10px] text-[#9CA3AF]">No custom tokens. Using <span className="text-[#F5C542]">MUX_TOKEN_ID</span> and <span className="text-[#F5C542]">MUX_TOKEN_SECRET</span> from environment variables by default.</p>
+        )}
+        {selectedToken && (
+          <p className="text-[10px] text-[#22C55E]">Using token: <span className="font-semibold">{selectedToken.label}</span></p>
+        )}
       </div>
 
       {/* Upload section */}
