@@ -27,19 +27,19 @@ export default function HeroBanner({ items }: HeroBannerProps) {
   const item = featured[current];
 
   return (
-    <div className="relative w-full h-[60vh] md:h-[80vh] min-h-[400px]">
+    <div className="relative w-full h-[70vh] md:h-[90vh] lg:h-[100vh] min-h-[500px]">
       {item.banner && (
         <Image
           src={item.banner}
           alt={item.title}
           fill
-          className="object-cover"
+          className="object-contain bg-[#050608]"
           priority
           sizes="100vw"
         />
       )}
-      <div className="absolute inset-0 bg-gradient-to-t from-[#050608] via-[#050608]/60 to-transparent" />
-      <div className="absolute inset-0 bg-gradient-to-r from-[#050608]/80 to-transparent" />
+      <div className="absolute inset-0 bg-gradient-to-t from-[#050608] via-[#050608]/30 to-transparent" />
+      <div className="absolute inset-0 bg-gradient-to-r from-[#050608]/60 to-transparent" />
 
       <div className="absolute bottom-0 left-0 right-0 p-4 md:p-8 pb-24 md:pb-32">
         <div className="max-w-[1800px] mx-auto">
