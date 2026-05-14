@@ -14,7 +14,8 @@ export const metadata: Metadata = {
 
 async function getTrending() {
   try {
-    await connectDB();
+    const db = await connectDB();
+    if (!db) return [];
     const items = await Content.find({
       $or: [{ popularity: { $gt: 100 } }, { rating: { $gt: 7.5 } }],
     })

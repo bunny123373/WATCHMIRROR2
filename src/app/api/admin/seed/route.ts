@@ -13,7 +13,8 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    await connectDB();
+    const db = await connectDB();
+    if (!db) return NextResponse.json({ error: "Database not connected" }, { status: 500 });
     const body = await request.json();
     const { tmdbId, type, hlsLink, embedIframeLink, seasons } = body;
 

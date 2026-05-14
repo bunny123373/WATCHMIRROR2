@@ -26,7 +26,8 @@ export const metadata: Metadata = {
 
 async function getHomeData() {
   try {
-    await connectDB();
+    const db = await connectDB();
+    if (!db) return null;
 
     const [trending, latest, movies, series, action, drama, comedy, horror, english, hindi, korean] =
       await Promise.all([

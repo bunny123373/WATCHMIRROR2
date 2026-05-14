@@ -14,7 +14,8 @@ export const metadata: Metadata = {
 
 async function getSeries() {
   try {
-    await connectDB();
+    const db = await connectDB();
+    if (!db) return [];
     const items = await Content.find({ type: "series" })
       .sort({ popularity: -1 })
       .limit(50)

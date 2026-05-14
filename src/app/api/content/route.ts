@@ -9,7 +9,8 @@ function validateAdmin(request: NextRequest) {
 
 export async function GET(request: NextRequest) {
   try {
-    await connectDB();
+    const db = await connectDB();
+    if (!db) return NextResponse.json({ error: "Database not connected" }, { status: 500 });
     const { searchParams } = request.nextUrl;
     const type = searchParams.get("type");
     const category = searchParams.get("category");
@@ -43,7 +44,8 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    await connectDB();
+    const db = await connectDB();
+    if (!db) return NextResponse.json({ error: "Database not connected" }, { status: 500 });
     const body = await request.json();
     const content = await Content.create(body);
     return NextResponse.json(content, { status: 201 });
@@ -61,7 +63,8 @@ export async function PUT(request: NextRequest) {
   }
 
   try {
-    await connectDB();
+    const db = await connectDB();
+    if (!db) return NextResponse.json({ error: "Database not connected" }, { status: 500 });
     const body = await request.json();
     const { _id, ...updateData } = body;
     const content = await Content.findByIdAndUpdate(_id, updateData, { new: true });
@@ -80,7 +83,8 @@ export async function DELETE(request: NextRequest) {
   }
 
   try {
-    await connectDB();
+    const db = await connectDB();
+    if (!db) return NextResponse.json({ error: "Database not connected" }, { status: 500 });
     const { searchParams } = request.nextUrl;
     const id = searchParams.get("id");
     if (!id) {

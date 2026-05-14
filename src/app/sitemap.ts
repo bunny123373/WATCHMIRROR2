@@ -15,7 +15,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   try {
     const { connectDB } = await import("@/lib/db");
     const { Content } = await import("@/lib/models/Content");
-    await connectDB();
+    const db = await connectDB();
+    if (!db) return [...staticRoutes];
     const items = await Content.find({}, { slug: 1, type: 1, updatedAt: 1 })
       .sort({ popularity: -1 })
       .limit(500)

@@ -20,7 +20,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 async function getCategoryContent(slug: string) {
   try {
-    await connectDB();
+    const db = await connectDB();
+    if (!db) return [];
     const categoryName = slug.charAt(0).toUpperCase() + slug.slice(1);
     const items = await Content.find({ tags: categoryName })
       .sort({ popularity: -1 })

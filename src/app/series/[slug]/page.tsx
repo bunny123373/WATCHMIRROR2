@@ -44,7 +44,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 async function getSeries(slug: string) {
   try {
-    await connectDB();
+    const db = await connectDB();
+    if (!db) return null;
     const item = await Content.findOne({ slug, type: "series" }).lean() as IContent | null;
     if (!item) return null;
 

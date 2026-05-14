@@ -12,7 +12,8 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    await connectDB();
+    const db = await connectDB();
+    if (!db) return NextResponse.json({ error: "Database not connected" }, { status: 500 });
     const { id } = await params;
     const content = await Content.findOne({ slug: id }).lean();
     if (!content) {
@@ -33,7 +34,8 @@ export async function PUT(
   }
 
   try {
-    await connectDB();
+    const db = await connectDB();
+    if (!db) return NextResponse.json({ error: "Database not connected" }, { status: 500 });
     const { id } = await params;
     const body = await request.json();
     const content = await Content.findByIdAndUpdate(id, body, { new: true });
@@ -55,7 +57,8 @@ export async function DELETE(
   }
 
   try {
-    await connectDB();
+    const db = await connectDB();
+    if (!db) return NextResponse.json({ error: "Database not connected" }, { status: 500 });
     const { id } = await params;
     await Content.findByIdAndDelete(id);
     return NextResponse.json({ success: true });
