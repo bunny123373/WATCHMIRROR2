@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Monitor, Plus, Search, Trash2, Edit3, Film, Tv, Loader2, X, Save, Eye, Hash, Star,Globe, Calendar } from "lucide-react";
+import { Monitor, Plus, Search, Trash2, Edit3, Film, Tv, Loader2, X, Save, Eye, Hash, Star, Globe, Calendar, Check, ChevronRight, ChevronLeft } from "lucide-react";
 import AdminGuard from "@/components/AdminGuard";
 import { IContent, SearchResult } from "@/types";
 import { TMDB_IMAGE_W500, LANGUAGES } from "@/lib/constants";
@@ -39,6 +39,7 @@ export default function AdminPage() {
   const [selectedLanguage, setSelectedLanguage] = useState("English");
   const [selectedAudio, setSelectedAudio] = useState<string[]>(["English"]);
   const [importing, setImporting] = useState(false);
+  const [step, setStep] = useState(1);
 
   // Edit modal
   const [editItem, setEditItem] = useState<IContent | null>(null);
@@ -145,6 +146,7 @@ export default function AdminPage() {
     setTmdbQuery(""); setTmdbResults([]); setSearchError(""); setSearched(false);
     setSelectedItem(null); setSelectedDetails(null); setHlsLink(""); setEmbedLink(""); setSeasons("");
     setSelectedLanguage("English"); setSelectedAudio(["English"]);
+    setStep(1);
   };
 
   // --- Edit ---
@@ -293,125 +295,280 @@ export default function AdminPage() {
           )}
         </div>
 
-        {/* ADD MODAL */}
+        {/* ADD MODAL — Multi-step wizard */}
         {showAddModal && (
           <div className="fixed inset-0 z-50 bg-[#050608]/80 backdrop-blur-sm flex items-center justify-center p-4">
-            <div className="w-full max-w-2xl bg-[#0E1015] rounded-2xl border border-[#1F232D] max-h-[90vh] overflow-y-auto">
+            <div className="w-full max-w-3xl bg-[#0E1015] rounded-2xl border border-[#1F232D] max-h-[90vh] overflow-y-auto">
+              {/* Header */}
               <div className="flex items-center justify-between p-6 border-b border-[#1F232D]">
                 <h2 className="text-lg font-bold text-[#F9FAFB]">Add Content</h2>
                 <button onClick={() => { setShowAddModal(false); resetAddModal(); }} className="p-1 rounded-lg hover:bg-[#1F232D] transition-colors">
                   <X className="w-5 h-5 text-[#9CA3AF]" />
                 </button>
               </div>
-              <div className="p-6 space-y-5">
-                <div className="flex gap-2">
-                  <button onClick={() => setImportType("movie")} className={`flex-1 py-3 rounded-xl text-sm font-medium transition-all ${importType === "movie" ? "bg-[#8B5CF6] text-white" : "bg-[#1F232D] text-[#9CA3AF]"}`}>
-                    <Film className="w-4 h-4 inline mr-1" /> Movie
-                  </button>
-                  <button onClick={() => setImportType("series")} className={`flex-1 py-3 rounded-xl text-sm font-medium transition-all ${importType === "series" ? "bg-[#22C55E] text-white" : "bg-[#1F232D] text-[#9CA3AF]"}`}>
-                    <Tv className="w-4 h-4 inline mr-1" /> Series
-                  </button>
-                </div>
 
-                <div className="flex gap-2">
-                  <input type="text" value={tmdbQuery} onChange={(e) => setTmdbQuery(e.target.value)} onKeyDown={(e) => e.key === "Enter" && handleTmdbSearch()} placeholder="Search TMDB..." className="flex-1 h-12 px-4 rounded-xl bg-[#050608] border border-[#1F232D] text-[#F9FAFB] placeholder-[#9CA3AF] focus:outline-none focus:border-[#F5C542]" />
-                  <button onClick={handleTmdbSearch} className="px-4 py-2 rounded-xl gold-gradient text-[#050608] font-semibold"><Search className="w-4 h-4" /></button>
-                </div>
-
-                {tmdbLoading && <div className="flex justify-center py-4"><Loader2 className="w-5 h-5 text-[#F5C542] animate-spin" /></div>}
-                {searchError && <div className="p-3 rounded-xl bg-red-400/10 border border-red-400/20 text-center"><p className="text-red-400 text-sm">{searchError}</p></div>}
-                {!tmdbLoading && searched && !searchError && tmdbResults.length === 0 && (
-                  <div className="text-center py-6 text-[#9CA3AF] text-sm">No movies or series found for &ldquo;{tmdbQuery}&rdquo;</div>
-                )}
-
-                {tmdbResults.length > 0 && (
-                  <div className="space-y-2 max-h-48 overflow-y-auto">
-                    {tmdbResults.map((r) => (
-                      <button key={r.id} onClick={() => setSelectedItem(r)}
-                        className={`w-full flex items-center gap-3 p-3 rounded-xl border transition-all text-left ${selectedItem?.id === r.id ? "border-[#F5C542] bg-[#F5C542]/10" : "border-[#1F232D] bg-[#050608] hover:border-[#F5C542]/30"}`}>
-                        {r.poster_path && <img src={`${TMDB_IMAGE_W500}${r.poster_path}`} alt="" className="w-8 h-12 rounded object-cover" />}
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm text-[#F9FAFB] truncate">{"title" in r ? r.title : "name" in r ? r.name : ""}</p>
-                          <p className="text-xs text-[#9CA3AF]">{"release_date" in r ? new Date(r.release_date!).getFullYear() : "first_air_date" in r ? new Date(r.first_air_date!).getFullYear() : ""}</p>
-                        </div>
-                        <span className="text-xs text-[#F5C542]">★ {r.vote_average?.toFixed(1)}</span>
-                      </button>
-                    ))}
+              {/* Step indicator */}
+              <div className="flex items-center justify-center gap-2 px-6 pt-6">
+                {[
+                  { num: 1, label: "Search" },
+                  { num: 2, label: "Details" },
+                  { num: 3, label: "Review" },
+                ].map((s, i) => (
+                  <div key={s.num} className="flex items-center gap-2">
+                    <div className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-medium transition-all ${
+                      step === s.num
+                        ? "bg-[#F5C542] text-[#050608]"
+                        : step > s.num
+                        ? "bg-[#22C55E]/20 text-[#22C55E]"
+                        : "bg-[#1F232D] text-[#9CA3AF]"
+                    }`}>
+                      {step > s.num ? <Check className="w-3.5 h-3.5" /> : <span>{s.num}</span>}
+                      <span>{s.label}</span>
+                    </div>
+                    {i < 2 && <div className={`w-8 h-px ${step > s.num ? "bg-[#22C55E]" : "bg-[#1F232D]"}`} />}
                   </div>
+                ))}
+              </div>
+
+              <div className="p-6 space-y-5">
+                {/* ====== STEP 1: SEARCH ====== */}
+                {step === 1 && (
+                  <>
+                    <div className="flex gap-2">
+                      <button onClick={() => setImportType("movie")} className={`flex-1 py-3 rounded-xl text-sm font-medium transition-all ${importType === "movie" ? "bg-[#8B5CF6] text-white shadow-lg shadow-[#8B5CF6]/20" : "bg-[#1F232D] text-[#9CA3AF]"}`}>
+                        <Film className="w-4 h-4 inline mr-1" /> Movie
+                      </button>
+                      <button onClick={() => setImportType("series")} className={`flex-1 py-3 rounded-xl text-sm font-medium transition-all ${importType === "series" ? "bg-[#22C55E] text-white shadow-lg shadow-[#22C55E]/20" : "bg-[#1F232D] text-[#9CA3AF]"}`}>
+                        <Tv className="w-4 h-4 inline mr-1" /> Series
+                      </button>
+                    </div>
+
+                    <div className="flex gap-2">
+                      <div className="relative flex-1">
+                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#9CA3AF]" />
+                        <input type="text" value={tmdbQuery} onChange={(e) => setTmdbQuery(e.target.value)} onKeyDown={(e) => e.key === "Enter" && handleTmdbSearch()} placeholder="Search TMDB for movies or series..." className="w-full h-12 pl-11 pr-4 rounded-xl bg-[#050608] border border-[#1F232D] text-[#F9FAFB] placeholder-[#9CA3AF] focus:outline-none focus:border-[#F5C542]" />
+                      </div>
+                      <button onClick={handleTmdbSearch} className="px-5 h-12 rounded-xl gold-gradient text-[#050608] font-semibold hover:opacity-90 transition-opacity"><Search className="w-4 h-4" /></button>
+                    </div>
+
+                    {tmdbLoading && <div className="flex justify-center py-4"><Loader2 className="w-5 h-5 text-[#F5C542] animate-spin" /></div>}
+                    {searchError && <div className="p-3 rounded-xl bg-red-400/10 border border-red-400/20 text-center"><p className="text-red-400 text-sm">{searchError}</p></div>}
+                    {!tmdbLoading && searched && !searchError && tmdbResults.length === 0 && (
+                      <div className="text-center py-6 text-[#9CA3AF] text-sm">No results found for &ldquo;{tmdbQuery}&rdquo;</div>
+                    )}
+
+                    {tmdbResults.length > 0 && (
+                      <div className="space-y-2 max-h-52 overflow-y-auto pr-1">
+                        {tmdbResults.map((r) => (
+                          <button key={r.id} onClick={() => setSelectedItem(r)}
+                            className={`w-full flex items-center gap-3 p-3 rounded-xl border transition-all text-left ${
+                              selectedItem?.id === r.id
+                                ? "border-[#F5C542] bg-[#F5C542]/10 ring-1 ring-[#F5C542]/30"
+                                : "border-[#1F232D] bg-[#050608] hover:border-[#F5C542]/30"
+                            }`}>
+                            {r.poster_path ? (
+                              <img src={`${TMDB_IMAGE_W500}${r.poster_path}`} alt="" className="w-10 h-14 rounded-lg object-cover flex-shrink-0" />
+                            ) : (
+                              <div className="w-10 h-14 rounded-lg bg-[#1F232D] flex items-center justify-center flex-shrink-0">
+                                <Film className="w-4 h-4 text-[#9CA3AF]" />
+                              </div>
+                            )}
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm text-[#F9FAFB] font-medium truncate">{"title" in r ? r.title : "name" in r ? r.name : ""}</p>
+                              <p className="text-xs text-[#9CA3AF] mt-0.5">
+                                {"release_date" in r ? new Date(r.release_date!).getFullYear() : "first_air_date" in r ? new Date(r.first_air_date!).getFullYear() : ""}
+                                {"media_type" in r && r.media_type && <span className="ml-2 px-1.5 py-0.5 rounded bg-[#1F232D] text-[10px] uppercase">{r.media_type}</span>}
+                              </p>
+                            </div>
+                            <span className="text-xs text-[#F5C542] flex items-center gap-1">
+                              <Star className="w-3 h-3 fill-current" /> {r.vote_average?.toFixed(1)}
+                            </span>
+                            {selectedItem?.id === r.id && (
+                              <Check className="w-4 h-4 text-[#F5C542] flex-shrink-0" />
+                            )}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+
+                    {selectedDetails && !detailsLoading && (
+                      <div className="p-4 rounded-xl bg-gradient-to-br from-[#050608] to-[#0E1015] border border-[#1F232D]">
+                        <div className="flex gap-4">
+                          {selectedDetails.poster_path && <img src={`${TMDB_IMAGE_W500}${selectedDetails.poster_path}`} alt="" className="w-16 h-24 rounded-lg object-cover flex-shrink-0 shadow-lg" />}
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-semibold text-[#F9FAFB]">{selectedDetails.title || selectedDetails.name}</p>
+                            <div className="flex items-center gap-3 mt-1 text-xs text-[#9CA3AF]">
+                              <span>{selectedDetails.release_date?.slice(0, 4) || selectedDetails.first_air_date?.slice(0, 4)}</span>
+                              <span className="flex items-center gap-1"><Star className="w-3 h-3 text-[#F5C542]" /> {selectedDetails.vote_average?.toFixed(1)}</span>
+                            </div>
+                            <p className="text-xs text-[#9CA3AF] mt-2 line-clamp-2 leading-relaxed">{selectedDetails.overview}</p>
+                            <div className="flex flex-wrap gap-1 mt-2">
+                              {selectedDetails.genres?.slice(0, 4).map((g: any) => (
+                                <span key={g.id} className="px-2 py-0.5 text-[10px] rounded-full bg-[#1F232D] text-[#F5C542]">{g.name}</span>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                    {detailsLoading && <div className="flex justify-center py-4"><Loader2 className="w-5 h-5 text-[#F5C542] animate-spin" /></div>}
+
+                    <div className="flex justify-end pt-2">
+                      <button onClick={() => selectedItem && setStep(2)} disabled={!selectedItem} className="flex items-center gap-2 px-6 h-12 rounded-xl gold-gradient text-[#050608] font-semibold disabled:opacity-50 disabled:cursor-not-allowed hover:opacity-90 transition-opacity">
+                        Next <ChevronRight className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </>
                 )}
 
-                {selectedDetails && !detailsLoading && (
-                  <div className="p-4 rounded-xl bg-[#050608] border border-[#1F232D] space-y-3">
-                    <div className="flex gap-4">
-                      {selectedDetails.poster_path && <img src={`${TMDB_IMAGE_W500}${selectedDetails.poster_path}`} alt="" className="w-16 h-24 rounded-lg object-cover flex-shrink-0" />}
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-semibold text-[#F9FAFB]">{selectedDetails.title || selectedDetails.name}</p>
-                        <div className="flex items-center gap-2 mt-1 text-xs text-[#9CA3AF]">
-                          <span>{selectedDetails.release_date?.slice(0, 4) || selectedDetails.first_air_date?.slice(0, 4)}</span>
-                          <span>★ {selectedDetails.vote_average?.toFixed(1)}</span>
+                {/* ====== STEP 2: DETAILS ====== */}
+                {step === 2 && (
+                  <>
+                    {/* Selected item summary */}
+                    {selectedDetails && (
+                      <div className="flex items-center gap-3 p-3 rounded-xl bg-[#050608] border border-[#1F232D]">
+                        {selectedDetails.poster_path && <img src={`${TMDB_IMAGE_W500}${selectedDetails.poster_path}`} alt="" className="w-10 h-14 rounded-lg object-cover flex-shrink-0" />}
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium text-[#F9FAFB]">{selectedDetails.title || selectedDetails.name}</p>
+                          <p className="text-xs text-[#9CA3AF]">{selectedDetails.release_date?.slice(0, 4) || selectedDetails.first_air_date?.slice(0, 4)} &middot; {importType === "movie" ? "Movie" : "Series"}</p>
                         </div>
-                        <p className="text-xs text-[#9CA3AF] mt-2 line-clamp-2">{selectedDetails.overview}</p>
-                        <div className="flex flex-wrap gap-1 mt-2">
-                          {selectedDetails.genres?.slice(0, 4).map((g: any) => (
-                            <span key={g.id} className="px-2 py-0.5 text-[10px] rounded bg-[#1F232D] text-[#F5C542]">{g.name}</span>
-                          ))}
+                        <span className="text-xs text-[#F5C542]">★ {selectedDetails.vote_average?.toFixed(1)}</span>
+                      </div>
+                    )}
+
+                    {/* Language */}
+                    <div>
+                      <label className="block text-xs text-[#9CA3AF] mb-2 font-medium">Language</label>
+                      <select value={selectedLanguage} onChange={(e) => setSelectedLanguage(e.target.value)} className="w-full h-12 px-4 rounded-xl bg-[#050608] border border-[#1F232D] text-[#F9FAFB] text-sm focus:outline-none focus:border-[#F5C542] focus:ring-1 focus:ring-[#F5C542]/30 appearance-none cursor-pointer">
+                        {LANGUAGES.map((l) => (
+                          <option key={l} value={l} className="bg-[#0E1015]">{l}</option>
+                        ))}
+                      </select>
+                    </div>
+
+                    {/* Audio Available */}
+                    <div>
+                      <label className="block text-xs text-[#9CA3AF] mb-2 font-medium">Audio Available</label>
+                      <div className="flex flex-wrap gap-2">
+                        {LANGUAGES.map((l) => {
+                          const active = selectedAudio.includes(l);
+                          return (
+                            <button key={l} onClick={() => {
+                              setSelectedAudio((prev) =>
+                                active ? prev.filter((a) => a !== l) : [...prev, l]
+                              );
+                            }} className={`px-3 py-1.5 rounded-xl text-xs font-medium border transition-all ${
+                              active
+                                ? "bg-[#F5C542] text-[#050608] border-[#F5C542] shadow-sm"
+                                : "bg-[#050608] text-[#9CA3AF] border-[#1F232D] hover:border-[#F5C542]/50"
+                            }`}>
+                              {l}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+
+                    {/* Movie streams */}
+                    {importType === "movie" && (
+                      <div className="space-y-3 p-4 rounded-xl bg-[#050608] border border-[#1F232D]">
+                        <p className="text-xs font-medium text-[#F9FAFB]">Stream Sources</p>
+                        <input type="text" value={hlsLink} onChange={(e) => setHlsLink(e.target.value)} placeholder="HLS Stream URL (.m3u8)" className="w-full h-11 px-4 rounded-xl bg-[#0E1015] border border-[#1F232D] text-[#F9FAFB] placeholder-[#9CA3AF] text-sm focus:outline-none focus:border-[#F5C542]" />
+                        <input type="text" value={embedLink} onChange={(e) => setEmbedLink(e.target.value)} placeholder="Embed Iframe URL (fallback)" className="w-full h-11 px-4 rounded-xl bg-[#0E1015] border border-[#1F232D] text-[#F9FAFB] placeholder-[#9CA3AF] text-sm focus:outline-none focus:border-[#F5C542]" />
+                      </div>
+                    )}
+
+                    {/* Series seasons */}
+                    {importType === "series" && (
+                      <div className="p-4 rounded-xl bg-[#050608] border border-[#1F232D]">
+                        <label className="block text-xs text-[#9CA3AF] mb-2 font-medium">Seasons</label>
+                        <p className="text-[10px] text-[#9CA3AF] mb-2">Format: <code className="text-[#F5C542]">season:episodes</code>, comma separated</p>
+                        <input type="text" value={seasons} onChange={(e) => setSeasons(e.target.value)} placeholder="e.g. 1:10, 2:8, 3:12" className="w-full h-11 px-4 rounded-xl bg-[#0E1015] border border-[#1F232D] text-[#F9FAFB] placeholder-[#9CA3AF] text-sm focus:outline-none focus:border-[#F5C542]" />
+                      </div>
+                    )}
+
+                    {/* Navigation */}
+                    <div className="flex items-center justify-between pt-2">
+                      <button onClick={() => setStep(1)} className="flex items-center gap-2 px-5 h-12 rounded-xl bg-[#1F232D] text-[#F9FAFB] font-medium hover:bg-[#1F232D]/80 transition-all">
+                        <ChevronLeft className="w-4 h-4" /> Back
+                      </button>
+                      <button onClick={() => setStep(3)} className="flex items-center gap-2 px-6 h-12 rounded-xl gold-gradient text-[#050608] font-semibold hover:opacity-90 transition-opacity">
+                        Next <ChevronRight className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </>
+                )}
+
+                {/* ====== STEP 3: REVIEW & IMPORT ====== */}
+                {step === 3 && (
+                  <>
+                    {/* Preview Card */}
+                    <div className="rounded-2xl bg-gradient-to-br from-[#050608] to-[#0E1015] border border-[#1F232D] overflow-hidden">
+                      <div className="flex flex-col sm:flex-row">
+                        {/* Poster */}
+                        <div className="relative w-full sm:w-48 h-56 sm:h-auto bg-[#1F232D] flex-shrink-0">
+                          {selectedDetails?.poster_path ? (
+                            <img src={`${TMDB_IMAGE_W500}${selectedDetails.poster_path}`} alt="" className="w-full h-full object-cover" />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center">
+                              <Film className="w-12 h-12 text-[#9CA3AF]" />
+                            </div>
+                          )}
+                          <div className="absolute top-2 left-2 px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-[#F5C542] text-[#050608]">
+                            {importType}
+                          </div>
+                        </div>
+                        {/* Info */}
+                        <div className="flex-1 p-5 space-y-3">
+                          <h3 className="text-lg font-bold text-[#F9FAFB]">{selectedDetails?.title || selectedDetails?.name || "Untitled"}</h3>
+                          <div className="flex flex-wrap items-center gap-3 text-xs text-[#9CA3AF]">
+                            <span>{selectedDetails?.release_date?.slice(0, 4) || selectedDetails?.first_air_date?.slice(0, 4) || "—"}</span>
+                            <span className="flex items-center gap-1"><Star className="w-3 h-3 text-[#F5C542]" /> {selectedDetails?.vote_average?.toFixed(1) || "—"}</span>
+                            <span className="px-2 py-0.5 rounded bg-[#1F232D]">{selectedLanguage}</span>
+                          </div>
+                          <div className="flex flex-wrap gap-1.5">
+                            {selectedAudio.map((a) => (
+                              <span key={a} className="px-2 py-0.5 rounded text-[10px] bg-[#F5C542]/10 text-[#F5C542] border border-[#F5C542]/20">
+                                🔊 {a}
+                              </span>
+                            ))}
+                          </div>
+                          {selectedDetails?.overview && (
+                            <p className="text-xs text-[#9CA3AF] leading-relaxed line-clamp-2">{selectedDetails.overview}</p>
+                          )}
+                          {selectedDetails?.genres && (
+                            <div className="flex flex-wrap gap-1">
+                              {selectedDetails.genres.slice(0, 4).map((g: any) => (
+                                <span key={g.id} className="px-2 py-0.5 text-[10px] rounded-full bg-[#1F232D] text-[#F5C542]">{g.name}</span>
+                              ))}
+                            </div>
+                          )}
+                          <div className="pt-1 flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-[#9CA3AF]">
+                            {importType === "movie" && (
+                              <>
+                                <span className={hlsLink ? "text-[#22C55E]" : ""}>HLS: {hlsLink ? "Connected" : "Not set"}</span>
+                                <span className={embedLink ? "text-[#8B5CF6]" : ""}>Embed: {embedLink ? "Connected" : "Not set"}</span>
+                              </>
+                            )}
+                            {importType === "series" && (
+                              <span>{seasons ? seasons.split(",").length + " seasons" : "No seasons configured"}</span>
+                            )}
+                          </div>
                         </div>
                       </div>
                     </div>
-                  </div>
+
+                    {/* Navigation */}
+                    <div className="flex items-center justify-between pt-2">
+                      <button onClick={() => setStep(2)} className="flex items-center gap-2 px-5 h-12 rounded-xl bg-[#1F232D] text-[#F9FAFB] font-medium hover:bg-[#1F232D]/80 transition-all">
+                        <ChevronLeft className="w-4 h-4" /> Back
+                      </button>
+                      <button onClick={handleImport} disabled={importing} className="flex items-center gap-2 px-8 h-12 rounded-xl gold-gradient text-[#050608] font-semibold disabled:opacity-50 disabled:cursor-not-allowed hover:opacity-90 transition-opacity">
+                        {importing ? <Loader2 className="w-5 h-5 animate-spin" /> : <><Check className="w-4 h-4" /> Import Content</>}
+                      </button>
+                    </div>
+                  </>
                 )}
-                {detailsLoading && <div className="flex justify-center py-4"><Loader2 className="w-5 h-5 text-[#F5C542] animate-spin" /></div>}
-
-                {/* Language */}
-                <div>
-                  <label className="block text-xs text-[#9CA3AF] mb-2">Language</label>
-                  <select value={selectedLanguage} onChange={(e) => setSelectedLanguage(e.target.value)} className="w-full h-12 px-4 rounded-xl bg-[#050608] border border-[#1F232D] text-[#F9FAFB] text-sm focus:outline-none focus:border-[#F5C542] appearance-none cursor-pointer">
-                    {LANGUAGES.map((l) => (
-                      <option key={l} value={l} className="bg-[#0E1015]">{l}</option>
-                    ))}
-                  </select>
-                </div>
-
-                {/* Audio Available */}
-                <div>
-                  <label className="block text-xs text-[#9CA3AF] mb-2">Audio Available</label>
-                  <div className="flex flex-wrap gap-2">
-                    {LANGUAGES.map((l) => {
-                      const active = selectedAudio.includes(l);
-                      return (
-                        <button key={l} onClick={() => {
-                          setSelectedAudio((prev) =>
-                            active ? prev.filter((a) => a !== l) : [...prev, l]
-                          );
-                        }} className={`px-3 py-1.5 rounded-xl text-xs font-medium border transition-all ${
-                          active
-                            ? "bg-[#F5C542] text-[#050608] border-[#F5C542]"
-                            : "bg-[#050608] text-[#9CA3AF] border-[#1F232D] hover:border-[#F5C542]/50"
-                        }`}>
-                          {l}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-
-                {importType === "movie" && (
-                  <div className="space-y-3">
-                    <input type="text" value={hlsLink} onChange={(e) => setHlsLink(e.target.value)} placeholder="HLS Stream URL (.m3u8)" className="w-full h-12 px-4 rounded-xl bg-[#050608] border border-[#1F232D] text-[#F9FAFB] placeholder-[#9CA3AF] focus:outline-none focus:border-[#F5C542]" />
-                    <input type="text" value={embedLink} onChange={(e) => setEmbedLink(e.target.value)} placeholder="Embed Iframe URL (fallback)" className="w-full h-12 px-4 rounded-xl bg-[#050608] border border-[#1F232D] text-[#F9FAFB] placeholder-[#9CA3AF] focus:outline-none focus:border-[#F5C542]" />
-                  </div>
-                )}
-
-                {importType === "series" && (
-                  <div>
-                    <label className="block text-sm text-[#9CA3AF] mb-2">Seasons (format: 1:10,2:8 &mdash; season:episodes)</label>
-                    <input type="text" value={seasons} onChange={(e) => setSeasons(e.target.value)} placeholder="e.g. 1:10,2:8,3:12" className="w-full h-12 px-4 rounded-xl bg-[#050608] border border-[#1F232D] text-[#F9FAFB] placeholder-[#9CA3AF] focus:outline-none focus:border-[#F5C542]" />
-                  </div>
-                )}
-
-                <button onClick={handleImport} disabled={!selectedItem || importing} className="w-full h-12 rounded-xl gold-gradient text-[#050608] font-semibold disabled:opacity-50 disabled:cursor-not-allowed hover:opacity-90 transition-opacity">
-                  {importing ? <Loader2 className="w-5 h-5 animate-spin mx-auto" /> : "Import Content"}
-                </button>
               </div>
             </div>
           </div>

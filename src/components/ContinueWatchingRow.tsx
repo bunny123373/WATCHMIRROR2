@@ -47,7 +47,7 @@ function ContinueCard({ item }: { item: ContinueWatchingItem }) {
 
   return (
     <Link href={href} className="flex-shrink-0 w-36 sm:w-44 group">
-      <div className="relative aspect-[2/3] rounded-2xl overflow-hidden bg-[#0E1015] border border-[#1F232D]">
+      <div className="relative aspect-[2/3] rounded-none overflow-hidden bg-[#0E1015] border border-[#1F232D]">
         <Image
           src={item.poster || `${TMDB_IMAGE_W500}/placeholder.svg`}
           alt={item.title}
@@ -56,7 +56,6 @@ function ContinueCard({ item }: { item: ContinueWatchingItem }) {
           sizes="160px"
         />
         <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-[#050608] to-transparent p-3 pt-8">
-          <p className="text-xs font-medium text-[#F9FAFB] truncate">{item.title}</p>
           {item.episodeNumber && (
             <p className="text-[10px] text-[#9CA3AF]">S{item.seasonNumber} E{item.episodeNumber}</p>
           )}

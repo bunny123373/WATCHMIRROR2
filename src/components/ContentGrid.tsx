@@ -15,9 +15,11 @@ export default function ContentGrid({ items }: ContentGridProps) {
   }
 
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 md:gap-4">
+    <div className="flex flex-wrap justify-center gap-3 md:gap-4">
       {items.map((item) => (
-        <ContentCard key={item.slug} item={item} />
+        <div key={item.slug} className="w-[160px] sm:w-[180px] md:w-[200px] lg:w-[220px] flex-shrink-0">
+          <ContentCard item={item} />
+        </div>
       ))}
     </div>
   );

@@ -14,7 +14,7 @@ export default function ContentCard({ item }: ContentCardProps) {
 
   return (
     <Link href={href} className="group block">
-      <div className="relative aspect-[2/3] rounded-2xl overflow-hidden bg-[#0E1015] border border-[#1F232D] card-hover">
+      <div className="relative aspect-[2/3] rounded-none overflow-hidden bg-[#0E1015] border border-[#1F232D] card-hover">
         <Image
           src={item.poster || `${TMDB_IMAGE_W500}/placeholder.svg`}
           alt={item.title}
@@ -35,14 +35,7 @@ export default function ContentCard({ item }: ContentCardProps) {
             </span>
           </div>
         )}
-        <div className="absolute bottom-0 left-0 right-0 p-3 translate-y-2 group-hover:translate-y-0 transition-transform duration-300">
-          <p className="text-sm font-semibold text-[#F9FAFB] line-clamp-2">{item.title}</p>
-          <div className="flex items-center gap-2 mt-1 text-xs text-[#9CA3AF]">
-            <span>{item.year}</span>
-            <span>•</span>
-            <span className="capitalize">{item.category}</span>
-          </div>
-        </div>
+        <div className="absolute bottom-0 left-0 right-0 p-3 translate-y-2 group-hover:translate-y-0 transition-transform duration-300" />
       </div>
     </Link>
   );

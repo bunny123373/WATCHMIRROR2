@@ -5,6 +5,7 @@ import { IContent } from "@/types";
 import HeroBanner from "@/components/HeroBanner";
 import ContinueWatchingRow from "@/components/ContinueWatchingRow";
 import ContentRow from "@/components/ContentRow";
+import TrendingRow from "@/components/TrendingRow";
 
 export const dynamic = "force-dynamic";
 
@@ -89,10 +90,10 @@ export default async function HomePage() {
     );
   }
 
-  const sections: { title: string; items: IContent[]; href?: string }[] = [];
+  const sections: { title: string; items: IContent[]; href?: string; trending?: boolean }[] = [];
 
   if (data.trending.length > 0)
-    sections.push({ title: "Trending Now", items: data.trending, href: "/trending" });
+    sections.push({ title: "Trending Now", items: data.trending, href: "/trending", trending: true });
   if (data.latest.length > 0)
     sections.push({ title: "Latest Added", items: data.latest });
   if (data.movies.length > 0)
@@ -121,14 +122,23 @@ export default async function HomePage() {
       <div className="mt-4 md:mt-8 space-y-8 md:space-y-12">
         <ContinueWatchingRow />
 
-        {sections.map((section) => (
-          <ContentRow
-            key={section.title}
-            title={section.title}
-            items={section.items}
-            viewAllHref={section.href}
-          />
-        ))}
+        {sections.map((section) =>
+          section.trending ? (
+            <TrendingRow
+              key={section.title}
+              title={section.title}
+              items={section.items}
+              viewAllHref={section.href}
+            />
+          ) : (
+            <ContentRow
+              key={section.title}
+              title={section.title}
+              items={section.items}
+              viewAllHref={section.href}
+            />
+          )
+        )}
       </div>
     </main>
   );

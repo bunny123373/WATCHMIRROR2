@@ -53,7 +53,7 @@ export default function ContentRow({ title, items, viewAllHref }: ContentRowProp
           style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
         >
           {items.map((item) => (
-            <div key={item.slug} className="flex-shrink-0 w-[160px] sm:w-[180px] md:w-[200px]">
+            <div key={item.slug} className="flex-shrink-0 w-[100px] sm:w-[120px] md:w-[150px] lg:w-[170px]">
               <ContentCard item={item} />
             </div>
           ))}

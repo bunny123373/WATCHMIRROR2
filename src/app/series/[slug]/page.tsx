@@ -1,7 +1,7 @@
 import { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
-import { Play, Star, Calendar, Globe, Layers } from "lucide-react";
+import { Play, Star, Calendar, Globe, Layers, Headphones } from "lucide-react";
 import { notFound } from "next/navigation";
 import { connectDB } from "@/lib/db";
 import { Content } from "@/lib/models/Content";
@@ -168,6 +168,12 @@ export default async function SeriesDetailPage({ params }: Props) {
                   <Globe className="w-4 h-4" />
                   {item.language}
                 </span>
+                {item.audioAvailable && item.audioAvailable.length > 0 && (
+                  <span className="flex items-center gap-1">
+                    <Headphones className="w-4 h-4" />
+                    {item.audioAvailable.join(", ")}
+                  </span>
+                )}
                 <span className="capitalize px-2 py-0.5 rounded bg-[#1F232D] text-xs">
                   {item.category}
                 </span>

@@ -61,14 +61,14 @@ export default function HeroBanner({ items }: HeroBannerProps) {
             <div className="flex items-center gap-3">
               <Link
                 href={item.type === "movie" ? `/watch/${item.slug}` : `/series/${item.slug}`}
-                className="flex items-center gap-2 px-6 py-3 rounded-xl gold-gradient text-[#050608] font-semibold hover:opacity-90 transition-opacity"
+                className="flex items-center gap-2 px-6 py-3 rounded-none gold-gradient text-[#050608] font-semibold hover:opacity-90 transition-opacity"
               >
                 <Play className="w-5 h-5" />
                 {item.type === "movie" ? "Watch Now" : "View Series"}
               </Link>
               <Link
                 href={item.type === "movie" ? `/movie/${item.slug}` : `/series/${item.slug}`}
-                className="flex items-center gap-2 px-6 py-3 rounded-xl bg-[#1F232D]/80 text-[#F9FAFB] font-medium hover:bg-[#1F232D] transition-colors"
+                className="flex items-center gap-2 px-6 py-3 rounded-none bg-[#1F232D]/80 text-[#F9FAFB] font-medium hover:bg-[#1F232D] transition-colors"
               >
                 <Info className="w-5 h-5" />
                 Details
