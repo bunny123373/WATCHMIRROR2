@@ -89,7 +89,8 @@ export async function POST(request: NextRequest) {
 
     const content = await Content.create(contentData);
     return NextResponse.json(content, { status: 201 });
-  } catch (error) {
-    return NextResponse.json({ error: "Failed to seed content" }, { status: 500 });
+  } catch (error: any) {
+    const msg = error?.message || "Failed to seed content";
+    return NextResponse.json({ error: msg }, { status: 500 });
   }
 }

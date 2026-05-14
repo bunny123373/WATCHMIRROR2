@@ -35,9 +35,9 @@ export interface IContentDocument extends Document {
 }
 
 const CastSchema = new Schema({
-  name: { type: String, required: true },
-  character: { type: String, required: true },
-  profileImage: { type: String, required: true },
+  name: { type: String, default: "" },
+  character: { type: String, default: "" },
+  profileImage: { type: String, default: "" },
 }, { _id: false });
 
 const EpisodeSchema = new Schema({
@@ -57,9 +57,9 @@ const ContentSchema = new Schema({
   type: { type: String, enum: ["movie", "series"], required: true },
   title: { type: String, required: true },
   slug: { type: String, required: true, unique: true },
-  poster: { type: String, required: true },
-  banner: { type: String, required: true },
-  description: { type: String, required: true },
+  poster: { type: String, default: "" },
+  banner: { type: String, default: "" },
+  description: { type: String, default: "" },
   year: { type: Number, required: true },
   language: { type: String, default: "English" },
   category: { type: String, required: true },
