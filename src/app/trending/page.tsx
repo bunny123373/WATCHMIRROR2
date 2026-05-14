@@ -3,6 +3,8 @@ import { connectDB } from "@/lib/db";
 import { Content } from "@/lib/models/Content";
 import ContentGrid from "@/components/ContentGrid";
 
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: "Trending",
   description: "Trending movies and web series. Stream what's popular on WATCHMIRROR.",

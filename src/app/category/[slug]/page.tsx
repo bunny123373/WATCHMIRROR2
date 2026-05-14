@@ -4,6 +4,8 @@ import { Content } from "@/lib/models/Content";
 import ContentGrid from "@/components/ContentGrid";
 import { notFound } from "next/navigation";
 
+export const dynamic = "force-dynamic";
+
 interface Props {
   params: Promise<{ slug: string }>;
 }

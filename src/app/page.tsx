@@ -6,6 +6,8 @@ import HeroBanner from "@/components/HeroBanner";
 import ContinueWatchingRow from "@/components/ContinueWatchingRow";
 import ContentRow from "@/components/ContentRow";
 
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: "WATCHMIRROR - Stream Without Limits",
   description:
