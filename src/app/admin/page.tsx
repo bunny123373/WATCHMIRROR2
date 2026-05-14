@@ -550,7 +550,7 @@ export default function AdminPage() {
                                   const current = copy[idx].subtitles?.[0];
                                   copy[idx] = { ...copy[idx], subtitles: current ? [{ ...current, url: e.target.value }] : [] };
                                   setStreamInputs(copy);
-                                }} placeholder="Subtitle URL (.vtt)" className="flex-1 h-9 px-3 rounded-lg bg-[#050608] border border-[#1F232D] text-[#F9FAFB] placeholder-[#9CA3AF] text-[10px] focus:outline-none focus:border-[#F5C542]" disabled={!si.subtitles?.[0]?.language} />
+                                }} placeholder="Subtitle URL (.vtt / .srt)" className="flex-1 h-9 px-3 rounded-lg bg-[#050608] border border-[#1F232D] text-[#F9FAFB] placeholder-[#9CA3AF] text-[10px] focus:outline-none focus:border-[#F5C542]" disabled={!si.subtitles?.[0]?.language} />
                               </div>
                             </div>
                           </div>
@@ -823,7 +823,7 @@ export default function AdminPage() {
                                     updated.push({ ...stream, subtitles: subs });
                                   }
                                   setEditData({ ...editData, streams: updated });
-                                }} placeholder="Subtitle URL (.vtt)" className="flex-1 h-8 px-3 rounded-none bg-[#050608] border border-[#1F232D] text-[#F9FAFB] placeholder-[#9CA3AF] text-[10px] focus:outline-none focus:border-[#F5C542]" disabled={!stream.subtitles?.[0]?.language} />
+                                }} placeholder="Subtitle URL (.vtt / .srt)" className="flex-1 h-8 px-3 rounded-none bg-[#050608] border border-[#1F232D] text-[#F9FAFB] placeholder-[#9CA3AF] text-[10px] focus:outline-none focus:border-[#F5C542]" disabled={!stream.subtitles?.[0]?.language} />
                               </div>
                             </div>
                           </div>

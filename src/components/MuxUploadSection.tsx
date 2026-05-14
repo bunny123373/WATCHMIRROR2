@@ -363,9 +363,9 @@ export default function MuxUploadSection() {
 
       {/* Add Subtitles section */}
       <div className="space-y-4 p-4 rounded-none bg-[#050608] border border-[#1F232D] mt-4">
-        <p className="text-xs text-[#9CA3AF]">Add subtitles to an existing Mux asset (VTT file URL).</p>
+        <p className="text-xs text-[#9CA3AF]">Add subtitles to an existing Mux asset (VTT or SRT file URL).</p>
         <input type="text" value={subAssetId} onChange={(e) => setSubAssetId(e.target.value)} placeholder="Mux Asset ID" className="w-full h-9 px-3 rounded-none bg-[#0E1015] border border-[#1F232D] text-[#F9FAFB] text-xs placeholder-[#9CA3AF] focus:outline-none focus:border-[#F5C542]" />
-        <input type="text" value={subUrl} onChange={(e) => setSubUrl(e.target.value)} placeholder="Subtitle file URL (.vtt)" className="w-full h-9 px-3 rounded-none bg-[#0E1015] border border-[#1F232D] text-[#F9FAFB] text-xs placeholder-[#9CA3AF] focus:outline-none focus:border-[#F5C542]" />
+        <input type="text" value={subUrl} onChange={(e) => setSubUrl(e.target.value)} placeholder="Subtitle file URL (.vtt / .srt)" className="w-full h-9 px-3 rounded-none bg-[#0E1015] border border-[#1F232D] text-[#F9FAFB] text-xs placeholder-[#9CA3AF] focus:outline-none focus:border-[#F5C542]" />
         <div className="flex gap-2">
           <input type="text" value={subLang} onChange={(e) => setSubLang(e.target.value)} placeholder="Language code (e.g. en, fr, es)" className="flex-1 h-9 px-3 rounded-none bg-[#0E1015] border border-[#1F232D] text-[#F9FAFB] text-xs placeholder-[#9CA3AF] focus:outline-none focus:border-[#F5C542]" />
           <input type="text" value={subName} onChange={(e) => setSubName(e.target.value)} placeholder="Label (optional)" className="flex-1 h-9 px-3 rounded-none bg-[#0E1015] border border-[#1F232D] text-[#F9FAFB] text-xs placeholder-[#9CA3AF] focus:outline-none focus:border-[#F5C542]" />
