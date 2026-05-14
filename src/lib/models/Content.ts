@@ -9,6 +9,7 @@ export interface IContentDocument extends Document {
   description: string;
   year: number;
   language: string;
+  audioAvailable: string[];
   category: string;
   quality: string;
   rating: number;
@@ -62,6 +63,7 @@ const ContentSchema = new Schema({
   description: { type: String, default: "" },
   year: { type: Number, required: true },
   language: { type: String, default: "English" },
+  audioAvailable: [{ type: String }],
   category: { type: String, required: true },
   quality: { type: String, default: "1080p" },
   rating: { type: Number, default: 0 },

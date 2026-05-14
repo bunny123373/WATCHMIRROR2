@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { Monitor, Plus, Search, Trash2, Edit3, Film, Tv, Loader2, X, Save, Eye, Hash, Star,Globe, Calendar } from "lucide-react";
 import AdminGuard from "@/components/AdminGuard";
 import { IContent, SearchResult } from "@/types";
-import { TMDB_IMAGE_W500 } from "@/lib/constants";
+import { TMDB_IMAGE_W500, LANGUAGES } from "@/lib/constants";
 
 const ADMIN_KEY = "WATCHMIRROR123";
 
@@ -36,6 +36,8 @@ export default function AdminPage() {
   const [hlsLink, setHlsLink] = useState("");
   const [embedLink, setEmbedLink] = useState("");
   const [seasons, setSeasons] = useState("");
+  const [selectedLanguage, setSelectedLanguage] = useState("English");
+  const [selectedAudio, setSelectedAudio] = useState<string[]>(["English"]);
   const [importing, setImporting] = useState(false);
 
   // Edit modal
@@ -126,7 +128,7 @@ export default function AdminPage() {
       const res = await fetch("/api/admin/seed", {
         method: "POST",
         headers: { "Content-Type": "application/json", "x-admin-key": ADMIN_KEY },
-        body: JSON.stringify({ tmdbId: selectedItem.id, type: importType, hlsLink, embedIframeLink: embedLink, seasons: parsedSeasons }),
+        body: JSON.stringify({ tmdbId: selectedItem.id, type: importType, hlsLink, embedIframeLink: embedLink, seasons: parsedSeasons, language: selectedLanguage, audioAvailable: selectedAudio }),
       });
       if (res.ok) {
         setShowAddModal(false); resetAddModal(); fetchContent();
@@ -142,12 +144,15 @@ export default function AdminPage() {
   const resetAddModal = () => {
     setTmdbQuery(""); setTmdbResults([]); setSearchError(""); setSearched(false);
     setSelectedItem(null); setSelectedDetails(null); setHlsLink(""); setEmbedLink(""); setSeasons("");
+    setSelectedLanguage("English"); setSelectedAudio(["English"]);
   };
 
   // --- Edit ---
   const openEdit = (item: IContent) => {
     setEditItem(item);
-    setEditData(JSON.parse(JSON.stringify(item)));
+    const d = JSON.parse(JSON.stringify(item));
+    if (!d.audioAvailable) d.audioAvailable = [];
+    setEditData(d);
   };
 
   const handleEditSave = async () => {
@@ -357,6 +362,39 @@ export default function AdminPage() {
                 )}
                 {detailsLoading && <div className="flex justify-center py-4"><Loader2 className="w-5 h-5 text-[#F5C542] animate-spin" /></div>}
 
+                {/* Language */}
+                <div>
+                  <label className="block text-xs text-[#9CA3AF] mb-2">Language</label>
+                  <select value={selectedLanguage} onChange={(e) => setSelectedLanguage(e.target.value)} className="w-full h-12 px-4 rounded-xl bg-[#050608] border border-[#1F232D] text-[#F9FAFB] text-sm focus:outline-none focus:border-[#F5C542] appearance-none cursor-pointer">
+                    {LANGUAGES.map((l) => (
+                      <option key={l} value={l} className="bg-[#0E1015]">{l}</option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Audio Available */}
+                <div>
+                  <label className="block text-xs text-[#9CA3AF] mb-2">Audio Available</label>
+                  <div className="flex flex-wrap gap-2">
+                    {LANGUAGES.map((l) => {
+                      const active = selectedAudio.includes(l);
+                      return (
+                        <button key={l} onClick={() => {
+                          setSelectedAudio((prev) =>
+                            active ? prev.filter((a) => a !== l) : [...prev, l]
+                          );
+                        }} className={`px-3 py-1.5 rounded-xl text-xs font-medium border transition-all ${
+                          active
+                            ? "bg-[#F5C542] text-[#050608] border-[#F5C542]"
+                            : "bg-[#050608] text-[#9CA3AF] border-[#1F232D] hover:border-[#F5C542]/50"
+                        }`}>
+                          {l}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
                 {importType === "movie" && (
                   <div className="space-y-3">
                     <input type="text" value={hlsLink} onChange={(e) => setHlsLink(e.target.value)} placeholder="HLS Stream URL (.m3u8)" className="w-full h-12 px-4 rounded-xl bg-[#050608] border border-[#1F232D] text-[#F9FAFB] placeholder-[#9CA3AF] focus:outline-none focus:border-[#F5C542]" />
@@ -406,7 +444,11 @@ export default function AdminPage() {
                   </div>
                   <div>
                     <label className="block text-xs text-[#9CA3AF] mb-1">Language</label>
-                    <input type="text" value={editData.language || ""} onChange={(e) => setEditData({ ...editData, language: e.target.value })} className="w-full h-10 px-3 rounded-xl bg-[#050608] border border-[#1F232D] text-[#F9FAFB] text-sm focus:outline-none focus:border-[#F5C542]" />
+                    <select value={editData.language || "English"} onChange={(e) => setEditData({ ...editData, language: e.target.value })} className="w-full h-10 px-3 rounded-xl bg-[#050608] border border-[#1F232D] text-[#F9FAFB] text-sm focus:outline-none focus:border-[#F5C542] appearance-none cursor-pointer">
+                      {LANGUAGES.map((l) => (
+                        <option key={l} value={l} className="bg-[#0E1015]">{l}</option>
+                      ))}
+                    </select>
                   </div>
                   <div>
                     <label className="block text-xs text-[#9CA3AF] mb-1">Quality</label>
@@ -415,6 +457,33 @@ export default function AdminPage() {
                   <div>
                     <label className="block text-xs text-[#9CA3AF] mb-1">Rating (0-10)</label>
                     <input type="number" step="0.1" value={editData.rating || 0} onChange={(e) => setEditData({ ...editData, rating: parseFloat(e.target.value) || 0 })} className="w-full h-10 px-3 rounded-xl bg-[#050608] border border-[#1F232D] text-[#F9FAFB] text-sm focus:outline-none focus:border-[#F5C542]" />
+                  </div>
+                </div>
+
+                {/* Audio Available */}
+                <div>
+                  <label className="block text-xs text-[#9CA3AF] mb-2">Audio Available</label>
+                  <div className="flex flex-wrap gap-2">
+                    {LANGUAGES.map((l) => {
+                      const audio = editData.audioAvailable || [];
+                      const active = audio.includes(l);
+                      return (
+                        <button key={l} onClick={() => {
+                          setEditData({
+                            ...editData,
+                            audioAvailable: active
+                              ? audio.filter((a: string) => a !== l)
+                              : [...audio, l],
+                          });
+                        }} className={`px-3 py-1.5 rounded-xl text-xs font-medium border transition-all ${
+                          active
+                            ? "bg-[#F5C542] text-[#050608] border-[#F5C542]"
+                            : "bg-[#050608] text-[#9CA3AF] border-[#1F232D] hover:border-[#F5C542]/50"
+                        }`}>
+                          {l}
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
 

@@ -27,6 +27,7 @@ export interface IContent {
   description: string;
   year: number;
   language: string;
+  audioAvailable: string[];
   category: string;
   quality: string;
   rating: number;

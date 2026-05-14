@@ -1,8 +1,7 @@
 "use client";
 
-import { useEffect, useRef, useCallback } from "react";
+import { useCallback } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { ArrowLeft, Film, ChevronLeft, ChevronRight } from "lucide-react";
 import { useDispatch } from "react-redux";
 import { addContinueWatching } from "@/store/slices/continueSlice";
@@ -31,10 +30,7 @@ export default function SeriesWatchClient({
   currentEpisodeNum,
   seasons,
 }: SeriesWatchClientProps) {
-  const router = useRouter();
   const dispatch = useDispatch();
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const saveIntervalRef = useRef<any>(null);
 
   const hasHls = !!currentEpisode?.hlsLink?.trim();
   const hasEmbed = !!currentEpisode?.embedIframeLink?.trim();
@@ -77,12 +73,6 @@ export default function SeriesWatchClient({
     [dispatch, item.slug, item.title, item.poster, currentSeason, currentEpisodeNum]
   );
 
-  useEffect(() => {
-    return () => {
-      if (saveIntervalRef.current) clearInterval(saveIntervalRef.current);
-    };
-  }, [currentSeason, currentEpisodeNum]);
-
   return (
     <main className="min-h-screen pt-16 pb-20 md:pb-0 bg-[#050608]">
       <div className="max-w-[1800px] mx-auto px-4 md:px-8 py-6">
@@ -102,10 +92,9 @@ export default function SeriesWatchClient({
           </p>
         )}
 
-        {/* Player */}
         {canStream ? (
           hasHls ? (
-            <HLSPlayer src={currentEpisode!.hlsLink!} poster={item.banner} />
+            <HLSPlayer src={currentEpisode!.hlsLink!} poster={item.banner} onProgress={saveProgress} />
           ) : (
             <IframePlayer src={currentEpisode!.embedIframeLink!} />
           )
@@ -121,7 +110,6 @@ export default function SeriesWatchClient({
           </div>
         )}
 
-        {/* Navigation */}
         <div className="flex items-center justify-between mt-4 gap-4">
           {prevEpisode ? (
             <Link
@@ -147,7 +135,6 @@ export default function SeriesWatchClient({
           )}
         </div>
 
-        {/* Episode List */}
         {seasons.length > 0 && (
           <div className="mt-8">
             <h2 className="text-lg font-bold text-[#F9FAFB] mb-4">Episodes</h2>

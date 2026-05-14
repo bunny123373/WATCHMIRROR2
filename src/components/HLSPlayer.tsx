@@ -1,67 +1,15 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import Hls from "hls.js";
+import MuxPlayer from "@mux/mux-player-react";
 
 interface HLSPlayerProps {
   src: string;
   poster?: string;
+  onProgress?: (currentTime: number, duration: number) => void;
 }
 
-export default function HLSPlayer({ src, poster }: HLSPlayerProps) {
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const [error, setError] = useState(false);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const video = videoRef.current;
-    if (!video || !src || !src.trim()) {
-      setLoading(false);
-      setError(true);
-      return;
-    }
-
-    setLoading(true);
-    setError(false);
-
-    if (Hls.isSupported()) {
-      const hls = new Hls();
-      hls.loadSource(src);
-      hls.attachMedia(video);
-      hls.on(Hls.Events.MANIFEST_PARSED, () => {
-        setLoading(false);
-        video.play().catch(() => {});
-      });
-      hls.on(Hls.Events.ERROR, (_event, data) => {
-        if (data.fatal) {
-          setError(true);
-          setLoading(false);
-        }
-      });
-      return () => {
-        hls.destroy();
-      };
-    } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
-      video.src = src;
-      video.addEventListener("loadedmetadata", () => {
-        setLoading(false);
-        video.play().catch(() => {});
-      });
-      video.addEventListener("error", () => {
-        setError(true);
-        setLoading(false);
-      });
-      return () => {
-        video.removeEventListener("loadedmetadata", () => {});
-        video.removeEventListener("error", () => {});
-      };
-    } else {
-      setError(true);
-      setLoading(false);
-    }
-  }, [src]);
-
-  if (error) {
+export default function HLSPlayer({ src, poster, onProgress }: HLSPlayerProps) {
+  if (!src?.trim()) {
     return (
       <div className="w-full aspect-video rounded-2xl bg-[#0E1015] border border-[#1F232D] flex items-center justify-center">
         <div className="text-center">
@@ -74,17 +22,17 @@ export default function HLSPlayer({ src, poster }: HLSPlayerProps) {
 
   return (
     <div className="relative w-full aspect-video rounded-2xl bg-[#0E1015] border border-[#1F232D] overflow-hidden">
-      {loading && (
-        <div className="absolute inset-0 flex items-center justify-center bg-[#0E1015] z-10">
-          <div className="w-10 h-10 border-2 border-[#F5C542] border-t-transparent rounded-full animate-spin" />
-        </div>
-      )}
-      <video
-        ref={videoRef}
-        className="w-full h-full object-contain"
+      <MuxPlayer
+        src={src}
         poster={poster}
-        controls
-        playsInline
+        streamType="on-demand"
+        style={{ width: "100%", height: "100%" }}
+        className="w-full h-full object-contain"
+        onTimeUpdate={(evt: any) => {
+          if (onProgress) {
+            onProgress(evt.target.currentTime, evt.target.duration);
+          }
+        }}
       />
     </div>
   );

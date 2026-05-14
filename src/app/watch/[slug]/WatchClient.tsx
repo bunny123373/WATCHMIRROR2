@@ -1,8 +1,7 @@
 "use client";
 
-import { useEffect, useRef, useCallback } from "react";
+import { useCallback } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { ArrowLeft, Film } from "lucide-react";
 import { useDispatch } from "react-redux";
 import { addContinueWatching } from "@/store/slices/continueSlice";
@@ -18,8 +17,6 @@ interface WatchClientProps {
 
 export default function WatchClient({ item, related }: WatchClientProps) {
   const dispatch = useDispatch();
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const saveIntervalRef = useRef<any>(null);
 
   const hasHls = !!item.hlsLink?.trim();
   const hasEmbed = !!item.embedIframeLink?.trim();
@@ -42,31 +39,9 @@ export default function WatchClient({ item, related }: WatchClientProps) {
     );
   }, [dispatch, item.slug, item.title, item.poster]);
 
-  useEffect(() => {
-    return () => {
-      if (saveIntervalRef.current) clearInterval(saveIntervalRef.current);
-    };
-  }, []);
-
-  const handleTimeUpdate = () => {
-    const video = videoRef.current;
-    if (!video) return;
-    if (video.duration && video.currentTime / video.duration > 0.9) return;
-
-    saveProgress(video.currentTime, video.duration);
-  };
-
-  const handleLoadedMetadata = () => {
-    if (saveIntervalRef.current) clearInterval(saveIntervalRef.current);
-    saveIntervalRef.current = setInterval(() => {
-      handleTimeUpdate();
-    }, 5000);
-  };
-
   return (
     <main className="min-h-screen pt-16 pb-20 md:pb-0 bg-[#050608]">
       <div className="max-w-[1800px] mx-auto px-4 md:px-8 py-6">
-        {/* Back button */}
         <Link
           href={`/movie/${item.slug}`}
           className="inline-flex items-center gap-2 text-[#9CA3AF] hover:text-[#F5C542] transition-colors mb-4"
@@ -75,14 +50,11 @@ export default function WatchClient({ item, related }: WatchClientProps) {
           Back to details
         </Link>
 
-        {/* Player */}
         <div className="mb-6">
           <h1 className="text-2xl font-bold text-[#F9FAFB] mb-4">{item.title}</h1>
           {canStream ? (
             hasHls ? (
-              <div onLoadedData={handleLoadedMetadata}>
-                <HLSPlayer src={item.hlsLink!} poster={item.banner} />
-              </div>
+              <HLSPlayer src={item.hlsLink!} poster={item.banner} onProgress={saveProgress} />
             ) : (
               <IframePlayer src={item.embedIframeLink!} />
             )
@@ -99,7 +71,6 @@ export default function WatchClient({ item, related }: WatchClientProps) {
           )}
         </div>
 
-        {/* Info */}
         <div className="flex flex-wrap items-center gap-3 text-sm text-[#9CA3AF] mb-8">
           <span className="px-2 py-0.5 rounded bg-[#F5C542] text-[#050608] text-xs font-semibold">
             {item.quality}
@@ -109,12 +80,10 @@ export default function WatchClient({ item, related }: WatchClientProps) {
           {item.rating > 0 && <span>★ {item.rating.toFixed(1)}</span>}
         </div>
 
-        {/* Description */}
         <p className="text-[#9CA3AF] leading-relaxed max-w-3xl mb-8">
           {item.description}
         </p>
 
-        {/* Related */}
         {related.length > 0 && (
           <div className="mt-8">
             <ContentRow title="Related Movies" items={related} />
