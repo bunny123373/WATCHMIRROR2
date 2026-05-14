@@ -5,6 +5,7 @@ import { Monitor, Plus, Search, Trash2, Edit3, Film, Tv, Loader2, X, Save, Eye, 
 import AdminGuard from "@/components/AdminGuard";
 import { IContent, SearchResult } from "@/types";
 import { TMDB_IMAGE_W500, LANGUAGES, LANGUAGES_GROUPED } from "@/lib/constants";
+import MuxUploadSection from "@/components/MuxUploadSection";
 
 const ADMIN_KEY = "WATCHMIRROR123";
 
@@ -234,6 +235,8 @@ export default function AdminPage() {
               <p className="text-xs text-[#9CA3AF]">Series</p>
             </div>
           </div>
+
+          <MuxUploadSection />
 
           {/* Toast */}
           {toast && (

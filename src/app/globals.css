@@ -115,26 +115,6 @@ body.no-scroll {
   overflow: hidden;
 }
 
-/* Mux player custom styles */
-mux-player {
-  --controls: all;
-  --media-settings-menu: all;
-  --media-settings-menu-item: all;
-  font-family: inherit;
-}
-mux-player::part(vertical-layer) {
-  background: transparent;
-}
-mux-player::part(settings-menu) {
-  --media-menu-background: #0E1015;
-  --media-menu-color: #F9FAFB;
-  border: 1px solid #1F232D;
-  font-size: 13px;
-}
-mux-player::part(settings-menu-item) {
-  --media-menu-item-checked-indicator-color: #F5C542;
-}
-
 .safe-area-bottom {
   padding-bottom: env(safe-area-inset-bottom, 0px);
 }

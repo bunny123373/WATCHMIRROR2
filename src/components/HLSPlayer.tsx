@@ -1,6 +1,8 @@
 "use client";
 
+import { useMemo } from "react";
 import MuxPlayer from "@mux/mux-player-react";
+import "@mux/mux-player/themes/classic";
 
 interface HLSPlayerProps {
   src: string;
@@ -10,7 +12,14 @@ interface HLSPlayerProps {
   onProgress?: (currentTime: number, duration: number) => void;
 }
 
+const MUX_PATTERN = /stream\.mux\.com\/([a-zA-Z0-9]+)/;
+
 export default function HLSPlayer({ src, poster, subtitleUrl, subtitleLang, onProgress }: HLSPlayerProps) {
+  const muxPlaybackId = useMemo(() => {
+    const match = src?.match(MUX_PATTERN);
+    return match ? match[1] : null;
+  }, [src]);
+
   if (!src?.trim()) {
     return (
       <div className="w-full aspect-video rounded-none bg-[#0E1015] border border-[#1F232D] flex items-center justify-center">
@@ -23,14 +32,14 @@ export default function HLSPlayer({ src, poster, subtitleUrl, subtitleLang, onPr
   }
 
   return (
-    <div className="relative w-full aspect-video rounded-none bg-[#0E1015] border border-[#1F232D] overflow-hidden">
+    <div className="relative w-full bg-[#0E1015] border border-[#1F232D]" style={{ aspectRatio: "16/9" }}>
       <MuxPlayer
-        src={src}
+        {...(muxPlaybackId ? { playbackId: muxPlaybackId } : { src })}
         poster={poster}
         streamType="on-demand"
+        theme="classic"
         {...{ "audio-track-button": true } as any}
-        style={{ width: "100%", height: "100%" }}
-        className="w-full h-full object-contain"
+        style={{ aspectRatio: "16/9", width: "100%" }}
         onTimeUpdate={(evt: any) => {
           if (onProgress) {
             onProgress(evt.target.currentTime, evt.target.duration);
