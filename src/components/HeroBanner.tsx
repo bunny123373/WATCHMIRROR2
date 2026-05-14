@@ -28,9 +28,9 @@ export default function HeroBanner({ items }: HeroBannerProps) {
 
   return (
     <div className="relative w-full aspect-video md:h-[90vh] lg:h-[100vh] min-h-[220px] md:min-h-[500px]">
-      {item.poster && (
+      {item.banner && (
         <Image
-          src={item.poster}
+          src={item.banner}
           alt={item.title}
           fill
           className="object-cover bg-[#050608]"
@@ -41,7 +41,7 @@ export default function HeroBanner({ items }: HeroBannerProps) {
       <div className="absolute inset-0 bg-gradient-to-t from-[#050608] via-[#050608]/30 to-transparent" />
       <div className="absolute inset-0 bg-gradient-to-r from-[#050608]/60 to-transparent" />
 
-      <div className="absolute bottom-0 left-0 right-0 p-4 md:p-8 pb-24 md:pb-32">
+      <div className="absolute bottom-0 left-0 right-0 p-4 md:p-8 pb-1 md:pb-16">
         <div className="max-w-[1800px] mx-auto">
           <div className="max-w-2xl">
             <div className="flex items-center gap-3 mb-3">
