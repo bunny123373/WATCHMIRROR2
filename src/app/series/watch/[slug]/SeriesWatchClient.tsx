@@ -1,10 +1,13 @@
 "use client";
 
-import { useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
-import { ArrowLeft, Film, ChevronLeft, ChevronRight, Headphones } from "lucide-react";
-import { useDispatch } from "react-redux";
+import { useRouter } from "next/navigation";
+import { ArrowLeft, Film, ChevronLeft, ChevronRight, Headphones, Check } from "lucide-react";
+import { useDispatch, useSelector } from "react-redux";
 import { addContinueWatching } from "@/store/slices/continueSlice";
+import { markEpisodeWatched, setWatchedEpisodes } from "@/store/slices/episodeProgressSlice";
+import { RootState } from "@/store/store";
 import HLSPlayer from "@/components/HLSPlayer";
 import IframePlayer from "@/components/IframePlayer";
 import { IContent, Season } from "@/types";
@@ -33,6 +36,22 @@ export default function SeriesWatchClient({
   audio,
 }: SeriesWatchClientProps) {
   const dispatch = useDispatch();
+  const router = useRouter();
+  const watched = useSelector((s: RootState) => s.episodeProgress.watched);
+  const [autoPlayCountdown, setAutoPlayCountdown] = useState<number | null>(null);
+
+  // Hydrate from localStorage
+  useEffect(() => {
+    const stored = localStorage.getItem("watchmirror_watched");
+    if (stored) {
+      try { dispatch(setWatchedEpisodes(JSON.parse(stored))); } catch {}
+    }
+  }, [dispatch]);
+
+  // Persist to localStorage
+  useEffect(() => {
+    localStorage.setItem("watchmirror_watched", JSON.stringify(watched));
+  }, [watched]);
 
   const hasHls = !!currentEpisode?.hlsLink?.trim();
   const hasEmbed = !!currentEpisode?.embedIframeLink?.trim();
@@ -52,6 +71,9 @@ export default function SeriesWatchClient({
   const prevEpisode = currentIndex > 0 ? allEpisodes[currentIndex - 1] : null;
   const nextEpisode =
     currentIndex < allEpisodes.length - 1 ? allEpisodes[currentIndex + 1] : null;
+
+  const isWatched = (sn: number, en: number) =>
+    watched.some((w) => w.slug === item.slug && w.seasonNumber === sn && w.episodeNumber === en);
 
   const saveProgress = useCallback(
     (currentTime: number, duration: number) => {
@@ -74,6 +96,34 @@ export default function SeriesWatchClient({
     },
     [dispatch, item.slug, item.title, item.poster, currentSeason, currentEpisodeNum]
   );
+
+  const handleEnded = useCallback(() => {
+    dispatch(markEpisodeWatched({
+      slug: item.slug,
+      seasonNumber: currentSeason,
+      episodeNumber: currentEpisodeNum,
+      watchedAt: Date.now(),
+    }));
+
+    if (nextEpisode) {
+      setAutoPlayCountdown(10);
+    }
+  }, [dispatch, item.slug, currentSeason, currentEpisodeNum, nextEpisode]);
+
+  useEffect(() => {
+    if (autoPlayCountdown === null) return;
+    if (autoPlayCountdown <= 0) {
+      setAutoPlayCountdown(null);
+      if (nextEpisode) {
+        router.push(`/series/watch/${item.slug}?season=${nextEpisode.seasonNumber}&episode=${nextEpisode.episodeNumber}${audio ? `&audio=${encodeURIComponent(audio)}` : ""}`);
+      }
+      return;
+    }
+    const timer = setTimeout(() => setAutoPlayCountdown(autoPlayCountdown - 1), 1000);
+    return () => clearTimeout(timer);
+  }, [autoPlayCountdown, nextEpisode, item.slug, audio, router]);
+
+  const cancelAutoPlay = () => setAutoPlayCountdown(null);
 
   return (
     <main className="min-h-screen pt-14 md:pt-16 pb-20 md:pb-0 bg-[#050608]">
@@ -101,7 +151,7 @@ export default function SeriesWatchClient({
 
         {canStream ? (
           hasHls ? (
-            <HLSPlayer src={currentEpisode!.hlsLink!} poster={item.banner} onProgress={saveProgress} />
+            <HLSPlayer src={currentEpisode!.hlsLink!} poster={item.banner} onProgress={saveProgress} onEnded={handleEnded} />
           ) : (
             <IframePlayer src={currentEpisode!.embedIframeLink!} />
           )
@@ -113,6 +163,23 @@ export default function SeriesWatchClient({
               <p className="text-[#9CA3AF] text-sm mt-1">
                 This episode does not have a stream source yet.
               </p>
+            </div>
+          </div>
+        )}
+
+        {autoPlayCountdown !== null && nextEpisode && (
+          <div className="flex items-center justify-between mt-3 p-3 rounded-none bg-[#0E1015] border border-[#1F232D]">
+            <p className="text-sm text-[#F9FAFB]">
+              Next episode in <span className="text-[#F5C542] font-bold">{autoPlayCountdown}s</span>
+            </p>
+            <div className="flex items-center gap-2">
+              <button onClick={cancelAutoPlay} className="text-xs text-[#9CA3AF] hover:text-[#F9FAFB] transition-colors">Cancel</button>
+              <Link
+                href={`/series/watch/${item.slug}?season=${nextEpisode.seasonNumber}&episode=${nextEpisode.episodeNumber}${audio ? `&audio=${encodeURIComponent(audio)}` : ""}`}
+                className="text-xs text-[#F5C542] hover:underline"
+              >
+                Play now &rarr;
+              </Link>
             </div>
           </div>
         )}
@@ -159,11 +226,17 @@ export default function SeriesWatchClient({
                         currentSeason === season.seasonNumber &&
                         currentEpisodeNum === ep.episodeNumber
                           ? "bg-[#F5C542]/10 border-[#F5C542]"
+                          : isWatched(season.seasonNumber, ep.episodeNumber)
+                          ? "bg-[#22C55E]/5 border-[#22C55E]/30"
                           : "bg-[#0E1015] border-[#1F232D] hover:border-[#F5C542]/30"
                       }`}
                     >
-                      <span className="flex-shrink-0 w-8 h-8 rounded-lg bg-[#1F232D] flex items-center justify-center text-xs text-[#9CA3AF]">
-                        {ep.episodeNumber}
+                      <span className={`flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center text-xs ${
+                        isWatched(season.seasonNumber, ep.episodeNumber)
+                          ? "bg-[#22C55E]/20 text-[#22C55E]"
+                          : "bg-[#1F232D] text-[#9CA3AF]"
+                      }`}>
+                        {isWatched(season.seasonNumber, ep.episodeNumber) ? <Check className="w-4 h-4" /> : ep.episodeNumber}
                       </span>
                       <span className="text-sm text-[#F9FAFB] truncate">
                         {ep.episodeTitle}

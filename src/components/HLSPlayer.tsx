@@ -10,11 +10,12 @@ interface HLSPlayerProps {
   subtitleUrl?: string;
   subtitleLang?: string;
   onProgress?: (currentTime: number, duration: number) => void;
+  onEnded?: () => void;
 }
 
 const MUX_PATTERN = /stream\.mux\.com\/([a-zA-Z0-9]+)/;
 
-export default function HLSPlayer({ src, poster, subtitleUrl, subtitleLang, onProgress }: HLSPlayerProps) {
+export default function HLSPlayer({ src, poster, subtitleUrl, subtitleLang, onProgress, onEnded }: HLSPlayerProps) {
   const muxPlaybackId = useMemo(() => {
     const match = src?.match(MUX_PATTERN);
     return match ? match[1] : null;
@@ -46,6 +47,7 @@ export default function HLSPlayer({ src, poster, subtitleUrl, subtitleLang, onPr
             onProgress(evt.target.currentTime, evt.target.duration);
           }
         }}
+        onEnded={() => onEnded?.()}
       >
         {subtitleUrl && (
           <track

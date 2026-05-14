@@ -16,6 +16,8 @@ export default function SearchOverlay() {
   const { isOpen, query } = useSelector((state: RootState) => state.search);
   const [results, setResults] = useState<SearchResult[]>([]);
   const [loading, setLoading] = useState(false);
+  const [filterType, setFilterType] = useState<"all" | "movie" | "tv">("all");
+  const [filterYear, setFilterYear] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
   const debounceRef = useRef<any>(null);
 
@@ -38,7 +40,10 @@ export default function SearchOverlay() {
     debounceRef.current = setTimeout(async () => {
       setLoading(true);
       try {
-        const res = await fetch(`/api/tmdb/search?query=${encodeURIComponent(query)}`);
+        const params = new URLSearchParams({ query });
+        if (filterType !== "all") params.set("type", filterType);
+        if (filterYear) params.set("year", filterYear);
+        const res = await fetch(`/api/tmdb/search?${params}`);
         const data = await res.json();
         setResults(data.results || []);
       } catch {
@@ -47,7 +52,7 @@ export default function SearchOverlay() {
         setLoading(false);
       }
     }, 400);
-  }, [query]);
+  }, [query, filterType, filterYear]);
 
   useEffect(() => {
     const handleEsc = (e: KeyboardEvent) => {
@@ -90,7 +95,24 @@ export default function SearchOverlay() {
               </button>
             </div>
 
-            <div className="mt-6">
+            <div className="flex items-center gap-3 mt-4">
+              <div className="flex gap-1">
+                {(["all", "movie", "tv"] as const).map((t) => (
+                  <button key={t} onClick={() => setFilterType(t)}
+                    className={`px-3 py-1.5 rounded-none text-xs font-medium transition-all ${
+                      filterType === t ? "bg-[#F5C542] text-[#050608]" : "bg-[#0E1015] text-[#9CA3AF] border border-[#1F232D] hover:border-[#F5C542]/50"
+                    }`}>
+                    {t === "all" ? "All" : t === "movie" ? "Movies" : "Series"}
+                  </button>
+                ))}
+              </div>
+              <input type="number" value={filterYear} onChange={(e) => setFilterYear(e.target.value)}
+                placeholder="Year"
+                className="w-20 h-8 px-2 rounded-none bg-[#0E1015] border border-[#1F232D] text-[#F9FAFB] text-xs placeholder-[#9CA3AF] focus:outline-none focus:border-[#F5C542] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+              />
+            </div>
+
+            <div className="mt-4">
               {loading && (
                 <div className="flex justify-center py-8">
                   <Loader2 className="w-6 h-6 text-[#F5C542] animate-spin" />
