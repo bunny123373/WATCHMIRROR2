@@ -44,7 +44,7 @@ export default function SeriesClient({ item }: SeriesClientProps) {
 
       {allAudio.length > 0 && (
         <div className="mb-4">
-          <p className="text-xs text-[#9CA3AF] mb-2 font-medium">Audio</p>
+                          <p className="text-xs text-[#9CA3AF] mb-2 font-medium">Select Audio Language</p>
           <div className="flex flex-wrap gap-2">
             {allAudio.map((audio) => (
               <button

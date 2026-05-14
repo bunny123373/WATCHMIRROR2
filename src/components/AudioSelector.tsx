@@ -41,6 +41,7 @@ export default function AudioSelector({ slug, streams, audioAvailable, dubLangua
 
   return (
     <div className="space-y-3">
+      <p className="text-xs text-[#9CA3AF] font-medium">Select Audio Language</p>
       <div className="flex flex-wrap gap-2">
         {allLanguages.map((lang) => (
           <button
