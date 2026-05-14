@@ -760,17 +760,84 @@ export default function AdminPage() {
                   <textarea value={editData.description || ""} onChange={(e) => setEditData({ ...editData, description: e.target.value })} rows={3} className="w-full px-3 py-2 rounded-xl bg-[#050608] border border-[#1F232D] text-[#F9FAFB] text-sm focus:outline-none focus:border-[#F5C542] resize-none" />
                 </div>
 
-                {/* Movie stream links */}
+                {/* Movie stream links — driven by dub language toggles */}
                 {editItem.type === "movie" && (
-                  <div className="space-y-3">
-                    <div>
-                      <label className="block text-xs text-[#9CA3AF] mb-1">HLS Stream URL</label>
-                      <input type="text" value={editData.hlsLink || ""} onChange={(e) => setEditData({ ...editData, hlsLink: e.target.value })} placeholder=".m3u8 URL" className="w-full h-10 px-3 rounded-xl bg-[#050608] border border-[#1F232D] text-[#F9FAFB] text-sm focus:outline-none focus:border-[#F5C542]" />
-                    </div>
-                    <div>
-                      <label className="block text-xs text-[#9CA3AF] mb-1">Embed Iframe URL</label>
-                      <input type="text" value={editData.embedIframeLink || ""} onChange={(e) => setEditData({ ...editData, embedIframeLink: e.target.value })} placeholder="Fallback embed URL" className="w-full h-10 px-3 rounded-xl bg-[#050608] border border-[#1F232D] text-[#F9FAFB] text-sm focus:outline-none focus:border-[#F5C542]" />
-                    </div>
+                  <div className="space-y-4 p-4 rounded-xl bg-[#050608] border border-[#1F232D]">
+                    <label className="text-xs font-medium text-[#F9FAFB]">Dub Language Stream Sources</label>
+                    <p className="text-[10px] text-[#9CA3AF]">Stream inputs appear automatically when you toggle dub languages above.</p>
+                    {(() => {
+                      const editLangs = new Set<string>();
+                      if (editData.language) editLangs.add(editData.language);
+                      (editData.dubLanguage || []).forEach((l: string) => editLangs.add(l));
+                      const editStreamMap = new Map((editData.streams || []).map((s: any) => [s.language, s]));
+                      return Array.from(editLangs).map((lang) => {
+                        const existing = editStreamMap.get(lang);
+                        const stream: any = existing || { language: lang, hlsLink: "", embedIframeLink: "", subtitles: [] };
+                        const idx = (editData.streams || []).findIndex((s: any) => s.language === lang);
+                        const isMain = lang === editData.language;
+                        return (
+                          <div key={lang} className="p-3 rounded-lg bg-[#0E1015] border border-[#1F232D]">
+                            <p className="text-xs font-medium text-[#F5C542] mb-2">{lang}{isMain ? ' (Main)' : ''}</p>
+                            <div className="space-y-2">
+                              <input type="text" value={stream.hlsLink} onChange={(e) => {
+                                const updated = [...(editData.streams || [])];
+                                if (idx >= 0) {
+                                  updated[idx] = { ...updated[idx], hlsLink: e.target.value };
+                                } else {
+                                  updated.push({ ...stream, hlsLink: e.target.value });
+                                }
+                                setEditData({ ...editData, streams: updated });
+                              }} placeholder="HLS Stream URL (.m3u8)" className="w-full h-9 px-3 rounded-none bg-[#050608] border border-[#1F232D] text-[#F9FAFB] placeholder-[#9CA3AF] text-xs focus:outline-none focus:border-[#F5C542]" />
+                              <input type="text" value={stream.embedIframeLink} onChange={(e) => {
+                                const updated = [...(editData.streams || [])];
+                                if (idx >= 0) {
+                                  updated[idx] = { ...updated[idx], embedIframeLink: e.target.value };
+                                } else {
+                                  updated.push({ ...stream, embedIframeLink: e.target.value });
+                                }
+                                setEditData({ ...editData, streams: updated });
+                              }} placeholder="Embed Iframe URL (fallback)" className="w-full h-9 px-3 rounded-none bg-[#050608] border border-[#1F232D] text-[#F9FAFB] placeholder-[#9CA3AF] text-xs focus:outline-none focus:border-[#F5C542]" />
+                              <div className="flex gap-2">
+                                <select value={stream.subtitles?.[0]?.language || ""} onChange={(e) => {
+                                  const updated = [...(editData.streams || [])];
+                                  const subs = e.target.value ? [{ language: e.target.value, url: updated[idx]?.subtitles?.[0]?.url || "" }] : [];
+                                  if (idx >= 0) {
+                                    updated[idx] = { ...updated[idx], subtitles: subs };
+                                  } else {
+                                    updated.push({ ...stream, subtitles: subs });
+                                  }
+                                  setEditData({ ...editData, streams: updated });
+                                }} className="w-28 h-8 px-2 rounded-none bg-[#050608] border border-[#1F232D] text-[#F9FAFB] text-[10px] focus:outline-none focus:border-[#F5C542] appearance-none cursor-pointer">
+                                  <option value="" className="bg-[#0E1015]">No subs</option>
+                                  {LANGUAGES.map((l) => (
+                                    <option key={l} value={l} className="bg-[#0E1015]">{l}</option>
+                                  ))}
+                                </select>
+                                <input type="text" value={stream.subtitles?.[0]?.url || ""} onChange={(e) => {
+                                  const updated = [...(editData.streams || [])];
+                                  const current = updated[idx]?.subtitles?.[0];
+                                  const subs = current ? [{ ...current, url: e.target.value }] : [];
+                                  if (idx >= 0) {
+                                    updated[idx] = { ...updated[idx], subtitles: subs };
+                                  } else {
+                                    updated.push({ ...stream, subtitles: subs });
+                                  }
+                                  setEditData({ ...editData, streams: updated });
+                                }} placeholder="Subtitle URL (.vtt)" className="flex-1 h-8 px-3 rounded-none bg-[#050608] border border-[#1F232D] text-[#F9FAFB] placeholder-[#9CA3AF] text-[10px] focus:outline-none focus:border-[#F5C542]" disabled={!stream.subtitles?.[0]?.language} />
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      });
+                    })()}
+                    {/* Also show old-style single HLS/Embed as fallback */}
+                    {(!editData.language && (editData.dubLanguage || []).length === 0) && (
+                      <div className="p-3 rounded-lg bg-[#0E1015] border border-[#1F232D]">
+                        <p className="text-xs text-[#F5C542] mb-2">Default Stream</p>
+                        <input type="text" value={editData.hlsLink || ""} onChange={(e) => setEditData({ ...editData, hlsLink: e.target.value })} placeholder="HLS Stream URL (.m3u8)" className="w-full h-9 px-3 rounded-none bg-[#050608] border border-[#1F232D] text-[#F9FAFB] placeholder-[#9CA3AF] text-xs focus:outline-none focus:border-[#F5C542] mb-2" />
+                        <input type="text" value={editData.embedIframeLink || ""} onChange={(e) => setEditData({ ...editData, embedIframeLink: e.target.value })} placeholder="Embed Iframe URL (fallback)" className="w-full h-9 px-3 rounded-none bg-[#050608] border border-[#1F232D] text-[#F9FAFB] placeholder-[#9CA3AF] text-xs focus:outline-none focus:border-[#F5C542]" />
+                      </div>
+                    )}
                   </div>
                 )}
 
