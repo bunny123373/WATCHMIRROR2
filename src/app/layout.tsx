@@ -24,6 +24,10 @@ export const metadata: Metadata = {
   description:
     "Watch premium movies and web series online in HD. Stream without limits on WATCHMIRROR - your ultimate OTT streaming platform.",
   metadataBase: new URL(process.env.SITE_URL || "https://watchmirror.vercel.app"),
+  icons: {
+    icon: "/favicon.svg",
+    apple: "/favicon.svg",
+  },
   openGraph: {
     siteName: "WATCHMIRROR",
     type: "website",

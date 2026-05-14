@@ -14,6 +14,14 @@ export default function AdminPage() {
   const [localSearch, setLocalSearch] = useState("");
   const [filterType, setFilterType] = useState<"all" | "movie" | "series">("all");
 
+  // Toast
+  const [toast, setToast] = useState<{ msg: string; type: "success" | "error" } | null>(null);
+
+  const showToast = (msg: string, type: "success" | "error" = "success") => {
+    setToast({ msg, type });
+    setTimeout(() => setToast(null), 3500);
+  };
+
   // Add modal
   const [showAddModal, setShowAddModal] = useState(false);
   const [tmdbQuery, setTmdbQuery] = useState("");
@@ -122,8 +130,12 @@ export default function AdminPage() {
       });
       if (res.ok) {
         setShowAddModal(false); resetAddModal(); fetchContent();
+        showToast("Content imported successfully");
+      } else {
+        const d = await res.json().catch(() => ({}));
+        showToast(d?.error || "Import failed", "error");
       }
-    } catch { alert("Failed to import"); }
+    } catch { showToast("Network error — import failed", "error"); }
     finally { setImporting(false); }
   };
 
@@ -147,9 +159,9 @@ export default function AdminPage() {
         headers: { "Content-Type": "application/json", "x-admin-key": ADMIN_KEY },
         body: JSON.stringify(editData),
       });
-      if (res.ok) { setEditItem(null); setEditData(null); fetchContent(); }
-      else alert("Failed to save");
-    } catch { alert("Failed to save"); }
+      if (res.ok) { setEditItem(null); setEditData(null); fetchContent(); showToast("Changes saved"); }
+      else showToast("Failed to save", "error");
+    } catch { showToast("Failed to save", "error"); }
     finally { setSaving(false); }
   };
 
@@ -166,7 +178,7 @@ export default function AdminPage() {
     if (!confirm("Delete this content?")) return;
     try {
       await fetch(`/api/content/${id}`, { method: "DELETE", headers: { "x-admin-key": ADMIN_KEY } });
-      fetchContent();
+      fetchContent(); showToast("Content deleted");
     } catch {}
   };
 
@@ -201,6 +213,17 @@ export default function AdminPage() {
               <p className="text-xs text-[#9CA3AF]">Series</p>
             </div>
           </div>
+
+          {/* Toast */}
+          {toast && (
+            <div className={`fixed top-6 right-6 z-[60] px-5 py-3 rounded-2xl shadow-2xl border text-sm font-medium transition-all ${
+              toast.type === "success"
+                ? "bg-[#22C55E]/20 border-[#22C55E]/40 text-[#22C55E]"
+                : "bg-red-400/20 border-red-400/40 text-red-400"
+            }`}>
+              {toast.msg}
+            </div>
+          )}
 
           {/* Search & Filter */}
           <div className="flex flex-col sm:flex-row gap-3 mb-6">
