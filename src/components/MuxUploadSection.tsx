@@ -4,52 +4,34 @@ import { useState, useRef, useEffect } from "react";
 import { Upload, Copy, Check, Loader2, Music, Subtitles, Monitor, Plus, Trash2, Key } from "lucide-react";
 
 interface MuxToken {
-  id: string;
+  _id: string;
   label: string;
   tokenId: string;
   tokenSecret: string;
 }
 
-const TOKENS_KEY = "mux_tokens";
-const SELECTED_KEY = "mux_selected_token";
+const ADMIN_KEY = "WATCHMIRROR123";
 
-function loadTokens(): MuxToken[] {
-  if (typeof window === "undefined") return [];
-  try {
-    const raw = localStorage.getItem(TOKENS_KEY);
-    return raw ? JSON.parse(raw) : [];
-  } catch {
-    return [];
-  }
-}
-
-function saveTokens(tokens: MuxToken[]) {
-  localStorage.setItem(TOKENS_KEY, JSON.stringify(tokens));
-}
-
-function loadSelected(): string | null {
-  if (typeof window === "undefined") return null;
-  return localStorage.getItem(SELECTED_KEY);
-}
-
-function saveSelected(id: string | null) {
-  if (id) localStorage.setItem(SELECTED_KEY, id);
-  else localStorage.removeItem(SELECTED_KEY);
+function apiHeaders(): Record<string, string> {
+  return { "Content-Type": "application/json", "x-admin-key": ADMIN_KEY };
 }
 
 function tokenHeaders(selected: MuxToken | null): Record<string, string> {
   if (selected) {
     return {
+      "Content-Type": "application/json",
+      "x-admin-key": ADMIN_KEY,
       "x-mux-token-id": selected.tokenId,
       "x-mux-token-secret": selected.tokenSecret,
     };
   }
-  return {};
+  return { "Content-Type": "application/json", "x-admin-key": ADMIN_KEY };
 }
 
 export default function MuxUploadSection() {
   const [tokens, setTokens] = useState<MuxToken[]>([]);
   const [selectedTokenId, setSelectedTokenId] = useState<string | null>(null);
+  const [loadingTokens, setLoadingTokens] = useState(true);
 
   // Token form
   const [showTokenForm, setShowTokenForm] = useState(false);
@@ -84,39 +66,55 @@ export default function MuxUploadSection() {
   const [addingSub, setAddingSub] = useState(false);
   const [subMsg, setSubMsg] = useState("");
 
-  useEffect(() => {
-    setTokens(loadTokens());
-    setSelectedTokenId(loadSelected());
-  }, []);
-
-  useEffect(() => {
-    saveTokens(tokens);
-  }, [tokens]);
-
-  useEffect(() => {
-    saveSelected(selectedTokenId);
-  }, [selectedTokenId]);
-
-  const selectedToken = tokens.find((t) => t.id === selectedTokenId) || null;
-
-  const addToken = () => {
-    if (!newLabel || !newTokenId || !newTokenSecret) return;
-    const token: MuxToken = {
-      id: crypto.randomUUID(),
-      label: newLabel,
-      tokenId: newTokenId,
-      tokenSecret: newTokenSecret,
-    };
-    setTokens((prev) => [...prev, token]);
-    setNewLabel("");
-    setNewTokenId("");
-    setNewTokenSecret("");
-    setShowTokenForm(false);
+  const fetchTokens = async () => {
+    setLoadingTokens(true);
+    try {
+      const res = await fetch("/api/admin/tokens", { headers: apiHeaders() });
+      if (res.ok) {
+        const data = await res.json();
+        setTokens(data);
+      }
+    } catch {
+    } finally {
+      setLoadingTokens(false);
+    }
   };
 
-  const deleteToken = (id: string) => {
-    setTokens((prev) => prev.filter((t) => t.id !== id));
-    if (selectedTokenId === id) setSelectedTokenId(null);
+  useEffect(() => {
+    fetchTokens();
+  }, []);
+
+  const selectedToken = tokens.find((t) => t._id === selectedTokenId) || null;
+
+  const addToken = async () => {
+    if (!newLabel || !newTokenId || !newTokenSecret) return;
+    try {
+      const res = await fetch("/api/admin/tokens", {
+        method: "POST",
+        headers: apiHeaders(),
+        body: JSON.stringify({ label: newLabel, tokenId: newTokenId, tokenSecret: newTokenSecret }),
+      });
+      if (res.ok) {
+        await fetchTokens();
+        setNewLabel("");
+        setNewTokenId("");
+        setNewTokenSecret("");
+        setShowTokenForm(false);
+      }
+    } catch {}
+  };
+
+  const deleteToken = async (id: string) => {
+    try {
+      const res = await fetch(`/api/admin/tokens?id=${id}`, {
+        method: "DELETE",
+        headers: apiHeaders(),
+      });
+      if (res.ok) {
+        if (selectedTokenId === id) setSelectedTokenId(null);
+        await fetchTokens();
+      }
+    } catch {}
   };
 
   const handleStartUpload = async () => {
@@ -139,7 +137,7 @@ export default function MuxUploadSection() {
       const tHeaders = tokenHeaders(selectedToken);
       const res = await fetch("/api/mux/create-upload", {
         method: "POST",
-        headers: { "Content-Type": "application/json", ...tHeaders },
+        headers: tHeaders,
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to create upload");
@@ -202,7 +200,7 @@ export default function MuxUploadSection() {
     try {
       const res = await fetch("/api/mux/add-track", {
         method: "POST",
-        headers: { "Content-Type": "application/json", ...tokenHeaders(selectedToken) },
+        headers: tokenHeaders(selectedToken),
         body: JSON.stringify({ assetId: trackAssetId, url: trackUrl, languageCode: trackLang, name: trackName || trackLang }),
       });
       if (!res.ok) {
@@ -227,7 +225,7 @@ export default function MuxUploadSection() {
     try {
       const res = await fetch("/api/mux/add-track", {
         method: "POST",
-        headers: { "Content-Type": "application/json", ...tokenHeaders(selectedToken) },
+        headers: tokenHeaders(selectedToken),
         body: JSON.stringify({ assetId: subAssetId, url: subUrl, languageCode: subLang, name: subName || subLang, type: "text" }),
       });
       if (!res.ok) {
@@ -275,32 +273,34 @@ export default function MuxUploadSection() {
           </div>
         )}
 
-        {tokens.length > 0 && (
+        {loadingTokens ? (
+          <div className="flex items-center gap-2 text-xs text-[#9CA3AF] py-2">
+            <Loader2 className="w-3 h-3 animate-spin" /> Loading tokens...
+          </div>
+        ) : tokens.length > 0 ? (
           <div className="space-y-1.5 pt-2 border-t border-[#1F232D]">
             {tokens.map((t) => (
-              <div key={t.id} className="flex items-center gap-2">
+              <div key={t._id} className="flex items-center gap-2">
                 <button
-                  onClick={() => setSelectedTokenId(t.id === selectedTokenId ? null : t.id)}
+                  onClick={() => setSelectedTokenId(t._id === selectedTokenId ? null : t._id)}
                   className={`flex-1 flex items-center gap-2 px-3 h-8 rounded-none text-xs text-left transition-colors ${
-                    selectedTokenId === t.id
+                    selectedTokenId === t._id
                       ? "bg-[#F5C542]/10 border border-[#F5C542] text-[#F5C542]"
                       : "bg-[#0E1015] border border-[#1F232D] text-[#9CA3AF] hover:text-[#F9FAFB]"
                   }`}
                 >
-                  <Check className={`w-3 h-3 ${selectedTokenId === t.id ? "opacity-100" : "opacity-0"}`} />
+                  <Check className={`w-3 h-3 ${selectedTokenId === t._id ? "opacity-100" : "opacity-0"}`} />
                   <span className="truncate">{t.label}</span>
                   <span className="ml-auto text-[10px] opacity-50">{t.tokenId.slice(0, 8)}...</span>
                 </button>
-                <button onClick={() => deleteToken(t.id)} className="p-1.5 rounded-none hover:bg-red-500/10 text-red-400 transition-colors">
+                <button onClick={() => deleteToken(t._id)} className="p-1.5 rounded-none hover:bg-red-500/10 text-red-400 transition-colors">
                   <Trash2 className="w-3.5 h-3.5" />
                 </button>
               </div>
             ))}
           </div>
-        )}
-
-        {tokens.length === 0 && !showTokenForm && (
-          <p className="text-[10px] text-[#9CA3AF]">No custom tokens. Using <span className="text-[#F5C542]">MUX_TOKEN_ID</span> and <span className="text-[#F5C542]">MUX_TOKEN_SECRET</span> from environment variables by default.</p>
+        ) : (
+          <p className="text-[10px] text-[#9CA3AF]">No custom tokens saved. Using <span className="text-[#F5C542]">MUX_TOKEN_ID</span> and <span className="text-[#F5C542]">MUX_TOKEN_SECRET</span> from server environment by default.</p>
         )}
         {selectedToken && (
           <p className="text-[10px] text-[#22C55E]">Using token: <span className="font-semibold">{selectedToken.label}</span></p>
