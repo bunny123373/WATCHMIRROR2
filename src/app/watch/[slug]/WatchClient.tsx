@@ -2,7 +2,7 @@
 
 import { useCallback } from "react";
 import Link from "next/link";
-import { ArrowLeft, Film } from "lucide-react";
+import { ArrowLeft, Film, Headphones } from "lucide-react";
 import { useDispatch } from "react-redux";
 import { addContinueWatching } from "@/store/slices/continueSlice";
 import HLSPlayer from "@/components/HLSPlayer";
@@ -13,9 +13,10 @@ import { IContent } from "@/types";
 interface WatchClientProps {
   item: IContent;
   related: IContent[];
+  audio?: string;
 }
 
-export default function WatchClient({ item, related }: WatchClientProps) {
+export default function WatchClient({ item, related, audio }: WatchClientProps) {
   const dispatch = useDispatch();
 
   const hasHls = !!item.hlsLink?.trim();
@@ -52,6 +53,12 @@ export default function WatchClient({ item, related }: WatchClientProps) {
 
         <div className="mb-6">
           <h1 className="text-2xl font-bold text-[#F9FAFB] mb-4">{item.title}</h1>
+          {audio && (
+            <div className="flex items-center gap-2 text-sm text-[#F5C542] mb-4">
+              <Headphones className="w-4 h-4" />
+              Audio: {audio}
+            </div>
+          )}
           {canStream ? (
             hasHls ? (
               <HLSPlayer src={item.hlsLink!} poster={item.banner} onProgress={saveProgress} />

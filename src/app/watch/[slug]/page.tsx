@@ -7,6 +7,7 @@ import WatchClient from "./WatchClient";
 
 interface Props {
   params: Promise<{ slug: string }>;
+  searchParams: Promise<{ audio?: string }>;
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -55,10 +56,11 @@ async function getMovie(slug: string) {
   }
 }
 
-export default async function WatchMoviePage({ params }: Props) {
+export default async function WatchMoviePage({ params, searchParams }: Props) {
   const { slug } = await params;
+  const { audio } = await searchParams;
   const data = await getMovie(slug);
   if (!data) notFound();
 
-  return <WatchClient item={data.item} related={data.related} />;
+  return <WatchClient item={data.item} related={data.related} audio={audio} />;
 }

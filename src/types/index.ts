@@ -27,7 +27,7 @@ export interface IContent {
   description: string;
   year: number;
   language: string;
-  dubLanguage: string;
+  dubLanguage: string[];
   audioAvailable: string[];
   category: string;
   quality: string;

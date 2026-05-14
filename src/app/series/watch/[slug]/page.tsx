@@ -7,7 +7,7 @@ import SeriesWatchClient from "./SeriesWatchClient";
 
 interface Props {
   params: Promise<{ slug: string }>;
-  searchParams: Promise<{ season?: string; episode?: string }>;
+  searchParams: Promise<{ season?: string; episode?: string; audio?: string }>;
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -66,6 +66,7 @@ export default async function SeriesWatchPage({ params, searchParams }: Props) {
       currentSeason={seasonNum}
       currentEpisodeNum={episodeNum}
       seasons={item.seasons || []}
+      audio={sp.audio}
     />
   );
 }

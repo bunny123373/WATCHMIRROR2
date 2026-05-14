@@ -8,6 +8,7 @@ import { Content } from "@/lib/models/Content";
 import { IContent } from "@/types";
 import CastCarousel from "@/components/CastCarousel";
 import ContentRow from "@/components/ContentRow";
+import AudioSelector from "@/components/AudioSelector";
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -172,13 +173,7 @@ export default async function MovieDetailPage({ params }: Props) {
                 {item.description}
               </p>
 
-              <Link
-                href={`/watch/${item.slug}`}
-                className="inline-flex items-center gap-2 px-8 py-3 rounded-none gold-gradient text-[#050608] font-semibold hover:opacity-90 transition-opacity text-lg"
-              >
-                <Play className="w-5 h-5" />
-                Watch Now
-              </Link>
+              <AudioSelector slug={item.slug} audioAvailable={item.audioAvailable} dubLanguage={item.dubLanguage} />
 
               {/* Tags */}
               {item.tags && item.tags.length > 0 && (

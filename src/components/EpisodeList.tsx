@@ -8,9 +8,10 @@ interface EpisodeListProps {
   episodes: Episode[];
   slug: string;
   seasonNumber: number;
+  audio?: string;
 }
 
-export default function EpisodeList({ episodes, slug, seasonNumber }: EpisodeListProps) {
+export default function EpisodeList({ episodes, slug, seasonNumber, audio }: EpisodeListProps) {
   if (!episodes.length) {
     return (
       <div className="text-center py-8 text-[#9CA3AF]">
@@ -24,7 +25,7 @@ export default function EpisodeList({ episodes, slug, seasonNumber }: EpisodeLis
       {episodes.map((episode) => (
         <Link
           key={episode.episodeNumber}
-          href={`/series/watch/${slug}?season=${seasonNumber}&episode=${episode.episodeNumber}`}
+          href={`/series/watch/${slug}?season=${seasonNumber}&episode=${episode.episodeNumber}${audio ? `&audio=${encodeURIComponent(audio)}` : ""}`}
           className="flex items-center gap-4 p-4 rounded-xl bg-[#0E1015] border border-[#1F232D] hover:border-[#F5C542]/30 transition-all group"
         >
           <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-[#1F232D] flex items-center justify-center group-hover:bg-[#F5C542] transition-colors">

@@ -37,7 +37,7 @@ export default function AdminPage() {
   const [embedLink, setEmbedLink] = useState("");
   const [seasons, setSeasons] = useState("");
   const [selectedLanguage, setSelectedLanguage] = useState("English");
-  const [dubLanguage, setDubLanguage] = useState("");
+  const [selectedDubLanguages, setSelectedDubLanguages] = useState<string[]>([]);
   const [selectedAudio, setSelectedAudio] = useState<string[]>(["English"]);
   const [importing, setImporting] = useState(false);
   const [step, setStep] = useState(1);
@@ -130,7 +130,7 @@ export default function AdminPage() {
       const res = await fetch("/api/admin/seed", {
         method: "POST",
         headers: { "Content-Type": "application/json", "x-admin-key": ADMIN_KEY },
-        body: JSON.stringify({ tmdbId: selectedItem.id, type: importType, hlsLink, embedIframeLink: embedLink, seasons: parsedSeasons, language: selectedLanguage, dubLanguage, audioAvailable: selectedAudio }),
+        body: JSON.stringify({ tmdbId: selectedItem.id, type: importType, hlsLink, embedIframeLink: embedLink, seasons: parsedSeasons, language: selectedLanguage, dubLanguages: selectedDubLanguages, audioAvailable: selectedAudio }),
       });
       if (res.ok) {
         setShowAddModal(false); resetAddModal(); fetchContent();
@@ -146,7 +146,7 @@ export default function AdminPage() {
   const resetAddModal = () => {
     setTmdbQuery(""); setTmdbResults([]); setSearchError(""); setSearched(false);
     setSelectedItem(null); setSelectedDetails(null); setHlsLink(""); setEmbedLink(""); setSeasons("");
-    setSelectedLanguage("English"); setDubLanguage(""); setSelectedAudio(["English"]);
+    setSelectedLanguage("English"); setSelectedDubLanguages([]); setSelectedAudio(["English"]);
     setStep(1);
   };
 
@@ -155,7 +155,7 @@ export default function AdminPage() {
     setEditItem(item);
     const d = JSON.parse(JSON.stringify(item));
     if (!d.audioAvailable) d.audioAvailable = [];
-    if (!d.dubLanguage) d.dubLanguage = "";
+    if (!d.dubLanguage) d.dubLanguage = [];
     setEditData(d);
   };
 
@@ -453,19 +453,27 @@ export default function AdminPage() {
                       </select>
                     </div>
 
-                    {/* Dub Language */}
+                    {/* Dub Languages */}
                     <div>
-                      <label className="block text-xs text-[#9CA3AF] mb-2 font-medium">Dub Language <span className="text-[#9CA3AF]/50">(optional)</span></label>
-                      <select value={dubLanguage} onChange={(e) => setDubLanguage(e.target.value)} className="w-full h-12 px-4 rounded-xl bg-[#050608] border border-[#1F232D] text-[#F9FAFB] text-sm focus:outline-none focus:border-[#F5C542] focus:ring-1 focus:ring-[#F5C542]/30 appearance-none cursor-pointer">
-                        <option value="" className="bg-[#0E1015]">No dubbing</option>
-                        {LANGUAGES_GROUPED.map((group) => (
-                          <optgroup key={group.label} label={group.label}>
-                            {group.languages.map((l) => (
-                              <option key={l} value={l} className="bg-[#0E1015]">{l}</option>
-                            ))}
-                          </optgroup>
-                        ))}
-                      </select>
+                      <label className="block text-xs text-[#9CA3AF] mb-2 font-medium">Dub Languages <span className="text-[#9CA3AF]/50">(optional, multi-select)</span></label>
+                      <div className="flex flex-wrap gap-2">
+                        {LANGUAGES.map((l) => {
+                          const active = selectedDubLanguages.includes(l);
+                          return (
+                            <button key={l} onClick={() => {
+                              setSelectedDubLanguages((prev) =>
+                                active ? prev.filter((a) => a !== l) : [...prev, l]
+                              );
+                            }} className={`px-3 py-1.5 rounded-none text-xs font-medium border transition-all ${
+                              active
+                                ? "bg-[#F5C542] text-[#050608] border-[#F5C542] shadow-sm"
+                                : "bg-[#050608] text-[#9CA3AF] border-[#1F232D] hover:border-[#F5C542]/50"
+                            }`}>
+                              {l}
+                            </button>
+                          );
+                        })}
+                      </div>
                     </div>
 
                     {/* Audio Available */}
@@ -635,17 +643,29 @@ export default function AdminPage() {
                     </select>
                   </div>
                   <div>
-                    <label className="block text-xs text-[#9CA3AF] mb-1">Dub Language <span className="text-[#9CA3AF]/50">(optional)</span></label>
-                    <select value={editData.dubLanguage || ""} onChange={(e) => setEditData({ ...editData, dubLanguage: e.target.value })} className="w-full h-10 px-3 rounded-xl bg-[#050608] border border-[#1F232D] text-[#F9FAFB] text-sm focus:outline-none focus:border-[#F5C542] appearance-none cursor-pointer">
-                      <option value="" className="bg-[#0E1015]">No dubbing</option>
-                      {LANGUAGES_GROUPED.map((group) => (
-                        <optgroup key={group.label} label={group.label}>
-                          {group.languages.map((l) => (
-                            <option key={l} value={l} className="bg-[#0E1015]">{l}</option>
-                          ))}
-                        </optgroup>
-                      ))}
-                    </select>
+                    <label className="block text-xs text-[#9CA3AF] mb-1">Dub Languages <span className="text-[#9CA3AF]/50">(multi-select)</span></label>
+                    <div className="flex flex-wrap gap-1.5 max-h-28 overflow-y-auto">
+                      {LANGUAGES.map((l) => {
+                        const active = (editData.dubLanguage || []).includes(l);
+                        return (
+                          <button key={l} onClick={() => {
+                            const current = editData.dubLanguage || [];
+                            setEditData({
+                              ...editData,
+                              dubLanguage: active
+                                ? current.filter((a: string) => a !== l)
+                                : [...current, l],
+                            });
+                          }} className={`px-2 py-1 rounded-none text-[10px] font-medium border transition-all ${
+                            active
+                              ? "bg-[#F5C542] text-[#050608] border-[#F5C542]"
+                              : "bg-[#050608] text-[#9CA3AF] border-[#1F232D] hover:border-[#F5C542]/50"
+                          }`}>
+                            {l}
+                          </button>
+                        );
+                      })}
+                    </div>
                   </div>
                   <div>
                     <label className="block text-xs text-[#9CA3AF] mb-1">Quality</label>

@@ -14,6 +14,15 @@ export default function SeriesClient({ item }: SeriesClientProps) {
     item.seasons?.[0]?.seasonNumber || 1
   );
 
+  const allAudio = [...(item.audioAvailable || [])];
+  if (item.dubLanguage) {
+    item.dubLanguage.forEach((dl) => {
+      if (!allAudio.includes(dl)) allAudio.push(dl);
+    });
+  }
+
+  const [selectedAudio, setSelectedAudio] = useState(allAudio[0] || "");
+
   if (!item.seasons?.length) {
     return (
       <div className="mt-8">
@@ -32,6 +41,28 @@ export default function SeriesClient({ item }: SeriesClientProps) {
       <h2 className="text-xl md:text-2xl font-bold text-[#F9FAFB] mb-4">
         Episodes
       </h2>
+
+      {allAudio.length > 0 && (
+        <div className="mb-4">
+          <p className="text-xs text-[#9CA3AF] mb-2 font-medium">Audio</p>
+          <div className="flex flex-wrap gap-2">
+            {allAudio.map((audio) => (
+              <button
+                key={audio}
+                onClick={() => setSelectedAudio(audio)}
+                className={`px-3 py-1.5 rounded-none text-xs font-medium border transition-all ${
+                  selectedAudio === audio
+                    ? "bg-[#F5C542] text-[#050608] border-[#F5C542]"
+                    : "bg-[#050608] text-[#9CA3AF] border-[#1F232D] hover:border-[#F5C542]/50"
+                }`}
+              >
+                {audio}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
       <SeasonSelector
         seasons={item.seasons}
         selectedSeason={selectedSeason}
@@ -42,6 +73,7 @@ export default function SeriesClient({ item }: SeriesClientProps) {
           episodes={currentSeason?.episodes || []}
           slug={item.slug}
           seasonNumber={selectedSeason}
+          audio={selectedAudio}
         />
       </div>
     </div>

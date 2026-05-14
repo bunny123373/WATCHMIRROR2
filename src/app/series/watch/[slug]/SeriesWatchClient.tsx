@@ -2,7 +2,7 @@
 
 import { useCallback } from "react";
 import Link from "next/link";
-import { ArrowLeft, Film, ChevronLeft, ChevronRight } from "lucide-react";
+import { ArrowLeft, Film, ChevronLeft, ChevronRight, Headphones } from "lucide-react";
 import { useDispatch } from "react-redux";
 import { addContinueWatching } from "@/store/slices/continueSlice";
 import HLSPlayer from "@/components/HLSPlayer";
@@ -21,6 +21,7 @@ interface SeriesWatchClientProps {
   currentSeason: number;
   currentEpisodeNum: number;
   seasons: Season[];
+  audio?: string;
 }
 
 export default function SeriesWatchClient({
@@ -29,6 +30,7 @@ export default function SeriesWatchClient({
   currentSeason,
   currentEpisodeNum,
   seasons,
+  audio,
 }: SeriesWatchClientProps) {
   const dispatch = useDispatch();
 
@@ -91,6 +93,11 @@ export default function SeriesWatchClient({
             {currentEpisode.episodeTitle}
           </p>
         )}
+        {audio && (
+          <p className="text-xs text-[#F5C542] mb-3 flex items-center gap-1">
+            <Headphones className="w-3 h-3" /> Audio: {audio}
+          </p>
+        )}
 
         {canStream ? (
           hasHls ? (
@@ -113,7 +120,7 @@ export default function SeriesWatchClient({
         <div className="flex items-center justify-between mt-4 gap-4">
           {prevEpisode ? (
             <Link
-              href={`/series/watch/${item.slug}?season=${prevEpisode.seasonNumber}&episode=${prevEpisode.episodeNumber}`}
+              href={`/series/watch/${item.slug}?season=${prevEpisode.seasonNumber}&episode=${prevEpisode.episodeNumber}${audio ? `&audio=${encodeURIComponent(audio)}` : ""}`}
               className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[#0E1015] border border-[#1F232D] text-[#F9FAFB] hover:border-[#F5C542]/30 transition-all text-sm"
             >
               <ChevronLeft className="w-4 h-4" />
@@ -124,7 +131,7 @@ export default function SeriesWatchClient({
           )}
           {nextEpisode ? (
             <Link
-              href={`/series/watch/${item.slug}?season=${nextEpisode.seasonNumber}&episode=${nextEpisode.episodeNumber}`}
+              href={`/series/watch/${item.slug}?season=${nextEpisode.seasonNumber}&episode=${nextEpisode.episodeNumber}${audio ? `&audio=${encodeURIComponent(audio)}` : ""}`}
               className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[#0E1015] border border-[#1F232D] text-[#F9FAFB] hover:border-[#F5C542]/30 transition-all text-sm"
             >
               {nextEpisode.episodeTitle}
@@ -147,7 +154,7 @@ export default function SeriesWatchClient({
                   {season.episodes.map((ep) => (
                     <Link
                       key={`${season.seasonNumber}-${ep.episodeNumber}`}
-                      href={`/series/watch/${item.slug}?season=${season.seasonNumber}&episode=${ep.episodeNumber}`}
+                      href={`/series/watch/${item.slug}?season=${season.seasonNumber}&episode=${ep.episodeNumber}${audio ? `&audio=${encodeURIComponent(audio)}` : ""}`}
                       className={`flex items-center gap-3 p-3 rounded-xl border transition-all ${
                         currentSeason === season.seasonNumber &&
                         currentEpisodeNum === ep.episodeNumber
