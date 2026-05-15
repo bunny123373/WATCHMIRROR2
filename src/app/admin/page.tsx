@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { Monitor, Plus, Search, Trash2, Edit3, Film, Tv, Loader2, X, Save, Eye, Hash, Star, Globe, Calendar, Check, ChevronRight, ChevronLeft } from "lucide-react";
 import AdminGuard from "@/components/AdminGuard";
 import { IContent, SearchResult } from "@/types";
-import { TMDB_IMAGE_W500, LANGUAGES, LANGUAGES_GROUPED } from "@/lib/constants";
+import { TMDB_IMAGE_W500, LANGUAGES, LANGUAGES_GROUPED, CONTENT_RATINGS } from "@/lib/constants";
 import MuxUploadSection from "@/components/MuxUploadSection";
 
 const ADMIN_KEY = "WATCHMIRROR123";
@@ -38,6 +38,7 @@ export default function AdminPage() {
   const [embedLink, setEmbedLink] = useState("");
   const [downloadLink, setDownloadLink] = useState("");
   const [seasons, setSeasons] = useState("");
+  const [selectedRating, setSelectedRating] = useState("TV-MA");
   const [selectedLanguage, setSelectedLanguage] = useState("English");
   const [selectedDubLanguages, setSelectedDubLanguages] = useState<string[]>([]);
   const [selectedAudio, setSelectedAudio] = useState<string[]>(["English"]);
@@ -144,7 +145,7 @@ export default function AdminPage() {
       const res = await fetch("/api/admin/seed", {
         method: "POST",
         headers: { "Content-Type": "application/json", "x-admin-key": ADMIN_KEY },
-        body: JSON.stringify({ tmdbId: selectedItem.id, type: importType, hlsLink, embedIframeLink: embedLink, downloadLink, streams: streamInputs.filter((s) => s.hlsLink || s.embedIframeLink), seasons: parsedSeasons, language: selectedLanguage, dubLanguages: selectedDubLanguages, audioAvailable: selectedAudio }),
+        body: JSON.stringify({ tmdbId: selectedItem.id, type: importType, hlsLink, embedIframeLink: embedLink, downloadLink, streams: streamInputs.filter((s) => s.hlsLink || s.embedIframeLink), seasons: parsedSeasons, language: selectedLanguage, dubLanguages: selectedDubLanguages, audioAvailable: selectedAudio, contentRating: selectedRating }),
       });
       if (res.ok) {
         setShowAddModal(false); resetAddModal(); fetchContent();
@@ -160,7 +161,7 @@ export default function AdminPage() {
   const resetAddModal = () => {
     setTmdbQuery(""); setTmdbResults([]); setSearchError(""); setSearched(false);
     setSelectedItem(null); setSelectedDetails(null); setHlsLink(""); setEmbedLink(""); setDownloadLink(""); setSeasons("");
-    setSelectedLanguage("English"); setSelectedDubLanguages([]); setSelectedAudio(["English"]); setStreamInputs([]);
+    setSelectedRating("TV-MA"); setSelectedLanguage("English"); setSelectedDubLanguages([]); setSelectedAudio(["English"]); setStreamInputs([]);
     setStep(1);
   };
 
@@ -286,6 +287,11 @@ export default function AdminPage() {
                       </div>
                       <div className="flex items-center gap-3 mt-0.5 text-[11px] text-[#9CA3AF]">
                         <span>{item.year}</span>
+                        {item.contentRating && (
+                          <span className="px-1.5 py-0.5 text-[10px] font-bold bg-[#1F232D] text-[#9CA3AF]">
+                            {item.contentRating}
+                          </span>
+                        )}
                         <span className="capitalize">{item.category}</span>
                         <span>{item.language}</span>
                         {item.rating > 0 && <span className="text-[#F5C542]">★ {item.rating.toFixed(1)}</span>}
@@ -454,6 +460,16 @@ export default function AdminPage() {
                       </div>
                     )}
 
+                    {/* Content Rating */}
+                    <div>
+                      <label className="block text-xs text-[#9CA3AF] mb-2 font-medium">Content Rating</label>
+                      <select value={selectedRating} onChange={(e) => setSelectedRating(e.target.value)} className="w-full h-12 px-4 rounded-none bg-[#050608] border border-[#1F232D] text-[#F9FAFB] text-sm focus:outline-none focus:border-[#F5C542] focus:ring-1 focus:ring-[#F5C542]/30 appearance-none cursor-pointer">
+                        {CONTENT_RATINGS.map((r) => (
+                          <option key={r.value} value={r.value} className="bg-[#0E1015]">{r.label}</option>
+                        ))}
+                      </select>
+                    </div>
+
                     {/* Language */}
                     <div>
                       <label className="block text-xs text-[#9CA3AF] mb-2 font-medium">Language</label>
@@ -613,6 +629,7 @@ export default function AdminPage() {
                             <span>{selectedDetails?.release_date?.slice(0, 4) || selectedDetails?.first_air_date?.slice(0, 4) || "—"}</span>
                             <span className="flex items-center gap-1"><Star className="w-3 h-3 text-[#F5C542]" /> {selectedDetails?.vote_average?.toFixed(1) || "—"}</span>
                             <span className="px-2 py-0.5 rounded bg-[#1F232D]">{selectedLanguage}</span>
+                            <span className="px-2 py-0.5 rounded bg-[#1F232D] font-bold">{selectedRating}</span>
                           </div>
                           <div className="flex flex-wrap gap-1.5">
                             {selectedAudio.map((a) => (
@@ -698,6 +715,14 @@ export default function AdminPage() {
                             <option key={l} value={l} className="bg-[#0E1015]">{l}</option>
                           ))}
                         </optgroup>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-xs text-[#9CA3AF] mb-1">Content Rating</label>
+                    <select value={editData.contentRating || "TV-MA"} onChange={(e) => setEditData({ ...editData, contentRating: e.target.value })} className="w-full h-10 px-3 rounded-none bg-[#050608] border border-[#1F232D] text-[#F9FAFB] text-sm focus:outline-none focus:border-[#F5C542] appearance-none cursor-pointer">
+                      {CONTENT_RATINGS.map((r) => (
+                        <option key={r.value} value={r.value} className="bg-[#0E1015]">{r.label}</option>
                       ))}
                     </select>
                   </div>

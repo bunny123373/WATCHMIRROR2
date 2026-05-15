@@ -36,7 +36,7 @@ export default async function TrendingPage() {
   const items = await getTrending();
 
   return (
-    <main className="min-h-screen pt-14 md:pt-16 pb-20 md:pb-0">
+    <main className="min-h-screen pt-14 md:pt-28 pb-20 md:pb-0">
       <div className="max-w-[1800px] mx-auto px-4 md:px-8 py-8">
         <h1 className="text-3xl md:text-4xl font-bold text-[#F9FAFB] mb-8">Trending</h1>
         <TrendingRow title="" items={items} />

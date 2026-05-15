@@ -16,6 +16,7 @@ export interface IContentDocument extends Document {
   rating: number;
   tags: string[];
   popularity: number;
+  contentRating?: string;
   trailerEmbedUrl?: string;
   cast: { name: string; character: string; profileImage: string }[];
   metaTitle: string;
@@ -75,6 +76,7 @@ const ContentSchema = new Schema({
   rating: { type: Number, default: 0 },
   tags: [{ type: String }],
   popularity: { type: Number, default: 0 },
+  contentRating: { type: String, default: "TV-MA" },
   trailerEmbedUrl: { type: String },
   cast: [CastSchema],
   metaTitle: { type: String },

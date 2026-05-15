@@ -42,6 +42,7 @@ export interface IContent {
   rating: number;
   tags: string[];
   popularity: number;
+  contentRating?: string;
   trailerEmbedUrl?: string;
   cast: Cast[];
   metaTitle: string;

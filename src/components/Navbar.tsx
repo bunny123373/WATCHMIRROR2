@@ -2,16 +2,17 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Search, Monitor, Film, TrendingUp, Clapperboard, Bookmark } from "lucide-react";
 import { useDispatch } from "react-redux";
 import { openSearch } from "@/store/slices/searchSlice";
+import { Home, Search, Film, Grid2X2 } from "lucide-react";
+import { WatchMirrorLogo } from "./LogoMark";
+import MaturitySettings from "./MaturitySettings";
 
 const navLinks = [
   { href: "/", label: "Home" },
   { href: "/movies", label: "Movies" },
-  { href: "/series", label: "Series" },
+  { href: "/series", label: "TV Shows" },
   { href: "/trending", label: "Trending" },
-  { href: "/my-list", label: "My List" },
 ];
 
 export default function Navbar() {
@@ -25,85 +26,116 @@ export default function Navbar() {
 
   return (
     <>
-      {/* Desktop Navbar */}
-      <nav className="hidden md:block fixed top-0 left-0 right-0 z-50 glass border-b border-[#1F232D]">
-        <div className="max-w-[1800px] mx-auto px-6 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-10">
-            <Link href="/" className="flex items-center gap-2">
-              <Monitor className="w-6 h-6 text-[#F5C542]" />
-              <span className="text-xl font-bold text-gradient">WATCHMIRROR</span>
-            </Link>
-            <div className="flex items-center gap-1">
-              {navLinks.map((link) => (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${
-                    isActive(link.href)
-                      ? "text-[#F5C542] bg-[#F5C542]/10"
-                      : "text-[#9CA3AF] hover:text-[#F9FAFB] hover:bg-[#0E1015]"
-                  }`}
-                >
-                  {link.label}
-                </Link>
-              ))}
-            </div>
+      {/* Desktop Navbar — pill style */}
+      <nav className="hidden md:block fixed top-3 left-1/2 -translate-x-1/2 z-50 w-[95%] max-w-7xl">
+        <div className="flex items-center justify-between px-3 py-2 rounded-[28px] border border-white/10 bg-black/80 backdrop-blur-2xl shadow-2xl">
+          {/* Logo */}
+          <Link href="/" className="flex items-center gap-1.5">
+            <WatchMirrorLogo width={24} height={24} />
+            <h1 className="text-base font-bold tracking-[0.15em]">
+              <span className="bg-gradient-to-r from-[#C084FC] via-[#8B5CF6] to-[#6D28D9] bg-clip-text text-transparent">WATCH</span>
+              <span className="text-white">MIRROR</span>
+            </h1>
+          </Link>
+
+          {/* Nav Links */}
+          <div className="hidden md:flex items-center gap-5 text-xs font-medium">
+            {navLinks.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                className={`relative transition ${
+                  isActive(link.href) ? "text-white" : "text-zinc-400 hover:text-white"
+                }`}
+              >
+                {link.label}
+                {isActive(link.href) && (
+                  <span className="absolute -bottom-1.5 left-0 w-full h-[2px] bg-[#F5C542] rounded-full" />
+                )}
+              </Link>
+            ))}
           </div>
-          <div className="flex items-center gap-3">
+
+          {/* Right Side */}
+          <div className="flex items-center gap-1.5">
+            {/* Search */}
             <button
               onClick={() => dispatch(openSearch())}
-              className="p-2 rounded-xl text-[#9CA3AF] hover:text-[#F9FAFB] hover:bg-[#0E1015] transition-all"
+              className="w-8 h-8 rounded-full bg-zinc-900 border border-white/5 flex items-center justify-center hover:bg-zinc-800 transition"
               aria-label="Search"
             >
-              <Search className="w-5 h-5" />
+              <Search className="w-3.5 h-3.5 text-white" />
             </button>
+
+            {/* Maturity Settings */}
+            <MaturitySettings className="w-8 h-8" iconClassName="w-3.5 h-3.5" />
           </div>
         </div>
       </nav>
 
-      {/* Mobile Top Navbar (brand only) */}
-      <nav className="md:hidden fixed top-0 left-0 right-0 z-50 glass border-b border-[#1F232D] safe-area-top">
-        <div className="flex items-center h-14 px-4">
-          <Link href="/" className="flex items-center gap-2">
-            <Monitor className="w-5 h-5 text-[#F5C542]" />
-            <span className="text-base font-bold text-gradient">WATCHMIRROR</span>
+      {/* Mobile Top Navbar — pill style */}
+      <nav className="md:hidden fixed top-2 left-1/2 -translate-x-1/2 z-50">
+        <div className="flex items-center px-4 py-1.5 rounded-full bg-black/80 backdrop-blur-2xl">
+          <Link href="/" className="flex items-center gap-1.5">
+            <WatchMirrorLogo width={18} height={18} />
+            <span className="text-xs font-bold tracking-[0.15em] whitespace-nowrap">
+              <span className="bg-gradient-to-r from-[#C084FC] via-[#8B5CF6] to-[#6D28D9] bg-clip-text text-transparent">WATCH</span>
+              <span className="text-white">MIRROR</span>
+            </span>
           </Link>
         </div>
       </nav>
 
-      {/* Mobile Bottom Nav */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 glass border-t border-[#1F232D] safe-area-bottom">
-        <div className="flex items-center justify-around h-16 px-2">
-          <MobileNavItem href="/" icon={<Clapperboard className="w-5 h-5" />} label="Home" />
-          <MobileNavItem href="/movies" icon={<Film className="w-5 h-5" />} label="Movies" />
-          <MobileNavItem href="/series" icon={<Monitor className="w-5 h-5" />} label="Series" />
-          <MobileNavItem href="/trending" icon={<TrendingUp className="w-5 h-5" />} label="Trending" />
-          <button
-            onClick={() => dispatch(openSearch())}
-            className="flex flex-col items-center gap-1 pt-1 px-3"
-          >
-            <Search className="w-5 h-5 text-[#9CA3AF]" />
-            <span className="text-[10px] text-[#9CA3AF]">Search</span>
+      {/* Mobile Bottom Nav — floating pill */}
+      <nav className="md:hidden fixed bottom-3 left-1/2 -translate-x-1/2 z-50 w-[93%] max-w-sm">
+        <div className="relative flex items-center justify-between px-4 py-3 rounded-[28px] border border-white/10 bg-black/75 backdrop-blur-3xl shadow-[0_0_40px_rgba(0,0,0,0.75)] overflow-visible">
+          <div className="absolute inset-0 rounded-[28px] bg-[linear-gradient(to_top,rgba(139,92,246,0.08),transparent)] pointer-events-none" />
+
+          {/* Home */}
+          <Link href="/" className="flex flex-col items-center gap-0.5 relative z-10">
+            <Home size={22} strokeWidth={2.5} className={pathname === "/" ? "text-violet-500" : "text-zinc-300"} />
+            <span className={`text-[11px] font-medium ${pathname === "/" ? "text-violet-500" : "text-zinc-300"}`}>Home</span>
+          </Link>
+
+          {/* Search */}
+          <button onClick={() => dispatch(openSearch())} className="flex flex-col items-center gap-0.5 relative z-10">
+            <Search size={22} strokeWidth={2.5} className="text-zinc-300" />
+            <span className="text-[11px] font-medium text-zinc-300">Search</span>
           </button>
+
+          {/* Center Floating Button */}
+          <button className="relative -mt-12 z-20">
+            <div className="relative w-16 h-16 rounded-full flex items-center justify-center">
+              <div className="absolute inset-0 rounded-full bg-violet-500 blur-xl opacity-40" />
+              <div className="relative w-16 h-16 rounded-full border border-white/10 bg-gradient-to-b from-violet-400 via-violet-500 to-violet-700 flex items-center justify-center shadow-[0_0_30px_rgba(139,92,246,0.7)]">
+                <div className="absolute inset-[4px] rounded-full border border-white/10" />
+                <svg width="26" height="26" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <defs>
+                    <linearGradient id="wm-gradient-mobile" x1="0" y1="0" x2="1" y2="1">
+                      <stop offset="0%" stopColor="#FFFFFF" />
+                      <stop offset="100%" stopColor="#E9D5FF" />
+                    </linearGradient>
+                  </defs>
+                  <path d="M8 15L28 92C30 102 42 102 45 92L58 42" stroke="url(#wm-gradient-mobile)" strokeWidth="16" strokeLinecap="round" strokeLinejoin="round" />
+                  <path d="M58 42L72 92C75 102 87 102 89 92L110 15" stroke="url(#wm-gradient-mobile)" strokeWidth="16" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </div>
+            </div>
+          </button>
+
+          {/* Movies */}
+          <Link href="/movies" className="flex flex-col items-center gap-0.5 relative z-10">
+            <Film size={22} strokeWidth={2.5} className={pathname.startsWith("/movies") ? "text-violet-500" : "text-zinc-300"} />
+            <span className={`text-[11px] font-medium ${pathname.startsWith("/movies") ? "text-violet-500" : "text-zinc-300"}`}>Movies</span>
+          </Link>
+
+          {/* More */}
+          <Link href="/trending" className="flex flex-col items-center gap-0.5 relative z-10">
+            <Grid2X2 size={22} strokeWidth={2.5} className={pathname.startsWith("/trending") ? "text-violet-500" : "text-zinc-300"} />
+            <span className={`text-[11px] font-medium ${pathname.startsWith("/trending") ? "text-violet-500" : "text-zinc-300"}`}>More</span>
+          </Link>
         </div>
       </nav>
     </>
-  );
-}
-
-function MobileNavItem({ href, icon, label }: { href: string; icon: React.ReactNode; label: string }) {
-  const pathname = usePathname();
-  const isActive = href === "/" ? pathname === "/" : pathname.startsWith(href);
-
-  return (
-    <Link
-      href={href}
-      className={`flex flex-col items-center gap-1 pt-1 px-3 transition-colors ${
-        isActive ? "text-[#F5C542]" : "text-[#9CA3AF]"
-      }`}
-    >
-      {icon}
-      <span className="text-[10px]">{label}</span>
-    </Link>
   );
 }

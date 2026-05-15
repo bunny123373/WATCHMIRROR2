@@ -1,11 +1,16 @@
+import { WatchMirrorLogo } from "@/components/LogoMark";
+
 export default function CircleLoading() {
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black overflow-hidden">
       <div className="absolute inset-0 bg-gradient-to-br from-zinc-900 via-black to-zinc-950" />
 
       <div className="relative flex flex-col items-center gap-4 md:gap-6 z-10 animate-fadeIn px-4">
-        <h1 className="text-white text-3xl md:text-5xl font-bold tracking-[0.2em] md:tracking-[0.25em] drop-shadow-2xl text-center">
-          WATCHMIRROR
+        <WatchMirrorLogo />
+
+        <h1 className="text-3xl md:text-5xl font-bold tracking-[0.2em] md:tracking-[0.25em] drop-shadow-2xl text-center">
+          <span className="bg-gradient-to-r from-[#C084FC] via-[#8B5CF6] to-[#6D28D9] bg-clip-text text-transparent">WATCH</span>
+          <span className="text-white">MIRROR</span>
         </h1>
 
         <div className="w-32 md:w-40 h-[2px] bg-zinc-800 overflow-hidden rounded-full">

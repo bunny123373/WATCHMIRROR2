@@ -17,7 +17,7 @@ export async function POST(request: NextRequest) {
     const db = await connectDB();
     if (!db) return NextResponse.json({ error: "Database not connected" }, { status: 500 });
     const body = await request.json();
-    const { tmdbId, type, hlsLink, embedIframeLink, downloadLink, seasons, language, dubLanguages, audioAvailable, streams } = body;
+    const { tmdbId, type, hlsLink, embedIframeLink, downloadLink, seasons, language, dubLanguages, audioAvailable, streams, contentRating } = body;
 
     let data;
     try {
@@ -65,6 +65,7 @@ export async function POST(request: NextRequest) {
       category,
       quality: "1080p",
       rating: data.vote_average || 0,
+      contentRating: contentRating || "TV-MA",
       tags,
       popularity: data.popularity || 0,
       trailerEmbedUrl: trailer

@@ -66,3 +66,66 @@ export const CATEGORIES = [
 ];
 
 export const QUALITIES = ["4K", "1080p", "720p", "480p", "360p"];
+
+export const CONTENT_RATINGS = [
+  { value: "G", label: "G — General Audiences" },
+  { value: "PG", label: "PG — Parental Guidance Suggested" },
+  { value: "PG-13", label: "PG-13 — Parents Strongly Cautioned" },
+  { value: "R", label: "R — Restricted" },
+  { value: "NC-17", label: "NC-17 — Adults Only" },
+  { value: "TV-Y", label: "TV-Y — All Children" },
+  { value: "TV-Y7", label: "TV-Y7 — Older Children" },
+  { value: "TV-G", label: "TV-G — General Audience" },
+  { value: "TV-PG", label: "TV-PG — Parental Guidance" },
+  { value: "TV-14", label: "TV-14 — Parents Strongly Cautioned" },
+  { value: "TV-MA", label: "TV-MA — Mature Audience Only" },
+  { value: "U/A 7+", label: "U/A 7+ — Parental Guidance for <7" },
+  { value: "U/A 13+", label: "U/A 13+ — Parental Guidance for <13" },
+  { value: "U/A 16+", label: "U/A 16+ — Parental Guidance for <16" },
+  { value: "A", label: "A — Adult Only (18+)" },
+];
+
+export const MATURITY_LEVELS = [
+  { value: "all", label: "All Ratings" },
+  { value: "G", label: "General (G)" },
+  { value: "PG", label: "Parental Guidance (PG)" },
+  { value: "PG-13", label: "Teens (PG-13)" },
+  { value: "R", label: "Mature (R)" },
+  { value: "NC-17", label: "Adult Only (NC-17)" },
+];
+
+export const RATING_HIERARCHY: Record<string, number> = {
+  "TV-Y": 0,
+  "TV-Y7": 0,
+  "G": 0,
+  "TV-G": 0,
+  "U/A 7+": 1,
+  "PG": 1,
+  "TV-PG": 1,
+  "PG-13": 2,
+  "TV-14": 2,
+  "U/A 13+": 2,
+  "R": 3,
+  "U/A 16+": 3,
+  "TV-MA": 3,
+  "NC-17": 4,
+  "A": 4,
+};
+
+export const RATING_COLORS: Record<string, string> = {
+  "G": "#22C55E",
+  "PG": "#3B82F6",
+  "PG-13": "#F59E0B",
+  "R": "#EF4444",
+  "NC-17": "#DC2626",
+  "TV-Y": "#22C55E",
+  "TV-Y7": "#22C55E",
+  "TV-G": "#22C55E",
+  "TV-PG": "#3B82F6",
+  "TV-14": "#F59E0B",
+  "TV-MA": "#EF4444",
+  "U/A 7+": "#3B82F6",
+  "U/A 13+": "#F59E0B",
+  "U/A 16+": "#EF4444",
+  "A": "#DC2626",
+};

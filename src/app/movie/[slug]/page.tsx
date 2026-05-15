@@ -103,7 +103,7 @@ export default async function MovieDetailPage({ params }: Props) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <main className="min-h-screen pt-14 md:pt-16 pb-20 md:pb-0">
+      <main className="min-h-screen pt-14 md:pt-28 pb-20 md:pb-0">
         {/* Banner */}
         <div className="relative w-full h-[40vh] md:h-[60vh]">
           <Image
@@ -136,6 +136,11 @@ export default async function MovieDetailPage({ params }: Props) {
             {/* Details */}
             <div className="flex-1 pt-4 md:pt-16">
               <div className="flex flex-wrap items-center gap-3 mb-3">
+                {item.contentRating && (
+                  <span className="px-2 py-1 text-xs font-bold bg-[#1F232D] text-[#F5C542] border border-[#F5C542]/30">
+                    {item.contentRating}
+                  </span>
+                )}
                 <span className="px-3 py-1 text-xs font-semibold rounded-full bg-[#F5C542] text-[#050608]">
                   {item.quality}
                 </span>

@@ -128,7 +128,7 @@ export default function SeriesWatchClient({
   const cancelAutoPlay = () => setAutoPlayCountdown(null);
 
   return (
-    <main className="min-h-screen pt-14 md:pt-16 pb-20 md:pb-0 bg-[#050608]">
+    <main className="min-h-screen pt-14 md:pt-28 pb-20 md:pb-0 bg-[#050608]">
       <div className="max-w-[1800px] mx-auto px-4 md:px-8 py-6">
         <Link
           href={`/series/${item.slug}`}
