@@ -10,6 +10,7 @@ import { markEpisodeWatched, setWatchedEpisodes } from "@/store/slices/episodePr
 import { RootState } from "@/store/store";
 import HLSPlayer from "@/components/HLSPlayer";
 import IframePlayer from "@/components/IframePlayer";
+import DownloadButton from "@/components/DownloadButton";
 import { IContent, Season } from "@/types";
 
 interface SeriesWatchClientProps {
@@ -19,6 +20,7 @@ interface SeriesWatchClientProps {
     episodeTitle: string;
     hlsLink?: string;
     embedIframeLink?: string;
+    downloadLink?: string;
     quality: string;
   } | null;
   currentSeason: number;
@@ -149,9 +151,14 @@ export default function SeriesWatchClient({
           </p>
         )}
 
-        {canStream ? (
+          {canStream ? (
           hasHls ? (
-            <HLSPlayer src={currentEpisode!.hlsLink!} poster={item.banner} onProgress={saveProgress} onEnded={handleEnded} />
+            <>
+              <HLSPlayer src={currentEpisode!.hlsLink!} poster={item.banner} onProgress={saveProgress} onEnded={handleEnded} />
+              <div className="mt-3">
+                {currentEpisode!.downloadLink ? <DownloadButton url={currentEpisode!.downloadLink!} label="Download Episode" /> : null}
+              </div>
+            </>
           ) : (
             <IframePlayer src={currentEpisode!.embedIframeLink!} />
           )

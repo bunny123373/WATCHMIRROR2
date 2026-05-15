@@ -36,6 +36,7 @@ export default function AdminPage() {
   const [importType, setImportType] = useState<"movie" | "series">("movie");
   const [hlsLink, setHlsLink] = useState("");
   const [embedLink, setEmbedLink] = useState("");
+  const [downloadLink, setDownloadLink] = useState("");
   const [seasons, setSeasons] = useState("");
   const [selectedLanguage, setSelectedLanguage] = useState("English");
   const [selectedDubLanguages, setSelectedDubLanguages] = useState<string[]>([]);
@@ -143,7 +144,7 @@ export default function AdminPage() {
       const res = await fetch("/api/admin/seed", {
         method: "POST",
         headers: { "Content-Type": "application/json", "x-admin-key": ADMIN_KEY },
-        body: JSON.stringify({ tmdbId: selectedItem.id, type: importType, hlsLink, embedIframeLink: embedLink, streams: streamInputs.filter((s) => s.hlsLink || s.embedIframeLink), seasons: parsedSeasons, language: selectedLanguage, dubLanguages: selectedDubLanguages, audioAvailable: selectedAudio }),
+        body: JSON.stringify({ tmdbId: selectedItem.id, type: importType, hlsLink, embedIframeLink: embedLink, downloadLink, streams: streamInputs.filter((s) => s.hlsLink || s.embedIframeLink), seasons: parsedSeasons, language: selectedLanguage, dubLanguages: selectedDubLanguages, audioAvailable: selectedAudio }),
       });
       if (res.ok) {
         setShowAddModal(false); resetAddModal(); fetchContent();
@@ -158,7 +159,7 @@ export default function AdminPage() {
 
   const resetAddModal = () => {
     setTmdbQuery(""); setTmdbResults([]); setSearchError(""); setSearched(false);
-    setSelectedItem(null); setSelectedDetails(null); setHlsLink(""); setEmbedLink(""); setSeasons("");
+    setSelectedItem(null); setSelectedDetails(null); setHlsLink(""); setEmbedLink(""); setDownloadLink(""); setSeasons("");
     setSelectedLanguage("English"); setSelectedDubLanguages([]); setSelectedAudio(["English"]); setStreamInputs([]);
     setStep(1);
   };
@@ -215,22 +216,22 @@ export default function AdminPage() {
               <h1 className="text-2xl font-bold text-[#F9FAFB]">WATCHMIRROR Admin Panel</h1>
               <p className="text-[#9CA3AF] text-sm mt-1">Manage your content library</p>
             </div>
-            <button onClick={() => setShowAddModal(true)} className="flex items-center gap-2 px-4 py-2 rounded-xl gold-gradient text-[#050608] font-semibold hover:opacity-90 transition-opacity">
+            <button onClick={() => setShowAddModal(true)} className="flex items-center gap-2 px-4 py-2 rounded-none gold-gradient text-[#050608] font-semibold hover:opacity-90 transition-opacity">
               <Plus className="w-4 h-4" /> Add Content
             </button>
           </div>
 
           {/* Stats */}
           <div className="grid grid-cols-3 gap-3 mb-6">
-            <div className="p-4 rounded-2xl bg-[#0E1015] border border-[#1F232D]">
+            <div className="p-4 rounded-none bg-[#0E1015] border border-[#1F232D]">
               <p className="text-2xl font-bold text-[#F5C542]">{stats.total}</p>
               <p className="text-xs text-[#9CA3AF]">Total Content</p>
             </div>
-            <div className="p-4 rounded-2xl bg-[#0E1015] border border-[#1F232D]">
+            <div className="p-4 rounded-none bg-[#0E1015] border border-[#1F232D]">
               <p className="text-2xl font-bold text-[#8B5CF6]">{stats.movies}</p>
               <p className="text-xs text-[#9CA3AF]">Movies</p>
             </div>
-            <div className="p-4 rounded-2xl bg-[#0E1015] border border-[#1F232D]">
+            <div className="p-4 rounded-none bg-[#0E1015] border border-[#1F232D]">
               <p className="text-2xl font-bold text-[#22C55E]">{stats.series}</p>
               <p className="text-xs text-[#9CA3AF]">Series</p>
             </div>
@@ -240,7 +241,7 @@ export default function AdminPage() {
 
           {/* Toast */}
           {toast && (
-            <div className={`fixed top-6 right-6 z-[60] px-5 py-3 rounded-2xl shadow-2xl border text-sm font-medium transition-all ${
+            <div className={`fixed top-6 right-6 z-[60] px-5 py-3 rounded-none shadow-2xl border text-sm font-medium transition-all ${
               toast.type === "success"
                 ? "bg-[#22C55E]/20 border-[#22C55E]/40 text-[#22C55E]"
                 : "bg-red-400/20 border-red-400/40 text-red-400"
@@ -253,11 +254,11 @@ export default function AdminPage() {
           <div className="flex flex-col sm:flex-row gap-3 mb-6">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#9CA3AF]" />
-              <input type="text" value={localSearch} onChange={(e) => setLocalSearch(e.target.value)} placeholder="Search title, category, language..." className="w-full h-10 pl-10 pr-4 rounded-xl bg-[#0E1015] border border-[#1F232D] text-[#F9FAFB] placeholder-[#9CA3AF] text-sm focus:outline-none focus:border-[#F5C542] transition-colors" />
+              <input type="text" value={localSearch} onChange={(e) => setLocalSearch(e.target.value)} placeholder="Search title, category, language..." className="w-full h-10 pl-10 pr-4 rounded-none bg-[#0E1015] border border-[#1F232D] text-[#F9FAFB] placeholder-[#9CA3AF] text-sm focus:outline-none focus:border-[#F5C542] transition-colors" />
             </div>
             <div className="flex gap-1">
               {(["all", "movie", "series"] as const).map((f) => (
-                <button key={f} onClick={() => setFilterType(f)} className={`px-3 py-2 rounded-xl text-xs font-medium transition-all ${filterType === f ? "bg-[#F5C542] text-[#050608]" : "bg-[#0E1015] text-[#9CA3AF] border border-[#1F232D] hover:border-[#F5C542]/50"}`}>
+                <button key={f} onClick={() => setFilterType(f)} className={`px-3 py-2 rounded-none text-xs font-medium transition-all ${filterType === f ? "bg-[#F5C542] text-[#050608]" : "bg-[#0E1015] text-[#9CA3AF] border border-[#1F232D] hover:border-[#F5C542]/50"}`}>
                   {f === "all" ? "All" : f === "movie" ? <><Film className="w-3 h-3 inline mr-1" />Movies</> : <><Tv className="w-3 h-3 inline mr-1" />Series</>}
                 </button>
               ))}
@@ -272,8 +273,8 @@ export default function AdminPage() {
               <p className="text-xs text-[#9CA3AF] mb-3">{filtered.length} result{filtered.length !== 1 ? "s" : ""}</p>
               <div className="grid gap-2">
                 {filtered.map((item) => (
-                  <div key={item._id} className="flex items-center gap-3 p-3 rounded-2xl bg-[#0E1015] border border-[#1F232D] hover:border-[#1F232D]/80 transition-colors">
-                    <div className="relative w-10 h-14 rounded-lg overflow-hidden bg-[#1F232D] flex-shrink-0">
+                  <div key={item._id} className="flex items-center gap-3 p-3 rounded-none bg-[#0E1015] border border-[#1F232D] hover:border-[#1F232D]/80 transition-colors">
+                    <div className="relative w-10 h-14 rounded-none overflow-hidden bg-[#1F232D] flex-shrink-0">
                       {item.poster && <img src={item.poster} alt="" className="w-full h-full object-cover" />}
                     </div>
                     <div className="flex-1 min-w-0">
@@ -293,10 +294,10 @@ export default function AdminPage() {
                       </div>
                     </div>
                     <div className="flex items-center gap-1">
-                      <button onClick={() => openEdit(item)} className="p-2 rounded-lg text-[#9CA3AF] hover:text-[#F5C542] hover:bg-[#F5C542]/10 transition-all" title="Edit">
+                      <button onClick={() => openEdit(item)} className="p-2 rounded-none text-[#9CA3AF] hover:text-[#F5C542] hover:bg-[#F5C542]/10 transition-all" title="Edit">
                         <Edit3 className="w-4 h-4" />
                       </button>
-                      <button onClick={() => handleDelete(item._id!)} className="p-2 rounded-lg text-[#9CA3AF] hover:text-red-400 hover:bg-red-400/10 transition-all" title="Delete">
+                      <button onClick={() => handleDelete(item._id!)} className="p-2 rounded-none text-[#9CA3AF] hover:text-red-400 hover:bg-red-400/10 transition-all" title="Delete">
                         <Trash2 className="w-4 h-4" />
                       </button>
                     </div>
@@ -315,11 +316,11 @@ export default function AdminPage() {
         {/* ADD MODAL — Multi-step wizard */}
         {showAddModal && (
           <div className="fixed inset-0 z-50 bg-[#050608]/80 backdrop-blur-sm flex items-center justify-center p-4">
-            <div className="w-full max-w-3xl bg-[#0E1015] rounded-2xl border border-[#1F232D] max-h-[90vh] overflow-y-auto">
+            <div className="w-full max-w-3xl bg-[#0E1015] rounded-none border border-[#1F232D] max-h-[90vh] overflow-y-auto">
               {/* Header */}
               <div className="flex items-center justify-between p-6 border-b border-[#1F232D]">
                 <h2 className="text-lg font-bold text-[#F9FAFB]">Add Content</h2>
-                <button onClick={() => { setShowAddModal(false); resetAddModal(); }} className="p-1 rounded-lg hover:bg-[#1F232D] transition-colors">
+                <button onClick={() => { setShowAddModal(false); resetAddModal(); }} className="p-1 rounded-none hover:bg-[#1F232D] transition-colors">
                   <X className="w-5 h-5 text-[#9CA3AF]" />
                 </button>
               </div>
@@ -332,7 +333,7 @@ export default function AdminPage() {
                   { num: 3, label: "Review" },
                 ].map((s, i) => (
                   <div key={s.num} className="flex items-center gap-2">
-                    <div className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-medium transition-all ${
+                    <div className={`flex items-center gap-2 px-3 py-1.5 rounded-none text-xs font-medium transition-all ${
                       step === s.num
                         ? "bg-[#F5C542] text-[#050608]"
                         : step > s.num
@@ -352,10 +353,10 @@ export default function AdminPage() {
                 {step === 1 && (
                   <>
                     <div className="flex gap-2">
-                      <button onClick={() => setImportType("movie")} className={`flex-1 py-3 rounded-xl text-sm font-medium transition-all ${importType === "movie" ? "bg-[#8B5CF6] text-white shadow-lg shadow-[#8B5CF6]/20" : "bg-[#1F232D] text-[#9CA3AF]"}`}>
+                      <button onClick={() => setImportType("movie")} className={`flex-1 py-3 rounded-none text-sm font-medium transition-all ${importType === "movie" ? "bg-[#8B5CF6] text-white shadow-lg shadow-[#8B5CF6]/20" : "bg-[#1F232D] text-[#9CA3AF]"}`}>
                         <Film className="w-4 h-4 inline mr-1" /> Movie
                       </button>
-                      <button onClick={() => setImportType("series")} className={`flex-1 py-3 rounded-xl text-sm font-medium transition-all ${importType === "series" ? "bg-[#22C55E] text-white shadow-lg shadow-[#22C55E]/20" : "bg-[#1F232D] text-[#9CA3AF]"}`}>
+                      <button onClick={() => setImportType("series")} className={`flex-1 py-3 rounded-none text-sm font-medium transition-all ${importType === "series" ? "bg-[#22C55E] text-white shadow-lg shadow-[#22C55E]/20" : "bg-[#1F232D] text-[#9CA3AF]"}`}>
                         <Tv className="w-4 h-4 inline mr-1" /> Series
                       </button>
                     </div>
@@ -363,13 +364,13 @@ export default function AdminPage() {
                     <div className="flex gap-2">
                       <div className="relative flex-1">
                         <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#9CA3AF]" />
-                        <input type="text" value={tmdbQuery} onChange={(e) => setTmdbQuery(e.target.value)} onKeyDown={(e) => e.key === "Enter" && handleTmdbSearch()} placeholder="Search TMDB for movies or series..." className="w-full h-12 pl-11 pr-4 rounded-xl bg-[#050608] border border-[#1F232D] text-[#F9FAFB] placeholder-[#9CA3AF] focus:outline-none focus:border-[#F5C542]" />
+                        <input type="text" value={tmdbQuery} onChange={(e) => setTmdbQuery(e.target.value)} onKeyDown={(e) => e.key === "Enter" && handleTmdbSearch()} placeholder="Search TMDB for movies or series..." className="w-full h-12 pl-11 pr-4 rounded-none bg-[#050608] border border-[#1F232D] text-[#F9FAFB] placeholder-[#9CA3AF] focus:outline-none focus:border-[#F5C542]" />
                       </div>
-                      <button onClick={handleTmdbSearch} className="px-5 h-12 rounded-xl gold-gradient text-[#050608] font-semibold hover:opacity-90 transition-opacity"><Search className="w-4 h-4" /></button>
+                      <button onClick={handleTmdbSearch} className="px-5 h-12 rounded-none gold-gradient text-[#050608] font-semibold hover:opacity-90 transition-opacity"><Search className="w-4 h-4" /></button>
                     </div>
 
                     {tmdbLoading && <div className="flex justify-center py-4"><Loader2 className="w-5 h-5 text-[#F5C542] animate-spin" /></div>}
-                    {searchError && <div className="p-3 rounded-xl bg-red-400/10 border border-red-400/20 text-center"><p className="text-red-400 text-sm">{searchError}</p></div>}
+                    {searchError && <div className="p-3 rounded-none bg-red-400/10 border border-red-400/20 text-center"><p className="text-red-400 text-sm">{searchError}</p></div>}
                     {!tmdbLoading && searched && !searchError && tmdbResults.length === 0 && (
                       <div className="text-center py-6 text-[#9CA3AF] text-sm">No results found for &ldquo;{tmdbQuery}&rdquo;</div>
                     )}
@@ -378,15 +379,15 @@ export default function AdminPage() {
                       <div className="space-y-2 max-h-52 overflow-y-auto pr-1">
                         {tmdbResults.map((r) => (
                           <button key={r.id} onClick={() => setSelectedItem(r)}
-                            className={`w-full flex items-center gap-3 p-3 rounded-xl border transition-all text-left ${
+                            className={`w-full flex items-center gap-3 p-3 rounded-none border transition-all text-left ${
                               selectedItem?.id === r.id
                                 ? "border-[#F5C542] bg-[#F5C542]/10 ring-1 ring-[#F5C542]/30"
                                 : "border-[#1F232D] bg-[#050608] hover:border-[#F5C542]/30"
                             }`}>
                             {r.poster_path ? (
-                              <img src={`${TMDB_IMAGE_W500}${r.poster_path}`} alt="" className="w-10 h-14 rounded-lg object-cover flex-shrink-0" />
+                              <img src={`${TMDB_IMAGE_W500}${r.poster_path}`} alt="" className="w-10 h-14 rounded-none object-cover flex-shrink-0" />
                             ) : (
-                              <div className="w-10 h-14 rounded-lg bg-[#1F232D] flex items-center justify-center flex-shrink-0">
+                              <div className="w-10 h-14 rounded-none bg-[#1F232D] flex items-center justify-center flex-shrink-0">
                                 <Film className="w-4 h-4 text-[#9CA3AF]" />
                               </div>
                             )}
@@ -409,9 +410,9 @@ export default function AdminPage() {
                     )}
 
                     {selectedDetails && !detailsLoading && (
-                      <div className="p-4 rounded-xl bg-gradient-to-br from-[#050608] to-[#0E1015] border border-[#1F232D]">
+                      <div className="p-4 rounded-none bg-gradient-to-br from-[#050608] to-[#0E1015] border border-[#1F232D]">
                         <div className="flex gap-4">
-                          {selectedDetails.poster_path && <img src={`${TMDB_IMAGE_W500}${selectedDetails.poster_path}`} alt="" className="w-16 h-24 rounded-lg object-cover flex-shrink-0 shadow-lg" />}
+                          {selectedDetails.poster_path && <img src={`${TMDB_IMAGE_W500}${selectedDetails.poster_path}`} alt="" className="w-16 h-24 rounded-none object-cover flex-shrink-0 shadow-lg" />}
                           <div className="flex-1 min-w-0">
                             <p className="text-sm font-semibold text-[#F9FAFB]">{selectedDetails.title || selectedDetails.name}</p>
                             <div className="flex items-center gap-3 mt-1 text-xs text-[#9CA3AF]">
@@ -421,7 +422,7 @@ export default function AdminPage() {
                             <p className="text-xs text-[#9CA3AF] mt-2 line-clamp-2 leading-relaxed">{selectedDetails.overview}</p>
                             <div className="flex flex-wrap gap-1 mt-2">
                               {selectedDetails.genres?.slice(0, 4).map((g: any) => (
-                                <span key={g.id} className="px-2 py-0.5 text-[10px] rounded-full bg-[#1F232D] text-[#F5C542]">{g.name}</span>
+                                <span key={g.id} className="px-2 py-0.5 text-[10px] rounded-none bg-[#1F232D] text-[#F5C542]">{g.name}</span>
                               ))}
                             </div>
                           </div>
@@ -431,7 +432,7 @@ export default function AdminPage() {
                     {detailsLoading && <div className="flex justify-center py-4"><Loader2 className="w-5 h-5 text-[#F5C542] animate-spin" /></div>}
 
                     <div className="flex justify-end pt-2">
-                      <button onClick={() => selectedItem && setStep(2)} disabled={!selectedItem} className="flex items-center gap-2 px-6 h-12 rounded-xl gold-gradient text-[#050608] font-semibold disabled:opacity-50 disabled:cursor-not-allowed hover:opacity-90 transition-opacity">
+                      <button onClick={() => selectedItem && setStep(2)} disabled={!selectedItem} className="flex items-center gap-2 px-6 h-12 rounded-none gold-gradient text-[#050608] font-semibold disabled:opacity-50 disabled:cursor-not-allowed hover:opacity-90 transition-opacity">
                         Next <ChevronRight className="w-4 h-4" />
                       </button>
                     </div>
@@ -443,8 +444,8 @@ export default function AdminPage() {
                   <>
                     {/* Selected item summary */}
                     {selectedDetails && (
-                      <div className="flex items-center gap-3 p-3 rounded-xl bg-[#050608] border border-[#1F232D]">
-                        {selectedDetails.poster_path && <img src={`${TMDB_IMAGE_W500}${selectedDetails.poster_path}`} alt="" className="w-10 h-14 rounded-lg object-cover flex-shrink-0" />}
+                      <div className="flex items-center gap-3 p-3 rounded-none bg-[#050608] border border-[#1F232D]">
+                        {selectedDetails.poster_path && <img src={`${TMDB_IMAGE_W500}${selectedDetails.poster_path}`} alt="" className="w-10 h-14 rounded-none object-cover flex-shrink-0" />}
                         <div className="flex-1 min-w-0">
                           <p className="text-sm font-medium text-[#F9FAFB]">{selectedDetails.title || selectedDetails.name}</p>
                           <p className="text-xs text-[#9CA3AF]">{selectedDetails.release_date?.slice(0, 4) || selectedDetails.first_air_date?.slice(0, 4)} &middot; {importType === "movie" ? "Movie" : "Series"}</p>
@@ -456,7 +457,7 @@ export default function AdminPage() {
                     {/* Language */}
                     <div>
                       <label className="block text-xs text-[#9CA3AF] mb-2 font-medium">Language</label>
-                      <select value={selectedLanguage} onChange={(e) => setSelectedLanguage(e.target.value)} className="w-full h-12 px-4 rounded-xl bg-[#050608] border border-[#1F232D] text-[#F9FAFB] text-sm focus:outline-none focus:border-[#F5C542] focus:ring-1 focus:ring-[#F5C542]/30 appearance-none cursor-pointer">
+                      <select value={selectedLanguage} onChange={(e) => setSelectedLanguage(e.target.value)} className="w-full h-12 px-4 rounded-none bg-[#050608] border border-[#1F232D] text-[#F9FAFB] text-sm focus:outline-none focus:border-[#F5C542] focus:ring-1 focus:ring-[#F5C542]/30 appearance-none cursor-pointer">
                         <option value="" className="bg-[#0E1015]">Select language</option>
                         {LANGUAGES_GROUPED.map((group) => (
                           <optgroup key={group.label} label={group.label}>
@@ -502,7 +503,7 @@ export default function AdminPage() {
                               setSelectedAudio((prev) =>
                                 active ? prev.filter((a) => a !== l) : [...prev, l]
                               );
-                            }} className={`px-3 py-1.5 rounded-xl text-xs font-medium border transition-all ${
+                            }} className={`px-3 py-1.5 rounded-none text-xs font-medium border transition-all ${
                               active
                                 ? "bg-[#F5C542] text-[#050608] border-[#F5C542] shadow-sm"
                                 : "bg-[#050608] text-[#9CA3AF] border-[#1F232D] hover:border-[#F5C542]/50"
@@ -516,30 +517,30 @@ export default function AdminPage() {
 
                     {/* Stream Sources per Language */}
                     {streamInputs.length > 0 && (
-                      <div className="space-y-3 p-4 rounded-xl bg-[#050608] border border-[#1F232D]">
+                      <div className="space-y-3 p-4 rounded-none bg-[#050608] border border-[#1F232D]">
                         <p className="text-xs font-medium text-[#F9FAFB]">Stream Sources per Language</p>
                         <p className="text-[10px] text-[#9CA3AF]">Provide HLS or Embed URL for each language</p>
                         {streamInputs.map((si, idx) => (
-                          <div key={si.language} className="p-3 rounded-lg bg-[#0E1015] border border-[#1F232D]">
+                          <div key={si.language} className="p-3 rounded-none bg-[#0E1015] border border-[#1F232D]">
                             <p className="text-xs font-medium text-[#F5C542] mb-2">{si.language}</p>
                             <div className="space-y-2">
                               <input type="text" value={si.hlsLink} onChange={(e) => {
                                 const copy = [...streamInputs];
                                 copy[idx] = { ...copy[idx], hlsLink: e.target.value };
                                 setStreamInputs(copy);
-                              }} placeholder="HLS Stream URL (.m3u8)" className="w-full h-10 px-3 rounded-lg bg-[#050608] border border-[#1F232D] text-[#F9FAFB] placeholder-[#9CA3AF] text-xs focus:outline-none focus:border-[#F5C542]" />
+                              }} placeholder="HLS Stream URL (.m3u8)" className="w-full h-10 px-3 rounded-none bg-[#050608] border border-[#1F232D] text-[#F9FAFB] placeholder-[#9CA3AF] text-xs focus:outline-none focus:border-[#F5C542]" />
                               <input type="text" value={si.embedIframeLink} onChange={(e) => {
                                 const copy = [...streamInputs];
                                 copy[idx] = { ...copy[idx], embedIframeLink: e.target.value };
                                 setStreamInputs(copy);
-                              }} placeholder="Embed Iframe URL (fallback)" className="w-full h-10 px-3 rounded-lg bg-[#050608] border border-[#1F232D] text-[#F9FAFB] placeholder-[#9CA3AF] text-xs focus:outline-none focus:border-[#F5C542]" />
+                              }} placeholder="Embed Iframe URL (fallback)" className="w-full h-10 px-3 rounded-none bg-[#050608] border border-[#1F232D] text-[#F9FAFB] placeholder-[#9CA3AF] text-xs focus:outline-none focus:border-[#F5C542]" />
                               <div className="flex gap-2">
                                 <select value={si.subtitles?.[0]?.language || ""} onChange={(e) => {
                                   const copy = [...streamInputs];
                                   const subs = e.target.value ? [{ language: e.target.value, url: copy[idx].subtitles?.[0]?.url || "" }] : [];
                                   copy[idx] = { ...copy[idx], subtitles: subs };
                                   setStreamInputs(copy);
-                                }} className="w-28 h-9 px-2 rounded-lg bg-[#050608] border border-[#1F232D] text-[#F9FAFB] text-[10px] focus:outline-none focus:border-[#F5C542] appearance-none cursor-pointer">
+                                }} className="w-28 h-9 px-2 rounded-none bg-[#050608] border border-[#1F232D] text-[#F9FAFB] text-[10px] focus:outline-none focus:border-[#F5C542] appearance-none cursor-pointer">
                                   <option value="" className="bg-[#0E1015]">No subs</option>
                                   {LANGUAGES.map((l) => (
                                     <option key={l} value={l} className="bg-[#0E1015]">{l}</option>
@@ -550,7 +551,7 @@ export default function AdminPage() {
                                   const current = copy[idx].subtitles?.[0];
                                   copy[idx] = { ...copy[idx], subtitles: current ? [{ ...current, url: e.target.value }] : [] };
                                   setStreamInputs(copy);
-                                }} placeholder="Subtitle URL (.vtt / .srt)" className="flex-1 h-9 px-3 rounded-lg bg-[#050608] border border-[#1F232D] text-[#F9FAFB] placeholder-[#9CA3AF] text-[10px] focus:outline-none focus:border-[#F5C542]" disabled={!si.subtitles?.[0]?.language} />
+                                }} placeholder="Subtitle URL (.vtt / .srt)" className="flex-1 h-9 px-3 rounded-none bg-[#050608] border border-[#1F232D] text-[#F9FAFB] placeholder-[#9CA3AF] text-[10px] focus:outline-none focus:border-[#F5C542]" disabled={!si.subtitles?.[0]?.language} />
                               </div>
                             </div>
                           </div>
@@ -558,21 +559,28 @@ export default function AdminPage() {
                       </div>
                     )}
 
+                    {/* Download Link */}
+                    <div className="p-4 rounded-none bg-[#050608] border border-[#1F232D]">
+                      <label className="block text-xs text-[#9CA3AF] mb-2 font-medium">Download Link</label>
+                      <p className="text-[10px] text-[#9CA3AF] mb-2">Optional direct download URL (e.g. MP4 file).</p>
+                      <input type="text" value={downloadLink} onChange={(e) => setDownloadLink(e.target.value)} placeholder="https://example.com/video.mp4" className="w-full h-11 px-4 rounded-none bg-[#0E1015] border border-[#1F232D] text-[#F9FAFB] placeholder-[#9CA3AF] text-sm focus:outline-none focus:border-[#F5C542]" />
+                    </div>
+
                     {/* Series seasons */}
                     {importType === "series" && (
-                      <div className="p-4 rounded-xl bg-[#050608] border border-[#1F232D]">
+                      <div className="p-4 rounded-none bg-[#050608] border border-[#1F232D]">
                         <label className="block text-xs text-[#9CA3AF] mb-2 font-medium">Seasons</label>
                         <p className="text-[10px] text-[#9CA3AF] mb-2">Format: <code className="text-[#F5C542]">season:episodes</code>, comma separated</p>
-                        <input type="text" value={seasons} onChange={(e) => setSeasons(e.target.value)} placeholder="e.g. 1:10, 2:8, 3:12" className="w-full h-11 px-4 rounded-xl bg-[#0E1015] border border-[#1F232D] text-[#F9FAFB] placeholder-[#9CA3AF] text-sm focus:outline-none focus:border-[#F5C542]" />
+                        <input type="text" value={seasons} onChange={(e) => setSeasons(e.target.value)} placeholder="e.g. 1:10, 2:8, 3:12" className="w-full h-11 px-4 rounded-none bg-[#0E1015] border border-[#1F232D] text-[#F9FAFB] placeholder-[#9CA3AF] text-sm focus:outline-none focus:border-[#F5C542]" />
                       </div>
                     )}
 
                     {/* Navigation */}
                     <div className="flex items-center justify-between pt-2">
-                      <button onClick={() => setStep(1)} className="flex items-center gap-2 px-5 h-12 rounded-xl bg-[#1F232D] text-[#F9FAFB] font-medium hover:bg-[#1F232D]/80 transition-all">
+                      <button onClick={() => setStep(1)} className="flex items-center gap-2 px-5 h-12 rounded-none bg-[#1F232D] text-[#F9FAFB] font-medium hover:bg-[#1F232D]/80 transition-all">
                         <ChevronLeft className="w-4 h-4" /> Back
                       </button>
-                      <button onClick={() => setStep(3)} className="flex items-center gap-2 px-6 h-12 rounded-xl gold-gradient text-[#050608] font-semibold hover:opacity-90 transition-opacity">
+                      <button onClick={() => setStep(3)} className="flex items-center gap-2 px-6 h-12 rounded-none gold-gradient text-[#050608] font-semibold hover:opacity-90 transition-opacity">
                         Next <ChevronRight className="w-4 h-4" />
                       </button>
                     </div>
@@ -583,7 +591,7 @@ export default function AdminPage() {
                 {step === 3 && (
                   <>
                     {/* Preview Card */}
-                    <div className="rounded-2xl bg-gradient-to-br from-[#050608] to-[#0E1015] border border-[#1F232D] overflow-hidden">
+                    <div className="rounded-none bg-gradient-to-br from-[#050608] to-[#0E1015] border border-[#1F232D] overflow-hidden">
                       <div className="flex flex-col sm:flex-row">
                         {/* Poster */}
                         <div className="relative w-full sm:w-48 h-56 sm:h-auto bg-[#1F232D] flex-shrink-0">
@@ -619,7 +627,7 @@ export default function AdminPage() {
                           {selectedDetails?.genres && (
                             <div className="flex flex-wrap gap-1">
                               {selectedDetails.genres.slice(0, 4).map((g: any) => (
-                                <span key={g.id} className="px-2 py-0.5 text-[10px] rounded-full bg-[#1F232D] text-[#F5C542]">{g.name}</span>
+                                <span key={g.id} className="px-2 py-0.5 text-[10px] rounded-none bg-[#1F232D] text-[#F5C542]">{g.name}</span>
                               ))}
                             </div>
                           )}
@@ -628,6 +636,7 @@ export default function AdminPage() {
                               <>
                                 <span className={hlsLink ? "text-[#22C55E]" : ""}>HLS: {hlsLink ? "Connected" : "Not set"}</span>
                                 <span className={embedLink ? "text-[#8B5CF6]" : ""}>Embed: {embedLink ? "Connected" : "Not set"}</span>
+                                <span className={downloadLink ? "text-[#F5C542]" : ""}>Download: {downloadLink ? "Connected" : "Not set"}</span>
                               </>
                             )}
                             {importType === "series" && (
@@ -640,10 +649,10 @@ export default function AdminPage() {
 
                     {/* Navigation */}
                     <div className="flex items-center justify-between pt-2">
-                      <button onClick={() => setStep(2)} className="flex items-center gap-2 px-5 h-12 rounded-xl bg-[#1F232D] text-[#F9FAFB] font-medium hover:bg-[#1F232D]/80 transition-all">
+                      <button onClick={() => setStep(2)} className="flex items-center gap-2 px-5 h-12 rounded-none bg-[#1F232D] text-[#F9FAFB] font-medium hover:bg-[#1F232D]/80 transition-all">
                         <ChevronLeft className="w-4 h-4" /> Back
                       </button>
-                      <button onClick={handleImport} disabled={importing} className="flex items-center gap-2 px-8 h-12 rounded-xl gold-gradient text-[#050608] font-semibold disabled:opacity-50 disabled:cursor-not-allowed hover:opacity-90 transition-opacity">
+                      <button onClick={handleImport} disabled={importing} className="flex items-center gap-2 px-8 h-12 rounded-none gold-gradient text-[#050608] font-semibold disabled:opacity-50 disabled:cursor-not-allowed hover:opacity-90 transition-opacity">
                         {importing ? <Loader2 className="w-5 h-5 animate-spin" /> : <><Check className="w-4 h-4" /> Import Content</>}
                       </button>
                     </div>
@@ -657,10 +666,10 @@ export default function AdminPage() {
         {/* EDIT MODAL */}
         {editItem && editData && (
           <div className="fixed inset-0 z-50 bg-[#050608]/80 backdrop-blur-sm flex items-center justify-center p-4">
-            <div className="w-full max-w-3xl bg-[#0E1015] rounded-2xl border border-[#1F232D] max-h-[90vh] overflow-y-auto">
+            <div className="w-full max-w-3xl bg-[#0E1015] rounded-none border border-[#1F232D] max-h-[90vh] overflow-y-auto">
               <div className="flex items-center justify-between p-6 border-b border-[#1F232D]">
                 <h2 className="text-lg font-bold text-[#F9FAFB]">Edit: {editItem.title}</h2>
-                <button onClick={() => { setEditItem(null); setEditData(null); }} className="p-1 rounded-lg hover:bg-[#1F232D] transition-colors">
+                <button onClick={() => { setEditItem(null); setEditData(null); }} className="p-1 rounded-none hover:bg-[#1F232D] transition-colors">
                   <X className="w-5 h-5 text-[#9CA3AF]" />
                 </button>
               </div>
@@ -669,19 +678,19 @@ export default function AdminPage() {
                 <div className="grid grid-cols-2 gap-3">
                   <div>
                     <label className="block text-xs text-[#9CA3AF] mb-1">Title</label>
-                    <input type="text" value={editData.title || ""} onChange={(e) => setEditData({ ...editData, title: e.target.value })} className="w-full h-10 px-3 rounded-xl bg-[#050608] border border-[#1F232D] text-[#F9FAFB] text-sm focus:outline-none focus:border-[#F5C542]" />
+                    <input type="text" value={editData.title || ""} onChange={(e) => setEditData({ ...editData, title: e.target.value })} className="w-full h-10 px-3 rounded-none bg-[#050608] border border-[#1F232D] text-[#F9FAFB] text-sm focus:outline-none focus:border-[#F5C542]" />
                   </div>
                   <div>
                     <label className="block text-xs text-[#9CA3AF] mb-1">Year</label>
-                    <input type="number" value={editData.year || ""} onChange={(e) => setEditData({ ...editData, year: parseInt(e.target.value) || 0 })} className="w-full h-10 px-3 rounded-xl bg-[#050608] border border-[#1F232D] text-[#F9FAFB] text-sm focus:outline-none focus:border-[#F5C542]" />
+                    <input type="number" value={editData.year || ""} onChange={(e) => setEditData({ ...editData, year: parseInt(e.target.value) || 0 })} className="w-full h-10 px-3 rounded-none bg-[#050608] border border-[#1F232D] text-[#F9FAFB] text-sm focus:outline-none focus:border-[#F5C542]" />
                   </div>
                   <div>
                     <label className="block text-xs text-[#9CA3AF] mb-1">Category</label>
-                    <input type="text" value={editData.category || ""} onChange={(e) => setEditData({ ...editData, category: e.target.value })} className="w-full h-10 px-3 rounded-xl bg-[#050608] border border-[#1F232D] text-[#F9FAFB] text-sm focus:outline-none focus:border-[#F5C542]" />
+                    <input type="text" value={editData.category || ""} onChange={(e) => setEditData({ ...editData, category: e.target.value })} className="w-full h-10 px-3 rounded-none bg-[#050608] border border-[#1F232D] text-[#F9FAFB] text-sm focus:outline-none focus:border-[#F5C542]" />
                   </div>
                   <div>
                     <label className="block text-xs text-[#9CA3AF] mb-1">Language</label>
-                    <select value={editData.language || "English"} onChange={(e) => setEditData({ ...editData, language: e.target.value })} className="w-full h-10 px-3 rounded-xl bg-[#050608] border border-[#1F232D] text-[#F9FAFB] text-sm focus:outline-none focus:border-[#F5C542] appearance-none cursor-pointer">
+                    <select value={editData.language || "English"} onChange={(e) => setEditData({ ...editData, language: e.target.value })} className="w-full h-10 px-3 rounded-none bg-[#050608] border border-[#1F232D] text-[#F9FAFB] text-sm focus:outline-none focus:border-[#F5C542] appearance-none cursor-pointer">
                       <option value="" className="bg-[#0E1015]">Select language</option>
                       {LANGUAGES_GROUPED.map((group) => (
                         <optgroup key={group.label} label={group.label}>
@@ -719,11 +728,11 @@ export default function AdminPage() {
                   </div>
                   <div>
                     <label className="block text-xs text-[#9CA3AF] mb-1">Quality</label>
-                    <input type="text" value={editData.quality || ""} onChange={(e) => setEditData({ ...editData, quality: e.target.value })} className="w-full h-10 px-3 rounded-xl bg-[#050608] border border-[#1F232D] text-[#F9FAFB] text-sm focus:outline-none focus:border-[#F5C542]" />
+                    <input type="text" value={editData.quality || ""} onChange={(e) => setEditData({ ...editData, quality: e.target.value })} className="w-full h-10 px-3 rounded-none bg-[#050608] border border-[#1F232D] text-[#F9FAFB] text-sm focus:outline-none focus:border-[#F5C542]" />
                   </div>
                   <div>
                     <label className="block text-xs text-[#9CA3AF] mb-1">Rating (0-10)</label>
-                    <input type="number" step="0.1" value={editData.rating || 0} onChange={(e) => setEditData({ ...editData, rating: parseFloat(e.target.value) || 0 })} className="w-full h-10 px-3 rounded-xl bg-[#050608] border border-[#1F232D] text-[#F9FAFB] text-sm focus:outline-none focus:border-[#F5C542]" />
+                    <input type="number" step="0.1" value={editData.rating || 0} onChange={(e) => setEditData({ ...editData, rating: parseFloat(e.target.value) || 0 })} className="w-full h-10 px-3 rounded-none bg-[#050608] border border-[#1F232D] text-[#F9FAFB] text-sm focus:outline-none focus:border-[#F5C542]" />
                   </div>
                 </div>
 
@@ -742,7 +751,7 @@ export default function AdminPage() {
                               ? audio.filter((a: string) => a !== l)
                               : [...audio, l],
                           });
-                        }} className={`px-3 py-1.5 rounded-xl text-xs font-medium border transition-all ${
+                        }} className={`px-3 py-1.5 rounded-none text-xs font-medium border transition-all ${
                           active
                             ? "bg-[#F5C542] text-[#050608] border-[#F5C542]"
                             : "bg-[#050608] text-[#9CA3AF] border-[#1F232D] hover:border-[#F5C542]/50"
@@ -757,12 +766,12 @@ export default function AdminPage() {
                 {/* Description */}
                 <div>
                   <label className="block text-xs text-[#9CA3AF] mb-1">Description</label>
-                  <textarea value={editData.description || ""} onChange={(e) => setEditData({ ...editData, description: e.target.value })} rows={3} className="w-full px-3 py-2 rounded-xl bg-[#050608] border border-[#1F232D] text-[#F9FAFB] text-sm focus:outline-none focus:border-[#F5C542] resize-none" />
+                  <textarea value={editData.description || ""} onChange={(e) => setEditData({ ...editData, description: e.target.value })} rows={3} className="w-full px-3 py-2 rounded-none bg-[#050608] border border-[#1F232D] text-[#F9FAFB] text-sm focus:outline-none focus:border-[#F5C542] resize-none" />
                 </div>
 
                 {/* Movie stream links — driven by dub language toggles */}
                 {editItem.type === "movie" && (
-                  <div className="space-y-4 p-4 rounded-xl bg-[#050608] border border-[#1F232D]">
+                  <div className="space-y-4 p-4 rounded-none bg-[#050608] border border-[#1F232D]">
                     <label className="text-xs font-medium text-[#F9FAFB]">Dub Language Stream Sources</label>
                     <p className="text-[10px] text-[#9CA3AF]">Stream inputs appear automatically when you toggle dub languages above.</p>
                     {(() => {
@@ -776,7 +785,7 @@ export default function AdminPage() {
                         const idx = (editData.streams || []).findIndex((s: any) => s.language === lang);
                         const isMain = lang === editData.language;
                         return (
-                          <div key={lang} className="p-3 rounded-lg bg-[#0E1015] border border-[#1F232D]">
+                          <div key={lang} className="p-3 rounded-none bg-[#0E1015] border border-[#1F232D]">
                             <p className="text-xs font-medium text-[#F5C542] mb-2">{lang}{isMain ? ' (Main)' : ''}</p>
                             <div className="space-y-2">
                               <input type="text" value={stream.hlsLink} onChange={(e) => {
@@ -832,12 +841,17 @@ export default function AdminPage() {
                     })()}
                     {/* Also show old-style single HLS/Embed as fallback */}
                     {(!editData.language && (editData.dubLanguage || []).length === 0) && (
-                      <div className="p-3 rounded-lg bg-[#0E1015] border border-[#1F232D]">
+                      <div className="p-3 rounded-none bg-[#0E1015] border border-[#1F232D]">
                         <p className="text-xs text-[#F5C542] mb-2">Default Stream</p>
                         <input type="text" value={editData.hlsLink || ""} onChange={(e) => setEditData({ ...editData, hlsLink: e.target.value })} placeholder="HLS Stream URL (.m3u8)" className="w-full h-9 px-3 rounded-none bg-[#050608] border border-[#1F232D] text-[#F9FAFB] placeholder-[#9CA3AF] text-xs focus:outline-none focus:border-[#F5C542] mb-2" />
                         <input type="text" value={editData.embedIframeLink || ""} onChange={(e) => setEditData({ ...editData, embedIframeLink: e.target.value })} placeholder="Embed Iframe URL (fallback)" className="w-full h-9 px-3 rounded-none bg-[#050608] border border-[#1F232D] text-[#F9FAFB] placeholder-[#9CA3AF] text-xs focus:outline-none focus:border-[#F5C542]" />
                       </div>
                     )}
+                    {/* Download Link */}
+                    <div className="mt-4">
+                      <label className="block text-xs text-[#9CA3AF] mb-1">Download Link</label>
+                      <input type="text" value={editData.downloadLink || ""} onChange={(e) => setEditData({ ...editData, downloadLink: e.target.value })} placeholder="https://example.com/video.mp4" className="w-full h-9 px-3 rounded-none bg-[#050608] border border-[#1F232D] text-[#F9FAFB] placeholder-[#9CA3AF] text-xs focus:outline-none focus:border-[#F5C542]" />
+                    </div>
                   </div>
                 )}
 
@@ -847,17 +861,18 @@ export default function AdminPage() {
                     <label className="block text-xs text-[#9CA3AF] mb-3">Seasons & Episodes</label>
                     <div className="space-y-4">
                       {editData.seasons.map((season: any, si: number) => (
-                        <div key={si} className="p-4 rounded-xl bg-[#050608] border border-[#1F232D]">
+                        <div key={si} className="p-4 rounded-none bg-[#050608] border border-[#1F232D]">
                           <p className="text-sm font-medium text-[#F5C542] mb-3">Season {season.seasonNumber}</p>
                           <div className="space-y-2">
                             {season.episodes.map((ep: any, ei: number) => (
-                              <div key={ei} className="flex flex-col sm:flex-row gap-2 p-2 rounded-lg bg-[#0E1015] border border-[#1F232D]">
+                              <div key={ei} className="flex flex-col sm:flex-row gap-2 p-2 rounded-none bg-[#0E1015] border border-[#1F232D]">
                                 <div className="flex-1">
-                                  <input type="text" value={ep.episodeTitle} onChange={(e) => updateEpisode(si, ei, "episodeTitle", e.target.value)} placeholder="Episode title" className="w-full h-9 px-3 rounded-lg bg-[#050608] border border-[#1F232D] text-[#F9FAFB] text-xs focus:outline-none focus:border-[#F5C542]" />
+                                  <input type="text" value={ep.episodeTitle} onChange={(e) => updateEpisode(si, ei, "episodeTitle", e.target.value)} placeholder="Episode title" className="w-full h-9 px-3 rounded-none bg-[#050608] border border-[#1F232D] text-[#F9FAFB] text-xs focus:outline-none focus:border-[#F5C542]" />
                                 </div>
                                 <div className="flex gap-2">
-                                  <input type="text" value={ep.hlsLink || ""} onChange={(e) => updateEpisode(si, ei, "hlsLink", e.target.value)} placeholder="HLS URL" className="w-36 h-9 px-3 rounded-lg bg-[#050608] border border-[#1F232D] text-[#F9FAFB] text-xs focus:outline-none focus:border-[#F5C542]" />
-                                  <input type="text" value={ep.embedIframeLink || ""} onChange={(e) => updateEpisode(si, ei, "embedIframeLink", e.target.value)} placeholder="Embed URL" className="w-36 h-9 px-3 rounded-lg bg-[#050608] border border-[#1F232D] text-[#F9FAFB] text-xs focus:outline-none focus:border-[#F5C542]" />
+                                  <input type="text" value={ep.hlsLink || ""} onChange={(e) => updateEpisode(si, ei, "hlsLink", e.target.value)} placeholder="HLS URL" className="w-36 h-9 px-3 rounded-none bg-[#050608] border border-[#1F232D] text-[#F9FAFB] text-xs focus:outline-none focus:border-[#F5C542]" />
+                                  <input type="text" value={ep.embedIframeLink || ""} onChange={(e) => updateEpisode(si, ei, "embedIframeLink", e.target.value)} placeholder="Embed URL" className="w-36 h-9 px-3 rounded-none bg-[#050608] border border-[#1F232D] text-[#F9FAFB] text-xs focus:outline-none focus:border-[#F5C542]" />
+                                  <input type="text" value={ep.downloadLink || ""} onChange={(e) => updateEpisode(si, ei, "downloadLink", e.target.value)} placeholder="Download URL" className="w-36 h-9 px-3 rounded-none bg-[#050608] border border-[#1F232D] text-[#F9FAFB] text-xs focus:outline-none focus:border-[#F5C542]" />
                                 </div>
                               </div>
                             ))}
@@ -868,7 +883,7 @@ export default function AdminPage() {
                   </div>
                 )}
 
-                <button onClick={handleEditSave} disabled={saving} className="w-full h-12 rounded-xl gold-gradient text-[#050608] font-semibold disabled:opacity-50 hover:opacity-90 transition-opacity flex items-center justify-center gap-2">
+                <button onClick={handleEditSave} disabled={saving} className="w-full h-12 rounded-none gold-gradient text-[#050608] font-semibold disabled:opacity-50 hover:opacity-90 transition-opacity flex items-center justify-center gap-2">
                   {saving ? <Loader2 className="w-5 h-5 animate-spin" /> : <><Save className="w-4 h-4" /> Save Changes</>}
                 </button>
               </div>

@@ -9,6 +9,7 @@ import { IContent } from "@/types";
 import CastCarousel from "@/components/CastCarousel";
 import ContentRow from "@/components/ContentRow";
 import SeriesClient from "./SeriesClient";
+import TrailerButton from "@/components/TrailerButton";
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -124,7 +125,7 @@ export default async function SeriesDetailPage({ params }: Props) {
           <div className="flex flex-col md:flex-row gap-6 md:gap-10">
             {/* Poster */}
             <div className="flex-shrink-0 w-48 md:w-64">
-              <div className="relative aspect-[2/3] rounded-2xl overflow-hidden bg-[#0E1015] border border-[#1F232D] shadow-2xl">
+              <div className="relative aspect-[2/3] rounded-none overflow-hidden bg-[#0E1015] border border-[#1F232D] shadow-2xl">
                 <Image
                   src={item.poster}
                   alt={item.title}
@@ -202,14 +203,7 @@ export default async function SeriesDetailPage({ params }: Props) {
               {item.trailerEmbedUrl && (
                 <div className="mt-8">
                   <h2 className="text-xl font-bold text-[#F9FAFB] mb-3">Trailer</h2>
-                  <div className="relative aspect-video max-w-2xl rounded-2xl overflow-hidden bg-[#0E1015] border border-[#1F232D]">
-                    <iframe
-                      src={item.trailerEmbedUrl}
-                      className="absolute inset-0 w-full h-full"
-                      allowFullScreen
-                      title="Trailer"
-                    />
-                  </div>
+                  <TrailerButton url={item.trailerEmbedUrl} />
                 </div>
               )}
             </div>

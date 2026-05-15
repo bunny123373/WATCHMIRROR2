@@ -7,6 +7,7 @@ import { useDispatch } from "react-redux";
 import { addContinueWatching } from "@/store/slices/continueSlice";
 import HLSPlayer from "@/components/HLSPlayer";
 import IframePlayer from "@/components/IframePlayer";
+import DownloadButton from "@/components/DownloadButton";
 import ContentRow from "@/components/ContentRow";
 import { IContent } from "@/types";
 
@@ -85,7 +86,12 @@ export default function WatchClient({ item, related, audio }: WatchClientProps) 
           )}
           {canStream ? (
             hasHls ? (
-              <HLSPlayer src={hlsSrc} poster={item.banner} subtitleUrl={subUrl} subtitleLang={subLang} onProgress={saveProgress} />
+              <>
+                <HLSPlayer src={hlsSrc} poster={item.banner} subtitleUrl={subUrl} subtitleLang={subLang} onProgress={saveProgress} />
+                <div className="mt-3">
+                  {item.downloadLink ? <DownloadButton url={item.downloadLink} /> : null}
+                </div>
+              </>
             ) : (
               <IframePlayer src={embedSrc} />
             )

@@ -1,18 +1,20 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import Link from "next/link";
 import { Play } from "lucide-react";
 import { ContentStream } from "@/types";
+import DownloadButton from "@/components/DownloadButton";
 
 interface AudioSelectorProps {
   slug: string;
   streams?: ContentStream[];
   audioAvailable?: string[];
   dubLanguage?: string[];
+  downloadLink?: string;
 }
 
-export default function AudioSelector({ slug, streams, audioAvailable, dubLanguage }: AudioSelectorProps) {
+export default function AudioSelector({ slug, streams, audioAvailable, dubLanguage, downloadLink }: AudioSelectorProps) {
   const allLanguages = streams && streams.length > 0
     ? streams.map((s) => s.language)
     : (() => {
@@ -27,15 +29,24 @@ export default function AudioSelector({ slug, streams, audioAvailable, dubLangua
 
   const [selectedAudio, setSelectedAudio] = useState(allLanguages[0] || "");
 
+  const downloadUrl = useMemo(() => {
+    if (!streams?.length) return "";
+    const s = streams.find((st) => st.language === selectedAudio);
+    return s?.hlsLink || "";
+  }, [streams, selectedAudio]);
+
   if (allLanguages.length === 0) {
     return (
-      <Link
-        href={`/watch/${slug}`}
-        className="inline-flex items-center gap-2 px-8 py-3 rounded-none gold-gradient text-[#050608] font-semibold hover:opacity-90 transition-opacity text-lg"
-      >
-        <Play className="w-5 h-5" />
-        Watch Now
-      </Link>
+      <div className="flex items-center gap-3">
+        <Link
+          href={`/watch/${slug}`}
+          className="inline-flex items-center gap-2 px-8 py-3 rounded-none gold-gradient text-[#050608] font-semibold hover:opacity-90 transition-opacity text-lg"
+        >
+          <Play className="w-5 h-5" />
+          Watch Now
+        </Link>
+        {downloadLink && <DownloadButton url={downloadLink} />}
+      </div>
     );
   }
 
@@ -57,13 +68,16 @@ export default function AudioSelector({ slug, streams, audioAvailable, dubLangua
           </button>
         ))}
       </div>
-      <Link
-        href={`/watch/${slug}?audio=${encodeURIComponent(selectedAudio)}`}
-        className="inline-flex items-center gap-2 px-8 py-3 rounded-none gold-gradient text-[#050608] font-semibold hover:opacity-90 transition-opacity text-lg"
-      >
-        <Play className="w-5 h-5" />
-        Watch Now
-      </Link>
+      <div className="flex items-center gap-3">
+        <Link
+          href={`/watch/${slug}?audio=${encodeURIComponent(selectedAudio)}`}
+          className="inline-flex items-center gap-2 px-8 py-3 rounded-none gold-gradient text-[#050608] font-semibold hover:opacity-90 transition-opacity text-lg"
+        >
+          <Play className="w-5 h-5" />
+          Watch Now
+        </Link>
+        {downloadUrl ? <DownloadButton url={downloadUrl} /> : downloadLink ? <DownloadButton url={downloadLink} /> : null}
+      </div>
     </div>
   );
 }

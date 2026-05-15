@@ -22,16 +22,18 @@ export interface IContentDocument extends Document {
   metaDescription: string;
   hlsLink?: string;
   embedIframeLink?: string;
+  downloadLink?: string;
   streams?: { language: string; hlsLink: string; embedIframeLink: string }[];
   seasons?: {
     seasonNumber: number;
     episodes: {
       episodeNumber: number;
       episodeTitle: string;
-      hlsLink?: string;
-      embedIframeLink?: string;
-      quality: string;
-    }[];
+  hlsLink?: string;
+  embedIframeLink?: string;
+  downloadLink?: string;
+  quality: string;
+}[];
   }[];
   createdAt?: Date;
   updatedAt?: Date;
@@ -48,6 +50,7 @@ const EpisodeSchema = new Schema({
   episodeTitle: { type: String, required: true },
   hlsLink: { type: String },
   embedIframeLink: { type: String },
+  downloadLink: { type: String },
   quality: { type: String, default: "1080p" },
 }, { _id: false });
 
@@ -78,6 +81,7 @@ const ContentSchema = new Schema({
   metaDescription: { type: String },
   hlsLink: { type: String },
   embedIframeLink: { type: String },
+  downloadLink: { type: String },
   streams: [{ type: Object }],
   seasons: [SeasonSchema],
 }, {

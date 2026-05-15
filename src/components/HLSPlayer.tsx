@@ -33,32 +33,30 @@ export default function HLSPlayer({ src, poster, subtitleUrl, subtitleLang, onPr
   }
 
   return (
-    <div className="relative w-full bg-[#0E1015] border border-[#1F232D]">
-      <MuxPlayer
-        {...(muxPlaybackId ? { playbackId: muxPlaybackId } : { src })}
-        poster={poster}
-        streamType="on-demand"
-        theme="classic"
-        autoPlay="any"
-        {...{ "audio-track-button": true } as any}
-        style={{ aspectRatio: "16/9", width: "100%", height: "auto" }}
-        onTimeUpdate={(evt: any) => {
-          if (onProgress) {
-            onProgress(evt.target.currentTime, evt.target.duration);
-          }
-        }}
-        onEnded={() => onEnded?.()}
-      >
-        {subtitleUrl && (
-          <track
-            kind="subtitles"
-            src={subtitleUrl}
-            srcLang={subtitleLang || "en"}
-            label={subtitleLang || "Subtitles"}
-            default
-          />
-        )}
-      </MuxPlayer>
-    </div>
+    <MuxPlayer
+      {...(muxPlaybackId ? { playbackId: muxPlaybackId } : { src })}
+      poster={poster}
+      streamType="on-demand"
+      theme="classic"
+      autoPlay="any"
+      {...{ "audio-track-button": true } as any}
+      className="w-full aspect-video"
+      onTimeUpdate={(evt: any) => {
+        if (onProgress) {
+          onProgress(evt.target.currentTime, evt.target.duration);
+        }
+      }}
+      onEnded={() => onEnded?.()}
+    >
+      {subtitleUrl && (
+        <track
+          kind="subtitles"
+          src={subtitleUrl}
+          srcLang={subtitleLang || "en"}
+          label={subtitleLang || "Subtitles"}
+          default
+        />
+      )}
+    </MuxPlayer>
   );
 }

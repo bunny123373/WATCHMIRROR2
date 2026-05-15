@@ -9,6 +9,7 @@ export interface Episode {
   episodeTitle: string;
   hlsLink?: string;
   embedIframeLink?: string;
+  downloadLink?: string;
   quality: string;
 }
 
@@ -47,6 +48,7 @@ export interface IContent {
   metaDescription: string;
   hlsLink?: string;
   embedIframeLink?: string;
+  downloadLink?: string;
   streams?: ContentStream[];
   seasons?: Season[];
   createdAt?: Date;

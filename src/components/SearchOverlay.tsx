@@ -84,11 +84,11 @@ export default function SearchOverlay() {
                 value={query}
                 onChange={(e) => dispatch(setQuery(e.target.value))}
                 placeholder="Search movies & series..."
-                className="w-full h-14 pl-12 pr-12 rounded-2xl bg-[#0E1015] border border-[#1F232D] text-[#F9FAFB] placeholder-[#9CA3AF] text-lg focus:outline-none focus:border-[#F5C542] transition-colors"
+                className="w-full h-14 pl-12 pr-12 rounded-none bg-[#0E1015] border border-[#1F232D] text-[#F9FAFB] placeholder-[#9CA3AF] text-lg focus:outline-none focus:border-[#F5C542] transition-colors"
               />
               <button
                 onClick={() => dispatch(closeSearch())}
-                className="absolute right-4 top-1/2 -translate-y-1/2 p-1 rounded-full hover:bg-[#1F232D] transition-colors"
+                className="absolute right-4 top-1/2 -translate-y-1/2 p-1 rounded-none hover:bg-[#1F232D] transition-colors"
                 aria-label="Close search"
               >
                 <X className="w-5 h-5 text-[#9CA3AF]" />
@@ -126,9 +126,9 @@ export default function SearchOverlay() {
                       key={result.id}
                       href={getLink(result)}
                       onClick={() => dispatch(closeSearch())}
-                      className="flex items-center gap-4 p-3 rounded-xl bg-[#0E1015] border border-[#1F232D] hover:border-[#F5C542]/30 transition-all"
+                      className="flex items-center gap-4 p-3 rounded-none bg-[#0E1015] border border-[#1F232D] hover:border-[#F5C542]/30 transition-all"
                     >
-                      <div className="relative w-12 h-16 rounded-lg overflow-hidden flex-shrink-0 bg-[#1F232D]">
+                      <div className="relative w-12 h-16 rounded-none overflow-hidden flex-shrink-0 bg-[#1F232D]">
                         {result.poster_path && (
                           <Image
                             src={`${TMDB_IMAGE_W500}${result.poster_path}`}

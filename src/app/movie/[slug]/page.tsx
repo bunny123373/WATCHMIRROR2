@@ -10,6 +10,7 @@ import CastCarousel from "@/components/CastCarousel";
 import ContentRow from "@/components/ContentRow";
 import AudioSelector from "@/components/AudioSelector";
 import SaveButton from "@/components/SaveButton";
+import TrailerButton from "@/components/TrailerButton";
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -117,7 +118,7 @@ export default async function MovieDetailPage({ params }: Props) {
           <div className="flex flex-col md:flex-row gap-6 md:gap-10">
             {/* Poster */}
             <div className="flex-shrink-0 w-48 md:w-64">
-              <div className="relative aspect-[2/3] rounded-2xl overflow-hidden bg-[#0E1015] border border-[#1F232D] shadow-2xl">
+              <div className="relative aspect-[2/3] rounded-none overflow-hidden bg-[#0E1015] border border-[#1F232D] shadow-2xl">
                 <Image
                   src={item.poster}
                   alt={item.title}
@@ -176,7 +177,7 @@ export default async function MovieDetailPage({ params }: Props) {
 
               <div className="flex items-start gap-3">
                 <div className="flex-1">
-                  <AudioSelector slug={item.slug} streams={item.streams} audioAvailable={item.audioAvailable} dubLanguage={item.dubLanguage} />
+                  <AudioSelector slug={item.slug} streams={item.streams} audioAvailable={item.audioAvailable} dubLanguage={item.dubLanguage} downloadLink={item.downloadLink} />
                 </div>
                 <SaveButton slug={item.slug} type="movie" title={item.title} poster={item.poster} year={item.year} quality={item.quality} className="mt-1" />
               </div>
@@ -200,15 +201,7 @@ export default async function MovieDetailPage({ params }: Props) {
               {item.trailerEmbedUrl && (
                 <div className="mt-8">
                   <h2 className="text-xl font-bold text-[#F9FAFB] mb-3">Trailer</h2>
-                  <div className="relative aspect-video max-w-2xl rounded-2xl overflow-hidden bg-[#0E1015] border border-[#1F232D]">
-                    <iframe
-                      src={item.trailerEmbedUrl}
-                      className="absolute inset-0 w-full h-full"
-                      allowFullScreen
-                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                      title="Trailer"
-                    />
-                  </div>
+                  <TrailerButton url={item.trailerEmbedUrl} />
                 </div>
               )}
 
