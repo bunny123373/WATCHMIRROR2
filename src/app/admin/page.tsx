@@ -561,8 +561,8 @@ export default function AdminPage() {
 
                     {/* Download Link */}
                     <div className="p-4 rounded-none bg-[#050608] border border-[#1F232D]">
-                      <label className="block text-xs text-[#9CA3AF] mb-2 font-medium">Download Link</label>
-                      <p className="text-[10px] text-[#9CA3AF] mb-2">Optional direct download URL (e.g. MP4 file).</p>
+                      <label className="block text-xs text-[#9CA3AF] mb-2 font-medium">Direct Download MP4</label>
+                      <p className="text-[10px] text-[#9CA3AF] mb-2">Direct MP4 video file URL for download.</p>
                       <input type="text" value={downloadLink} onChange={(e) => setDownloadLink(e.target.value)} placeholder="https://example.com/video.mp4" className="w-full h-11 px-4 rounded-none bg-[#0E1015] border border-[#1F232D] text-[#F9FAFB] placeholder-[#9CA3AF] text-sm focus:outline-none focus:border-[#F5C542]" />
                     </div>
 
@@ -849,7 +849,7 @@ export default function AdminPage() {
                     )}
                     {/* Download Link */}
                     <div className="mt-4">
-                      <label className="block text-xs text-[#9CA3AF] mb-1">Download Link</label>
+                      <label className="block text-xs text-[#9CA3AF] mb-1">Direct Download MP4</label>
                       <input type="text" value={editData.downloadLink || ""} onChange={(e) => setEditData({ ...editData, downloadLink: e.target.value })} placeholder="https://example.com/video.mp4" className="w-full h-9 px-3 rounded-none bg-[#050608] border border-[#1F232D] text-[#F9FAFB] placeholder-[#9CA3AF] text-xs focus:outline-none focus:border-[#F5C542]" />
                     </div>
                   </div>
@@ -872,7 +872,7 @@ export default function AdminPage() {
                                 <div className="flex gap-2">
                                   <input type="text" value={ep.hlsLink || ""} onChange={(e) => updateEpisode(si, ei, "hlsLink", e.target.value)} placeholder="HLS URL" className="w-36 h-9 px-3 rounded-none bg-[#050608] border border-[#1F232D] text-[#F9FAFB] text-xs focus:outline-none focus:border-[#F5C542]" />
                                   <input type="text" value={ep.embedIframeLink || ""} onChange={(e) => updateEpisode(si, ei, "embedIframeLink", e.target.value)} placeholder="Embed URL" className="w-36 h-9 px-3 rounded-none bg-[#050608] border border-[#1F232D] text-[#F9FAFB] text-xs focus:outline-none focus:border-[#F5C542]" />
-                                  <input type="text" value={ep.downloadLink || ""} onChange={(e) => updateEpisode(si, ei, "downloadLink", e.target.value)} placeholder="Download URL" className="w-36 h-9 px-3 rounded-none bg-[#050608] border border-[#1F232D] text-[#F9FAFB] text-xs focus:outline-none focus:border-[#F5C542]" />
+                                  <input type="text" value={ep.downloadLink || ""} onChange={(e) => updateEpisode(si, ei, "downloadLink", e.target.value)} placeholder="Direct MP4 URL" className="w-36 h-9 px-3 rounded-none bg-[#050608] border border-[#1F232D] text-[#F9FAFB] text-xs focus:outline-none focus:border-[#F5C542]" />
                                 </div>
                               </div>
                             ))}

@@ -150,8 +150,7 @@ export default function DownloadButton({ url, label = "Download" }: Props) {
                   <p className="text-xs text-[#9CA3AF]">Your download link is ready.</p>
                   <a
                     href={url}
-                    target="_blank"
-                    rel="noopener noreferrer"
+                    download
                     className="inline-flex items-center gap-2 px-8 h-11 rounded-none gold-gradient text-[#050608] font-semibold hover:opacity-90 transition-opacity text-sm"
                     onClick={closeModal}
                   >
