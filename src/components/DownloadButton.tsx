@@ -49,11 +49,12 @@ export default function DownloadButton({ url, slug, label = "Download" }: Props)
   const timerRef = useRef<any>(null);
 
   const filename = slug ? `${slug}.mp4` : "download.mp4";
+  const proxyUrl = `/api/download-proxy?url=${encodeURIComponent(url)}&filename=${encodeURIComponent(filename)}`;
 
   const doDownload = useCallback(() => {
-    triggerDownload(url, filename);
+    triggerDownload(proxyUrl, filename);
     setShowModal(false);
-  }, [url, filename]);
+  }, [proxyUrl, filename]);
 
   const openModal = () => {
     if (isVerified(url)) {
