@@ -1,6 +1,7 @@
 import { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
+import { Suspense } from "react";
 import { Play, Star, Calendar, Globe, Clock, Headphones } from "lucide-react";
 import { notFound } from "next/navigation";
 import { connectDB } from "@/lib/db";
@@ -11,6 +12,8 @@ import ContentRow from "@/components/ContentRow";
 import AudioSelector from "@/components/AudioSelector";
 import SaveButton from "@/components/SaveButton";
 import TrailerButton from "@/components/TrailerButton";
+
+export const revalidate = 60;
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -123,6 +126,7 @@ export default async function MovieDetailPage({ params }: Props) {
                   src={item.poster}
                   alt={item.title}
                   fill
+                  priority
                   className="object-cover"
                   sizes="256px"
                 />

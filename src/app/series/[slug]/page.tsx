@@ -11,6 +11,8 @@ import ContentRow from "@/components/ContentRow";
 import SeriesClient from "./SeriesClient";
 import TrailerButton from "@/components/TrailerButton";
 
+export const revalidate = 60;
+
 interface Props {
   params: Promise<{ slug: string }>;
 }
@@ -130,6 +132,7 @@ export default async function SeriesDetailPage({ params }: Props) {
                   src={item.poster}
                   alt={item.title}
                   fill
+                  priority
                   className="object-cover"
                   sizes="256px"
                 />
