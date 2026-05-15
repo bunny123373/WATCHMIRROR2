@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { Play } from "lucide-react";
 import { ContentStream } from "@/types";
@@ -28,12 +28,6 @@ export default function AudioSelector({ slug, streams, audioAvailable, dubLangua
       })();
 
   const [selectedAudio, setSelectedAudio] = useState(allLanguages[0] || "");
-
-  const downloadUrl = useMemo(() => {
-    if (!streams?.length) return "";
-    const s = streams.find((st) => st.language === selectedAudio);
-    return s?.hlsLink || "";
-  }, [streams, selectedAudio]);
 
   if (allLanguages.length === 0) {
     return (
@@ -76,7 +70,7 @@ export default function AudioSelector({ slug, streams, audioAvailable, dubLangua
           <Play className="w-5 h-5" />
           Watch Now
         </Link>
-        {downloadUrl ? <DownloadButton url={downloadUrl} /> : downloadLink ? <DownloadButton url={downloadLink} /> : null}
+        {downloadLink ? <DownloadButton url={downloadLink} /> : null}
       </div>
     </div>
   );
