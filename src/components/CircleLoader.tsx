@@ -12,7 +12,7 @@ export default function CircleLoader({ size = 40, thickness = 4, color = "second
 
   return (
     <div
-      className="m-auto animate-spin rounded-none"
+      className="m-auto rounded-none"
       style={{
         width: size,
         height: size,
@@ -20,6 +20,7 @@ export default function CircleLoader({ size = 40, thickness = 4, color = "second
         borderStyle: "solid",
         borderColor: `${borderColor}20`,
         borderTopColor: borderColor,
+        animation: "spinPulse 1.2s linear infinite",
       }}
     />
   );
