@@ -9,7 +9,7 @@ interface Props {
   label?: string;
 }
 
-const AD_URL = "https://www.profitablecpmratenetwork.com/d4cp6qn3?key=d02dd14587e874749866d9f432a7c519";
+const AD_URL = "https://www.profitablecpmratenetwork.com/agch3bg6jg?key=3ba10aeb32835a27ad99807868f15991";
 const VERIFY_SECONDS = 12;
 const STORAGE_KEY = "watchmirror_verified";
 
