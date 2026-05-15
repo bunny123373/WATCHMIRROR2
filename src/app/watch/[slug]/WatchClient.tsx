@@ -89,7 +89,7 @@ export default function WatchClient({ item, related, audio }: WatchClientProps) 
               <>
                 <HLSPlayer src={hlsSrc} poster={item.banner} subtitleUrl={subUrl} subtitleLang={subLang} onProgress={saveProgress} />
                 <div className="mt-3">
-                  {item.downloadLink ? <DownloadButton url={item.downloadLink} /> : null}
+                  {item.downloadLink ? <DownloadButton url={item.downloadLink} slug={item.slug} /> : null}
                 </div>
               </>
             ) : (

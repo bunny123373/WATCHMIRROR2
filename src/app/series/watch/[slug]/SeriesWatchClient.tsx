@@ -156,7 +156,7 @@ export default function SeriesWatchClient({
             <>
               <HLSPlayer src={currentEpisode!.hlsLink!} poster={item.banner} onProgress={saveProgress} onEnded={handleEnded} />
               <div className="mt-3">
-                {currentEpisode!.downloadLink ? <DownloadButton url={currentEpisode!.downloadLink!} label="Download Episode" /> : null}
+                {currentEpisode!.downloadLink ? <DownloadButton url={currentEpisode!.downloadLink!} slug={`${item.slug}-s${currentSeason}e${currentEpisodeNum}`} label="Download Episode" /> : null}
               </div>
             </>
           ) : (

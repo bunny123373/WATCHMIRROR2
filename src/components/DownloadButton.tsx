@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { Download, ShieldCheck, Loader2, ExternalLink, Lock, Timer } from "lucide-react";
 
 interface Props {
   url: string;
+  slug?: string;
   label?: string;
 }
 
@@ -30,16 +31,33 @@ function markVerified(downloadUrl: string) {
   } catch {}
 }
 
-export default function DownloadButton({ url, label = "Download" }: Props) {
+function triggerDownload(url: string, filename: string) {
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  a.style.display = "none";
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+}
+
+export default function DownloadButton({ url, slug, label = "Download" }: Props) {
   const [showModal, setShowModal] = useState(false);
   const [step, setStep] = useState<"ad" | "timer" | "verify" | "done">("ad");
   const [countdown, setCountdown] = useState(VERIFY_SECONDS);
   const [adOpened, setAdOpened] = useState(false);
   const timerRef = useRef<any>(null);
 
+  const filename = slug ? `${slug}.mp4` : "download.mp4";
+
+  const doDownload = useCallback(() => {
+    triggerDownload(url, filename);
+    setShowModal(false);
+  }, [url, filename]);
+
   const openModal = () => {
     if (isVerified(url)) {
-      window.open(url, "_blank", "noopener,noreferrer");
+      doDownload();
       return;
     }
     setStep("ad");
@@ -147,15 +165,13 @@ export default function DownloadButton({ url, label = "Download" }: Props) {
                 <div className="space-y-4 text-center py-8">
                   <ShieldCheck className="w-10 h-10 text-[#22C55E] mx-auto" />
                   <p className="text-sm text-[#F9FAFB] font-semibold">Verified Successfully</p>
-                  <p className="text-xs text-[#9CA3AF]">Your download link is ready.</p>
-                  <a
-                    href={url}
-                    download
+                  <p className="text-xs text-[#9CA3AF]">Your download is starting...</p>
+                  <button
+                    onClick={doDownload}
                     className="inline-flex items-center gap-2 px-8 h-11 rounded-none gold-gradient text-[#050608] font-semibold hover:opacity-90 transition-opacity text-sm"
-                    onClick={closeModal}
                   >
                     <Download className="w-4 h-4" /> Download Now
-                  </a>
+                  </button>
                 </div>
               )}
             </div>
