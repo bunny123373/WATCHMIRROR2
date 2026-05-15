@@ -11,10 +11,9 @@ interface AudioSelectorProps {
   streams?: ContentStream[];
   audioAvailable?: string[];
   dubLanguage?: string[];
-  downloadLink?: string;
 }
 
-export default function AudioSelector({ slug, streams, audioAvailable, dubLanguage, downloadLink }: AudioSelectorProps) {
+export default function AudioSelector({ slug, streams, audioAvailable, dubLanguage }: AudioSelectorProps) {
   const allLanguages = streams && streams.length > 0
     ? streams.map((s) => s.language)
     : (() => {
@@ -39,7 +38,7 @@ export default function AudioSelector({ slug, streams, audioAvailable, dubLangua
           <Play className="w-5 h-5" />
           Watch Now
         </Link>
-        {downloadLink && <DownloadButton url={downloadLink} slug={slug} />}
+        <DownloadButton slug={slug} />
       </div>
     );
   }
@@ -70,7 +69,7 @@ export default function AudioSelector({ slug, streams, audioAvailable, dubLangua
           <Play className="w-5 h-5" />
           Watch Now
         </Link>
-        {downloadLink ? <DownloadButton url={downloadLink} slug={slug} /> : null}
+        <DownloadButton slug={slug} />
       </div>
     </div>
   );

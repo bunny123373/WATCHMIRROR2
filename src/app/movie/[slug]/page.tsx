@@ -181,7 +181,7 @@ export default async function MovieDetailPage({ params }: Props) {
 
               <div className="flex items-start gap-3">
                 <div className="flex-1">
-                  <AudioSelector slug={item.slug} streams={item.streams} audioAvailable={item.audioAvailable} dubLanguage={item.dubLanguage} downloadLink={item.downloadLink} />
+                  <AudioSelector slug={item.slug} streams={item.streams} audioAvailable={item.audioAvailable} dubLanguage={item.dubLanguage} />
                 </div>
                 <SaveButton slug={item.slug} type="movie" title={item.title} poster={item.poster} year={item.year} quality={item.quality} className="mt-1" />
               </div>

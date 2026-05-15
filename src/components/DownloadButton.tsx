@@ -4,7 +4,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { Download, ShieldCheck, Loader2, ExternalLink, Lock, Timer } from "lucide-react";
 
 interface Props {
-  url: string;
+  url?: string;
   slug?: string;
   label?: string;
 }
@@ -13,8 +13,8 @@ const AD_URL = "https://www.profitablecpmratenetwork.com/agch3bg6jg?key=3ba10aeb
 const VERIFY_SECONDS = 12;
 const STORAGE_KEY = "watchmirror_verified";
 
-function isVerified(downloadUrl: string): boolean {
-  if (typeof window === "undefined") return false;
+function isVerified(downloadUrl: string | undefined): boolean {
+  if (typeof window === "undefined" || !downloadUrl) return false;
   try {
     const stored = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
     return stored[downloadUrl] === true;
@@ -23,7 +23,8 @@ function isVerified(downloadUrl: string): boolean {
   }
 }
 
-function markVerified(downloadUrl: string) {
+function markVerified(downloadUrl: string | undefined) {
+  if (!downloadUrl) return;
   try {
     const stored = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
     stored[downloadUrl] = true;
@@ -49,7 +50,8 @@ export default function DownloadButton({ url, slug, label = "Download" }: Props)
   const timerRef = useRef<any>(null);
 
   const filename = slug ? `${slug}.mp4` : "download.mp4";
-  const proxyUrl = `/api/download-proxy?url=${encodeURIComponent(url)}&filename=${encodeURIComponent(filename)}`;
+  const hasUrl = !!url?.trim();
+  const proxyUrl = hasUrl ? `/api/download-proxy?url=${encodeURIComponent(url!)}&filename=${encodeURIComponent(filename)}` : "";
 
   const doDownload = useCallback(() => {
     triggerDownload(proxyUrl, filename);
@@ -57,7 +59,7 @@ export default function DownloadButton({ url, slug, label = "Download" }: Props)
   }, [proxyUrl, filename]);
 
   const openModal = () => {
-    if (isVerified(url)) {
+    if (isVerified(url) && hasUrl) {
       doDownload();
       return;
     }
@@ -73,7 +75,14 @@ export default function DownloadButton({ url, slug, label = "Download" }: Props)
   };
 
   const openAd = () => {
-    window.open(AD_URL, "_blank", "noopener,noreferrer");
+    const a = document.createElement("a");
+    a.href = AD_URL;
+    a.target = "_blank";
+    a.rel = "noopener";
+    a.style.display = "none";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
     setAdOpened(true);
     setStep("timer");
     let count = VERIFY_SECONDS;
@@ -97,8 +106,6 @@ export default function DownloadButton({ url, slug, label = "Download" }: Props)
       if (timerRef.current) clearInterval(timerRef.current);
     };
   }, []);
-
-  if (!url?.trim()) return null;
 
   return (
     <>
@@ -166,13 +173,17 @@ export default function DownloadButton({ url, slug, label = "Download" }: Props)
                 <div className="space-y-4 text-center py-8">
                   <ShieldCheck className="w-10 h-10 text-[#22C55E] mx-auto" />
                   <p className="text-sm text-[#F9FAFB] font-semibold">Verified Successfully</p>
-                  <p className="text-xs text-[#9CA3AF]">Your download is starting...</p>
-                  <button
-                    onClick={doDownload}
-                    className="inline-flex items-center gap-2 px-8 h-11 rounded-none gold-gradient text-[#050608] font-semibold hover:opacity-90 transition-opacity text-sm"
-                  >
-                    <Download className="w-4 h-4" /> Download Now
-                  </button>
+                  <p className="text-xs text-[#9CA3AF]">{hasUrl ? "Your download is starting..." : "No download link configured yet."}</p>
+                  {hasUrl ? (
+                    <button
+                      onClick={doDownload}
+                      className="inline-flex items-center gap-2 px-8 h-11 rounded-none gold-gradient text-[#050608] font-semibold hover:opacity-90 transition-opacity text-sm"
+                    >
+                      <Download className="w-4 h-4" /> Download Now
+                    </button>
+                  ) : (
+                    <p className="text-xs text-[#F5C542]">Download link coming soon</p>
+                  )}
                 </div>
               )}
             </div>
