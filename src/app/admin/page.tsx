@@ -49,6 +49,11 @@ export default function AdminPage() {
   const [isPrimeVideo, setIsPrimeVideo] = useState(false);
 
   useEffect(() => {
+    const stored = localStorage.getItem("wm_profile");
+    if (stored === "prime") setIsPrimeVideo(true);
+  }, []);
+
+  useEffect(() => {
     if (selectedItem?.id) {
       setPeachifyId(String(selectedItem.id));
     }
@@ -168,14 +173,16 @@ export default function AdminPage() {
         headers: { "Content-Type": "application/json", "x-admin-key": ADMIN_KEY },
         body: JSON.stringify({ tmdbId: selectedItem.id, type: importType, hlsLink, embedIframeLink: embedLink, downloadLink, peachifyId, streams: streamInputs.filter((s) => s.hlsLink || s.embedIframeLink), seasons: parsedSeasons, language: selectedLanguage, dubLanguages: selectedDubLanguages, audioAvailable: selectedAudio, contentRating: selectedRating, isPrimeVideo }),
       });
+      const resText = await res.text();
+      let d;
+      try { d = JSON.parse(resText); } catch { d = {}; }
       if (res.ok) {
         setShowAddModal(false); resetAddModal(); fetchContent();
         showToast("Content imported successfully");
       } else {
-        const d = await res.json().catch(() => ({}));
-        showToast(d?.error || "Import failed", "error");
+        showToast(d?.error || resText.slice(0, 200) || "Import failed", "error");
       }
-    } catch { showToast("Network error — import failed", "error"); }
+    } catch (e: any) { showToast(e?.message || "Network error — import failed", "error"); }
     finally { setImporting(false); }
   };
 
@@ -403,7 +410,7 @@ export default function AdminPage() {
                       >
                         <span className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white transition-transform ${isPrimeVideo ? "translate-x-5" : ""}`} />
                       </button>
-                      {isPrimeVideo && <span className="text-xs text-[#00A8E1] font-medium">Yes</span>}
+                      {isPrimeVideo ? <span className="text-xs text-[#00A8E1] font-medium">Yes - Prime Video content</span> : <span className="text-xs text-[#E50914] font-medium">Netflix content</span>}
                     </div>
 
                     <div className="flex gap-2">
@@ -441,6 +448,9 @@ export default function AdminPage() {
                               <p className="text-xs text-[#9CA3AF] mt-0.5">
                                 {"release_date" in r ? new Date(r.release_date!).getFullYear() : "first_air_date" in r ? new Date(r.first_air_date!).getFullYear() : ""}
                                 {"media_type" in r && r.media_type && <span className="ml-2 px-1.5 py-0.5 rounded bg-[#1F232D] text-[10px] uppercase">{r.media_type}</span>}
+                                <span className={`ml-1.5 px-1.5 py-0.5 rounded text-[10px] font-medium ${isPrimeVideo ? "bg-[#00A8E1]/20 text-[#00A8E1]" : "bg-[#E50914]/20 text-[#E50914]"}`}>
+                                  {isPrimeVideo ? "Prime" : "Netflix"}
+                                </span>
                               </p>
                             </div>
                             <span className="text-xs text-[#F5C542] flex items-center gap-1">
@@ -463,6 +473,9 @@ export default function AdminPage() {
                             <div className="flex items-center gap-3 mt-1 text-xs text-[#9CA3AF]">
                               <span>{selectedDetails.release_date?.slice(0, 4) || selectedDetails.first_air_date?.slice(0, 4)}</span>
                               <span className="flex items-center gap-1"><Star className="w-3 h-3 text-[#F5C542]" /> {selectedDetails.vote_average?.toFixed(1)}</span>
+                              <span className={`px-1.5 py-0.5 rounded text-[10px] font-medium ${isPrimeVideo ? "bg-[#00A8E1]/20 text-[#00A8E1]" : "bg-[#E50914]/20 text-[#E50914]"}`}>
+                                {isPrimeVideo ? "Prime Video" : "Netflix"}
+                              </span>
                             </div>
                             <p className="text-xs text-[#9CA3AF] mt-2 line-clamp-2 leading-relaxed">{selectedDetails.overview}</p>
                             <div className="flex flex-wrap gap-1 mt-2">
@@ -718,6 +731,13 @@ export default function AdminPage() {
                               ))}
                             </div>
                           )}
+                          <div className="pt-2 flex items-center gap-2 text-[11px]">
+                            {isPrimeVideo ? (
+                              <span className="px-2 py-0.5 rounded-sm bg-[#00A8E1]/20 text-[#00A8E1] font-medium border border-[#00A8E1]/30">Prime Video content</span>
+                            ) : (
+                              <span className="px-2 py-0.5 rounded-sm bg-[#E50914]/20 text-[#E50914] font-medium border border-[#E50914]/30">Netflix content</span>
+                            )}
+                          </div>
                           <div className="pt-1 flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-[#9CA3AF]">
                             {importType === "movie" && (
                               <>

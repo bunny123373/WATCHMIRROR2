@@ -238,7 +238,7 @@ export default function SeriesWatchClient({
                     <Link
                       key={`${season.seasonNumber}-${ep.episodeNumber}`}
                       href={`/series/watch/${item.slug}?season=${season.seasonNumber}&episode=${ep.episodeNumber}${audio ? `&audio=${encodeURIComponent(audio)}` : ""}`}
-                      className={`flex items-center gap-3 p-3 rounded-xl border transition-all ${
+                      className={`flex items-center gap-3 p-3 border transition-all ${
                         currentSeason === season.seasonNumber &&
                         currentEpisodeNum === ep.episodeNumber
                           ? "bg-[#F5C542]/10 border-[#F5C542]"
@@ -247,7 +247,7 @@ export default function SeriesWatchClient({
                           : "bg-[#0E1015] border-[#1F232D] hover:border-[#F5C542]/30"
                       }`}
                     >
-                      <span className={`flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center text-xs ${
+                      <span className={`flex-shrink-0 w-8 h-8 flex items-center justify-center text-xs ${
                         isWatched(season.seasonNumber, ep.episodeNumber)
                           ? "bg-[#22C55E]/20 text-[#22C55E]"
                           : "bg-[#1F232D] text-[#9CA3AF]"
