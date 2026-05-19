@@ -12,6 +12,7 @@ export interface Episode {
   peachifyId?: string;
   downloadLink?: string;
   quality: string;
+  streams?: { language: string; hlsLink: string; embedIframeLink: string }[];
 }
 
 export interface Season {

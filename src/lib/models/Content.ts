@@ -57,6 +57,7 @@ const EpisodeSchema = new Schema({
   peachifyId: { type: String },
   downloadLink: { type: String },
   quality: { type: String, default: "1080p" },
+  streams: [{ type: Object }],
 }, { _id: false });
 
 const SeasonSchema = new Schema({

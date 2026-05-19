@@ -87,7 +87,13 @@ export async function POST(request: NextRequest) {
       contentData.hlsLink = hlsLink || "";
       contentData.embedIframeLink = embedIframeLink || "";
     } else {
-      contentData.seasons = seasons || [];
+      contentData.seasons = seasons?.map((s: any) => ({
+        ...s,
+        episodes: s.episodes?.map((ep: any) => ({
+          ...ep,
+          streams: streams || [],
+        })),
+      })) || [];
     }
 
     const existing = await Content.findOne({ slug });

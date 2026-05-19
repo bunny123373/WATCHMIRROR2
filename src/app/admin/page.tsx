@@ -144,16 +144,23 @@ export default function AdminPage() {
     try {
       const parsedSeasons = seasons
         ? seasons.split(",").map((s) => {
-            const [num, count] = s.trim().split(":");
+            const trimmed = s.trim();
+            if (!trimmed) return null;
+            const [num, count] = trimmed.split(":");
+            const sn = parseInt(num);
+            const ec = parseInt(count) || 1;
+            if (isNaN(sn)) return null;
             return {
-              seasonNumber: parseInt(num),
-              episodes: Array.from({ length: parseInt(count) || 1 }, (_, i) => ({
+              seasonNumber: sn,
+              episodes: Array.from({ length: ec }, (_, i) => ({
                 episodeNumber: i + 1,
                 episodeTitle: `Episode ${i + 1}`,
-                hlsLink: "", embedIframeLink: "", quality: "1080p",
+                hlsLink: "", embedIframeLink: "",
+                peachifyId: peachifyId || String(selectedItem.id),
+                quality: "1080p",
               })),
             };
-          })
+          }).filter(Boolean)
         : [];
       const res = await fetch("/api/admin/seed", {
         method: "POST",
@@ -977,7 +984,7 @@ export default function AdminPage() {
                                 ...updated[si],
                                 episodes: [
                                   ...(updated[si].episodes || []),
-                                  { episodeNumber: nextNum, episodeTitle: `Episode ${nextNum}`, hlsLink: "", embedIframeLink: "", downloadLink: "", quality: "1080p" },
+                                  { episodeNumber: nextNum, episodeTitle: `Episode ${nextNum}`, hlsLink: "", embedIframeLink: "", peachifyId: editItem?.peachifyId || "", downloadLink: "", quality: "1080p" },
                                 ],
                               };
                               setEditData({ ...editData, seasons: updated });
@@ -987,33 +994,53 @@ export default function AdminPage() {
                           </div>
                           <div className="space-y-2">
                             {season.episodes?.map((ep: any, ei: number) => (
-                              <div key={ei} className="flex flex-col sm:flex-row gap-2 p-2 rounded-none bg-[#0E1015] border border-[#1F232D]">
-                                <div className="flex-1 flex items-center gap-2">
-                                  <span className="text-[10px] text-[#9CA3AF] font-mono w-6">E{ep.episodeNumber}</span>
-                                  <input type="text" value={ep.episodeTitle} onChange={(e) => updateEpisode(si, ei, "episodeTitle", e.target.value)} placeholder="Episode title" className="w-full h-9 px-3 rounded-none bg-[#050608] border border-[#1F232D] text-[#F9FAFB] text-xs focus:outline-none focus:border-[#F5C542]" />
-                                </div>
-                                <div className="flex flex-col gap-2">
-                                  <div className="flex flex-col sm:flex-row gap-2">
-                                    <input type="text" value={ep.hlsLink || ""} onChange={(e) => updateEpisode(si, ei, "hlsLink", e.target.value)} placeholder="HLS URL" className="w-full sm:w-32 md:w-36 h-9 px-3 rounded-none bg-[#050608] border border-[#1F232D] text-[#F9FAFB] text-xs focus:outline-none focus:border-[#F5C542]" />
-                                    <input type="text" value={ep.embedIframeLink || ""} onChange={(e) => updateEpisode(si, ei, "embedIframeLink", e.target.value)} placeholder="Embed URL" className="w-full sm:w-32 md:w-36 h-9 px-3 rounded-none bg-[#050608] border border-[#1F232D] text-[#F9FAFB] text-xs focus:outline-none focus:border-[#F5C542]" />
-                                    <input type="text" value={ep.downloadLink || ""} onChange={(e) => updateEpisode(si, ei, "downloadLink", e.target.value)} placeholder="Direct MP4 URL" className="w-full sm:w-32 md:w-36 h-9 px-3 rounded-none bg-[#050608] border border-[#1F232D] text-[#F9FAFB] text-xs focus:outline-none focus:border-[#F5C542]" />
-                                  </div>
-                                  <div className="flex flex-col sm:flex-row gap-2">
-                                    <div className="flex items-center gap-2 border border-[#1F232D] px-2 py-1 flex-1">
-                                      <span className="text-[9px] text-[#9CA3AF] font-medium whitespace-nowrap">Abyss ID</span>
-                                      <input type="text" placeholder="sXceKo-r4" onChange={(e) => {
-                                        const id = e.target.value.trim();
-                                        if (id) updateEpisode(si, ei, "embedIframeLink", `https://abyssplayer.com/${id}`);
-                                      }} className="flex-1 h-7 px-2 rounded-none bg-[#050608] border border-[#1F232D] text-[#F9FAFB] placeholder-[#9CA3AF] text-[10px] focus:outline-none focus:border-[#F5C542]" />
-                                    </div>
-                                    <div className="flex items-center gap-2 border border-[#1F232D] px-2 py-1 flex-1">
-                                      <span className="text-[9px] text-[#9CA3AF] font-medium whitespace-nowrap">Peachify ID</span>
+                              <div key={ei} className="flex flex-col gap-2 p-2 rounded-none bg-[#0E1015] border border-[#1F232D]">
+                                <div className="flex items-center gap-2">
+                                  <span className="text-[10px] text-[#9CA3AF] font-mono w-6 flex-shrink-0">E{ep.episodeNumber}</span>
+                                  <input type="text" value={ep.episodeTitle} onChange={(e) => updateEpisode(si, ei, "episodeTitle", e.target.value)} placeholder="Episode title" className="flex-1 h-9 px-3 rounded-none bg-[#050608] border border-[#1F232D] text-[#F9FAFB] text-xs focus:outline-none focus:border-[#F5C542]" />
+                                  <div className="flex items-center gap-1">
+                                    <div className="flex items-center gap-2 border border-[#1F232D] px-2 py-1.5">
+                                      <span className="text-[9px] text-[#9CA3AF] whitespace-nowrap">Peachify</span>
                                       <input type="text" placeholder="255661" onChange={(e) => {
                                         const id = e.target.value.trim();
                                         if (id) updateEpisode(si, ei, "peachifyId", id);
-                                      }} className="flex-1 h-7 px-2 rounded-none bg-[#050608] border border-[#1F232D] text-[#F9FAFB] placeholder-[#9CA3AF] text-[10px] focus:outline-none focus:border-[#F5C542]" />
+                                      }} className="w-16 h-6 px-1 rounded-none bg-[#050608] border border-[#1F232D] text-[#F9FAFB] placeholder-[#9CA3AF] text-[9px] focus:outline-none focus:border-[#F5C542]" />
+                                    </div>
+                                    <div className="flex items-center gap-2 border border-[#1F232D] px-2 py-1.5">
+                                      <span className="text-[9px] text-[#9CA3AF] whitespace-nowrap">Abyss</span>
+                                      <input type="text" placeholder="sXceKo-r4" onChange={(e) => {
+                                        const id = e.target.value.trim();
+                                        if (id) updateEpisode(si, ei, "embedIframeLink", `https://abyssplayer.com/${id}`);
+                                      }} className="w-16 h-6 px-1 rounded-none bg-[#050608] border border-[#1F232D] text-[#F9FAFB] placeholder-[#9CA3AF] text-[9px] focus:outline-none focus:border-[#F5C542]" />
                                     </div>
                                   </div>
+                                </div>
+
+                                {/* Per-language streams */}
+                                <div className="pl-8 space-y-1.5">
+                                  {(ep.streams || []).length > 0 && (
+                                    <p className="text-[9px] text-[#9CA3AF] font-medium">Per-Language Streams</p>
+                                  )}
+                                  {(ep.streams || []).map((st: any, sti: number) => (
+                                    <div key={sti} className="flex flex-col sm:flex-row gap-1.5">
+                                      <span className="text-[10px] text-[#F5C542] font-medium w-16 flex-shrink-0 leading-9">{st.language}</span>
+                                      <input type="text" value={st.hlsLink || ""} onChange={(e) => {
+                                        const d = { ...editData };
+                                        if (d.seasons?.[si]?.episodes?.[ei]?.streams?.[sti]) {
+                                          d.seasons[si].episodes[ei].streams[sti].hlsLink = e.target.value;
+                                          setEditData(d);
+                                        }
+                                      }} placeholder="HLS URL" className="flex-1 h-8 px-2 rounded-none bg-[#050608] border border-[#1F232D] text-[#F9FAFB] placeholder-[#9CA3AF] text-[10px] focus:outline-none focus:border-[#F5C542]" />
+                                      <input type="text" value={st.embedIframeLink || ""} onChange={(e) => {
+                                        const d = { ...editData };
+                                        if (d.seasons?.[si]?.episodes?.[ei]?.streams?.[sti]) {
+                                          d.seasons[si].episodes[ei].streams[sti].embedIframeLink = e.target.value;
+                                          setEditData(d);
+                                        }
+                                      }} placeholder="Embed URL" className="flex-1 h-8 px-2 rounded-none bg-[#050608] border border-[#1F232D] text-[#F9FAFB] placeholder-[#9CA3AF] text-[10px] focus:outline-none focus:border-[#F5C542]" />
+                                    </div>
+                                  ))}
+                                  <input type="text" value={ep.downloadLink || ""} onChange={(e) => updateEpisode(si, ei, "downloadLink", e.target.value)} placeholder="Direct MP4 URL" className="w-full h-8 px-2 rounded-none bg-[#050608] border border-[#1F232D] text-[#F9FAFB] placeholder-[#9CA3AF] text-[10px] focus:outline-none focus:border-[#F5C542]" />
                                 </div>
                               </div>
                             ))}

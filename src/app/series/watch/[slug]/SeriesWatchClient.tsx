@@ -24,6 +24,7 @@ interface SeriesWatchClientProps {
     peachifyId?: string;
     downloadLink?: string;
     quality: string;
+    streams?: { language: string; hlsLink: string; embedIframeLink: string }[];
   } | null;
   currentSeason: number;
   currentEpisodeNum: number;
@@ -57,10 +58,13 @@ export default function SeriesWatchClient({
     localStorage.setItem("watchmirror_watched", JSON.stringify(watched));
   }, [watched]);
 
-  const hasHls = !!currentEpisode?.hlsLink?.trim();
+  const hasHls = !!(currentEpisode?.hlsLink?.trim() || (audio && currentEpisode?.streams?.find((s) => s.language === audio)?.hlsLink));
   const hasEmbed = !!currentEpisode?.embedIframeLink?.trim();
   const hasPeachify = !!(currentEpisode?.peachifyId || item.tmdbId);
   const canStream = hasHls || hasPeachify || hasEmbed;
+
+  const episodeHlsSrc = (audio && currentEpisode?.streams?.find((s) => s.language === audio)?.hlsLink)
+    || currentEpisode?.hlsLink || "";
 
   const allEpisodes = seasons.flatMap((s) =>
     s.episodes.map((e) => ({
@@ -157,7 +161,7 @@ export default function SeriesWatchClient({
           {canStream ? (
           hasHls ? (
             <>
-              <HLSPlayer src={currentEpisode!.hlsLink!} poster={item.banner} autoPlay audioTrack={audio || undefined} onProgress={saveProgress} onEnded={handleEnded} />
+              <HLSPlayer src={episodeHlsSrc} poster={item.banner} autoPlay audioTrack={audio || undefined} onProgress={saveProgress} onEnded={handleEnded} />
               <div className="mt-3">
                 <DownloadButton slug={`${item.slug}-s${currentSeason}e${currentEpisodeNum}`} label="Download Episode" />
               </div>
@@ -165,7 +169,7 @@ export default function SeriesWatchClient({
           ) : hasPeachify ? (
             <PeachifyPlayer type="tv" mediaId={currentEpisode!.peachifyId || String(item.tmdbId!)} season={currentSeason} episode={currentEpisodeNum} dub={audio} hide={["servers"]} />
           ) : (
-            <IframePlayer src={currentEpisode!.embedIframeLink!} />
+            <IframePlayer src={currentEpisode?.streams?.find((s) => s.language === audio)?.embedIframeLink || currentEpisode!.embedIframeLink!} />
           )
         ) : (
           <div className="w-full aspect-video rounded-2xl bg-[#0E1015] border border-[#1F232D] flex items-center justify-center">
