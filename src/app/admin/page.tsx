@@ -564,12 +564,12 @@ export default function AdminPage() {
                 <div className="flex items-center gap-3 px-1">
                   <label className="text-xs text-[#9CA3AF] font-medium">Prime Video Content:</label>
                   <button
-                    onClick={() => setEditData({ ...editData, primeVideo: !editData.primeVideo })}
-                    className={`relative w-11 h-6 rounded-full transition-colors ${editData.primeVideo ? "bg-[#00A8E1]" : "bg-[#1F232D]"}`}
+                    onClick={() => setIsPrimeVideo(!isPrimeVideo)}
+                    className={`relative w-11 h-6 rounded-full transition-colors ${isPrimeVideo ? "bg-[#00A8E1]" : "bg-[#1F232D]"}`}
                   >
-                    <span className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white transition-transform ${editData.primeVideo ? "translate-x-5" : ""}`} />
+                    <span className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white transition-transform ${isPrimeVideo ? "translate-x-5" : ""}`} />
                   </button>
-                  {editData.primeVideo && <span className="text-xs text-[#00A8E1] font-medium">Yes</span>}
+                  {isPrimeVideo && <span className="text-xs text-[#00A8E1] font-medium">Yes</span>}
                 </div>
 
                 {/* Audio Available */}
