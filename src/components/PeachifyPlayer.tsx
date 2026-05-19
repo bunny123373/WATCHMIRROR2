@@ -81,7 +81,6 @@ export function PeachifyPlayer({
         className="absolute inset-0 w-full h-full"
         allow="autoplay; fullscreen; picture-in-picture"
         allowFullScreen
-        sandbox="allow-scripts allow-same-origin allow-presentation"
         referrerPolicy="no-referrer"
         title="Peachify Player"
       />

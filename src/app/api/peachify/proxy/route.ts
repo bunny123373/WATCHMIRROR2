@@ -15,7 +15,7 @@ export async function GET(request: NextRequest) {
       signal: AbortSignal.timeout(10000),
       headers: {
         "User-Agent":
-          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
         Accept: "text/html,application/xhtml+xml",
       },
     });
@@ -24,20 +24,52 @@ export async function GET(request: NextRequest) {
 
     let html = await res.text();
 
-    // Override window.open before any other script runs
+    // Use <base> tag so all relative URLs (/_next/static/, /cdn-cgi/, etc.)
+    // resolve to peachify.top instead of localhost:5000
+    const blockerScript = `
+<script>
+window.open = function(){ return null; };
+
+(function(){
+  function killBlank(root){
+    if(!root) root = document;
+    (root.querySelectorAll ? root.querySelectorAll('a[target="_blank"]') : []).forEach(function(a){
+      a.setAttribute('target', '_self');
+      if(a.href && !a.href.includes('peachify.top')) a.href = 'javascript:void(0)';
+    });
+  }
+  if(document.body){ killBlank(document); }
+  else { document.addEventListener('DOMContentLoaded', function(){ killBlank(document); }); }
+
+  var _obs = new MutationObserver(function(ms){
+    ms.forEach(function(m){
+      m.addedNodes.forEach(function(n){
+        if(n.tagName === 'A' && n.getAttribute('target') === '_blank'){
+          n.setAttribute('target', '_self');
+          if(n.href && !n.href.includes('peachify.top')) n.href = 'javascript:void(0)';
+        } else if(n.querySelectorAll){
+          n.querySelectorAll('a[target="_blank"]').forEach(function(a){
+            a.setAttribute('target', '_self');
+            if(a.href && !a.href.includes('peachify.top')) a.href = 'javascript:void(0)';
+          });
+        }
+      });
+    });
+  });
+  _obs.observe(document.documentElement, {childList:true, subtree:true});
+})();
+</script>
+`;
+
+    html = html.replace("<head>", `<head>${blockerScript}<base href="https://peachify.top/">`);
+
     html = html.replace(
-      "<head>",
-      `<head><script>window.open = function(){ return null; };</script>`
+      /<script[^>]*src="https:\/\/stats\.peachify\.top[^>]*><\/script>/g,
+      ""
     );
-
-    // Strip document.onclick / ontouchend assignments
-    html = html.replace(/document\.onclick\s*=\s*\w+\s*;?/g, "document.onclick = null;");
-    html = html.replace(/document\.ontouchend\s*=\s*\w+\s*;?/g, "document.ontouchend = null;");
-
-    // Strip sandbox/iframe detection checks that show error messages
     html = html.replace(
-      /if\s*\(\s*document\[[\s\S]{0,200}?sandbox[\s\S]{0,500}?\)\s*\{[\s\S]{0,200}?\}/gi,
-      "if(false){}"
+      /<script[^>]*data-website-id[^>]*><\/script>/g,
+      ""
     );
 
     return new NextResponse(html, {
