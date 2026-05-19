@@ -163,7 +163,7 @@ export default function SeriesWatchClient({
               </div>
             </>
           ) : hasPeachify ? (
-            <PeachifyPlayer type="tv" mediaId={currentEpisode!.peachifyId!} season={currentSeason} episode={currentEpisodeNum} />
+            <PeachifyPlayer type="tv" mediaId={currentEpisode!.peachifyId!} season={currentSeason} episode={currentEpisodeNum} dub={audio} />
           ) : (
             <IframePlayer src={currentEpisode!.embedIframeLink!} />
           )

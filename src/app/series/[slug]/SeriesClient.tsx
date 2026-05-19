@@ -5,6 +5,8 @@ import { IContent } from "@/types";
 import SeasonSelector from "@/components/SeasonSelector";
 import EpisodeList from "@/components/EpisodeList";
 
+const DEFAULT_DUBS = ["English", "Hindi", "Tamil", "Telugu", "Kannada", "Malayalam"];
+
 interface SeriesClientProps {
   item: IContent;
 }
@@ -19,6 +21,9 @@ export default function SeriesClient({ item }: SeriesClientProps) {
     item.dubLanguage.forEach((dl) => {
       if (!allAudio.includes(dl)) allAudio.push(dl);
     });
+  }
+  if (allAudio.length === 0 && item.peachifyId) {
+    allAudio.push(...DEFAULT_DUBS);
   }
 
   const [selectedAudio, setSelectedAudio] = useState(allAudio[0] || "");

@@ -6,24 +6,29 @@ import { Play } from "lucide-react";
 import { ContentStream } from "@/types";
 import DownloadButton from "@/components/DownloadButton";
 
+const DEFAULT_DUBS = ["English", "Hindi", "Tamil", "Telugu", "Kannada", "Malayalam"];
+
 interface AudioSelectorProps {
   slug: string;
   streams?: ContentStream[];
   audioAvailable?: string[];
   dubLanguage?: string[];
+  hasPeachify?: boolean;
 }
 
-export default function AudioSelector({ slug, streams, audioAvailable, dubLanguage }: AudioSelectorProps) {
+export default function AudioSelector({ slug, streams, audioAvailable, dubLanguage, hasPeachify }: AudioSelectorProps) {
   const allLanguages = streams && streams.length > 0
     ? streams.map((s) => s.language)
     : (() => {
-        const list = [...(audioAvailable || [])];
+        const fromAdmin = [...(audioAvailable || [])];
         if (dubLanguage) {
           dubLanguage.forEach((dl) => {
-            if (!list.includes(dl)) list.push(dl);
+            if (!fromAdmin.includes(dl)) fromAdmin.push(dl);
           });
         }
-        return list;
+        if (fromAdmin.length > 0) return fromAdmin;
+        if (hasPeachify) return DEFAULT_DUBS;
+        return [];
       })();
 
   const [selectedAudio, setSelectedAudio] = useState(allLanguages[0] || "");

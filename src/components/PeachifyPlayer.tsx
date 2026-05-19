@@ -69,8 +69,7 @@ export function PeachifyPlayer({
     hide.forEach((control) => params.set(control, "hide"));
 
     const query = params.toString();
-    const peachifyUrl = `https://peachify.top${path}${query ? `?${query}` : ""}`;
-    return `/api/peachify/proxy?url=${encodeURIComponent(peachifyUrl)}`;
+    return `https://peachify.top${path}${query ? `?${query}` : ""}`;
   }, [type, mediaId, season, episode, dub, sub, server, startAt, autoNext, showNextBtn, accent, autoPlay, hide]);
 
   return (

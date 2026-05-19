@@ -96,7 +96,7 @@ export default function WatchClient({ item, related, audio }: WatchClientProps) 
                 </div>
               </>
             ) : hasPeachify ? (
-              <PeachifyPlayer type="movie" mediaId={peachifySrc} />
+              <PeachifyPlayer type="movie" mediaId={peachifySrc} dub={audio} />
             ) : (
               <IframePlayer src={embedSrc} />
             )
