@@ -47,6 +47,12 @@ export default function AdminPage() {
   const [step, setStep] = useState(1);
   const [peachifyId, setPeachifyId] = useState("");
 
+  useEffect(() => {
+    if (selectedItem?.id) {
+      setPeachifyId(String(selectedItem.id));
+    }
+  }, [selectedItem]);
+
   // Edit modal
   const [editItem, setEditItem] = useState<IContent | null>(null);
   const [editData, setEditData] = useState<any>(null);

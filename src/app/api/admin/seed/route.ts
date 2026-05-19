@@ -49,6 +49,7 @@ export async function POST(request: NextRequest) {
 
     const contentData: any = {
       type,
+      tmdbId: Number(tmdbId),
       title,
       slug,
       poster: data.poster_path
@@ -80,7 +81,7 @@ export async function POST(request: NextRequest) {
 
     contentData.downloadLink = downloadLink || "";
     contentData.streams = streams || [];
-    contentData.peachifyId = peachifyId || "";
+    contentData.peachifyId = peachifyId || String(tmdbId);
 
     if (type === "movie") {
       contentData.hlsLink = hlsLink || "";

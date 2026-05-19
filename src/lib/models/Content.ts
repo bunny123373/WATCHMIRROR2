@@ -21,6 +21,7 @@ export interface IContentDocument extends Document {
   cast: { name: string; character: string; profileImage: string }[];
   metaTitle: string;
   metaDescription: string;
+  tmdbId?: number;
   hlsLink?: string;
   embedIframeLink?: string;
   peachifyId?: string;
@@ -86,6 +87,7 @@ const ContentSchema = new Schema({
   metaDescription: { type: String },
   hlsLink: { type: String },
   embedIframeLink: { type: String },
+  tmdbId: { type: Number },
   peachifyId: { type: String },
   downloadLink: { type: String },
   streams: [{ type: Object }],

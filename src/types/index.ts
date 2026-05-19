@@ -48,6 +48,7 @@ export interface IContent {
   cast: Cast[];
   metaTitle: string;
   metaDescription: string;
+  tmdbId?: number;
   hlsLink?: string;
   embedIframeLink?: string;
   peachifyId?: string;

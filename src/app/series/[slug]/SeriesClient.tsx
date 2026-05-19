@@ -22,7 +22,7 @@ export default function SeriesClient({ item }: SeriesClientProps) {
       if (!allAudio.includes(dl)) allAudio.push(dl);
     });
   }
-  if (allAudio.length === 0 && item.peachifyId) {
+  if (allAudio.length === 0 && (item.peachifyId || item.tmdbId)) {
     allAudio.push(...DEFAULT_DUBS);
   }
 

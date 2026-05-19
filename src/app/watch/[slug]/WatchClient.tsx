@@ -34,7 +34,7 @@ export default function WatchClient({ item, related, audio }: WatchClientProps) 
 
   const hlsSrc = stream?.hlsLink || item.hlsLink || "";
   const embedSrc = stream?.embedIframeLink || item.embedIframeLink || "";
-  const peachifySrc = item.peachifyId || "";
+  const peachifySrc = item.peachifyId || (item.tmdbId ? String(item.tmdbId) : "");
   const hasHls = !!hlsSrc.trim();
   const hasEmbed = !!embedSrc.trim();
   const hasPeachify = !!peachifySrc.trim();
@@ -96,7 +96,7 @@ export default function WatchClient({ item, related, audio }: WatchClientProps) 
                 </div>
               </>
             ) : hasPeachify ? (
-              <PeachifyPlayer type="movie" mediaId={peachifySrc} dub={audio} />
+              <PeachifyPlayer type="movie" mediaId={peachifySrc} dub={audio} hide={["servers"]} />
             ) : (
               <IframePlayer src={embedSrc} />
             )

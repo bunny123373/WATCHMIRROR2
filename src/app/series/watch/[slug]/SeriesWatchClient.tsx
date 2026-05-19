@@ -59,7 +59,7 @@ export default function SeriesWatchClient({
 
   const hasHls = !!currentEpisode?.hlsLink?.trim();
   const hasEmbed = !!currentEpisode?.embedIframeLink?.trim();
-  const hasPeachify = !!currentEpisode?.peachifyId?.trim();
+  const hasPeachify = !!(currentEpisode?.peachifyId || item.tmdbId);
   const canStream = hasHls || hasPeachify || hasEmbed;
 
   const allEpisodes = seasons.flatMap((s) =>
@@ -163,7 +163,7 @@ export default function SeriesWatchClient({
               </div>
             </>
           ) : hasPeachify ? (
-            <PeachifyPlayer type="tv" mediaId={currentEpisode!.peachifyId!} season={currentSeason} episode={currentEpisodeNum} dub={audio} />
+            <PeachifyPlayer type="tv" mediaId={currentEpisode!.peachifyId || String(item.tmdbId!)} season={currentSeason} episode={currentEpisodeNum} dub={audio} hide={["servers"]} />
           ) : (
             <IframePlayer src={currentEpisode!.embedIframeLink!} />
           )
