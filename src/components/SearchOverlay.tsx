@@ -43,9 +43,15 @@ export default function SearchOverlay() {
         const tmdbParams = new URLSearchParams({ query });
         if (filterType !== "all") tmdbParams.set("type", filterType === "tv" ? "tv" : "movie");
         if (filterYear) tmdbParams.set("year", filterYear);
+        const profile = (localStorage.getItem("wm_profile") as "netflix" | "prime") || "netflix";
+        const localParams = new URLSearchParams({
+          search: query,
+          limit: "10",
+          primeVideo: profile === "prime" ? "true" : "false",
+        });
         const [tmdbRes, localRes] = await Promise.all([
           fetch(`/api/tmdb/search?${tmdbParams}`),
-          fetch(`/api/content?search=${encodeURIComponent(query)}&limit=10`),
+          fetch(`/api/content?${localParams}`),
         ]);
         const tmdbData = await tmdbRes.json();
         const localData = await localRes.json();

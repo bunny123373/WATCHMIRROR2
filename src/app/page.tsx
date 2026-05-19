@@ -33,27 +33,29 @@ async function getHomeData() {
   try {
     const db = await connectDB();
     if (!db) return null;
+    const netflixOnly = { primeVideo: { $ne: true } };
 
     const [trending, latest, movies, series, action, drama, comedy, horror, english, hindi, korean, , trendingSeries] =
       await Promise.all([
         Content.find({
+          ...netflixOnly,
           $or: [{ popularity: { $gt: 100 } }, { rating: { $gt: 7.5 } }],
         })
           .sort({ popularity: -1 })
           .limit(20)
           .lean(),
-        Content.find().sort({ createdAt: -1 }).limit(20).lean(),
-        Content.find({ type: "movie" }).sort({ popularity: -1 }).limit(20).lean(),
-        Content.find({ type: "series" }).sort({ popularity: -1 }).limit(20).lean(),
-        Content.find({ tags: "Action" }).sort({ popularity: -1 }).limit(20).lean(),
-        Content.find({ tags: "Drama" }).sort({ popularity: -1 }).limit(20).lean(),
-        Content.find({ tags: "Comedy" }).sort({ popularity: -1 }).limit(20).lean(),
-        Content.find({ tags: "Horror" }).sort({ popularity: -1 }).limit(20).lean(),
-        Content.find({ language: "English" }).sort({ popularity: -1 }).limit(20).lean(),
-        Content.find({ language: "Hindi" }).sort({ popularity: -1 }).limit(20).lean(),
-        Content.find({ language: "Korean" }).sort({ popularity: -1 }).limit(20).lean(),
-        Content.find({ language: "Hindi" }).sort({ popularity: -1 }).limit(10).lean(),
-        Content.find({ type: "series", $or: [{ popularity: { $gt: 50 } }, { rating: { $gt: 7 } }] })
+        Content.find(netflixOnly).sort({ createdAt: -1 }).limit(20).lean(),
+        Content.find({ ...netflixOnly, type: "movie" }).sort({ popularity: -1 }).limit(20).lean(),
+        Content.find({ ...netflixOnly, type: "series" }).sort({ popularity: -1 }).limit(20).lean(),
+        Content.find({ ...netflixOnly, tags: "Action" }).sort({ popularity: -1 }).limit(20).lean(),
+        Content.find({ ...netflixOnly, tags: "Drama" }).sort({ popularity: -1 }).limit(20).lean(),
+        Content.find({ ...netflixOnly, tags: "Comedy" }).sort({ popularity: -1 }).limit(20).lean(),
+        Content.find({ ...netflixOnly, tags: "Horror" }).sort({ popularity: -1 }).limit(20).lean(),
+        Content.find({ ...netflixOnly, language: "English" }).sort({ popularity: -1 }).limit(20).lean(),
+        Content.find({ ...netflixOnly, language: "Hindi" }).sort({ popularity: -1 }).limit(20).lean(),
+        Content.find({ ...netflixOnly, language: "Korean" }).sort({ popularity: -1 }).limit(20).lean(),
+        Content.find({ ...netflixOnly, language: "Hindi" }).sort({ popularity: -1 }).limit(10).lean(),
+        Content.find({ ...netflixOnly, type: "series", $or: [{ popularity: { $gt: 50 } }, { rating: { $gt: 7 } }] })
           .sort({ popularity: -1 })
           .limit(10)
           .lean(),

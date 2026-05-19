@@ -8,21 +8,22 @@ export async function GET() {
   try {
     const db = await connectDB();
     if (!db) return NextResponse.json({ error: "Database not connected" }, { status: 500 });
+    const netflixOnly = { primeVideo: { $ne: true } };
 
     const [trending, latest, movies, series, action, drama, comedy, horror, english, hindi, korean] =
       await Promise.all([
-        Content.find({ $or: [{ popularity: { $gt: 100 } }, { rating: { $gt: 7.5 } }] })
+        Content.find({ ...netflixOnly, $or: [{ popularity: { $gt: 100 } }, { rating: { $gt: 7.5 } }] })
           .sort({ popularity: -1 }).limit(20).lean(),
-        Content.find().sort({ createdAt: -1 }).limit(20).lean(),
-        Content.find({ type: "movie" }).sort({ popularity: -1 }).limit(20).lean(),
-        Content.find({ type: "series" }).sort({ popularity: -1 }).limit(20).lean(),
-        Content.find({ tags: "Action" }).sort({ popularity: -1 }).limit(20).lean(),
-        Content.find({ tags: "Drama" }).sort({ popularity: -1 }).limit(20).lean(),
-        Content.find({ tags: "Comedy" }).sort({ popularity: -1 }).limit(20).lean(),
-        Content.find({ tags: "Horror" }).sort({ popularity: -1 }).limit(20).lean(),
-        Content.find({ language: "English" }).sort({ popularity: -1 }).limit(20).lean(),
-        Content.find({ language: "Hindi" }).sort({ popularity: -1 }).limit(20).lean(),
-        Content.find({ language: "Korean" }).sort({ popularity: -1 }).limit(20).lean(),
+        Content.find(netflixOnly).sort({ createdAt: -1 }).limit(20).lean(),
+        Content.find({ ...netflixOnly, type: "movie" }).sort({ popularity: -1 }).limit(20).lean(),
+        Content.find({ ...netflixOnly, type: "series" }).sort({ popularity: -1 }).limit(20).lean(),
+        Content.find({ ...netflixOnly, tags: "Action" }).sort({ popularity: -1 }).limit(20).lean(),
+        Content.find({ ...netflixOnly, tags: "Drama" }).sort({ popularity: -1 }).limit(20).lean(),
+        Content.find({ ...netflixOnly, tags: "Comedy" }).sort({ popularity: -1 }).limit(20).lean(),
+        Content.find({ ...netflixOnly, tags: "Horror" }).sort({ popularity: -1 }).limit(20).lean(),
+        Content.find({ ...netflixOnly, language: "English" }).sort({ popularity: -1 }).limit(20).lean(),
+        Content.find({ ...netflixOnly, language: "Hindi" }).sort({ popularity: -1 }).limit(20).lean(),
+        Content.find({ ...netflixOnly, language: "Korean" }).sort({ popularity: -1 }).limit(20).lean(),
       ]);
 
     const parse = (data: any) => JSON.parse(JSON.stringify(data));

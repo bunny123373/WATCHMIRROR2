@@ -11,8 +11,8 @@ import { WatchMirrorLogo } from "./LogoMark";
 import MaturitySettings from "./MaturitySettings";
 
 export function getStoredProfile(): "netflix" | "prime" {
-  if (typeof window === "undefined") return "prime";
-  return (localStorage.getItem("wm_profile") as "netflix" | "prime") || "prime";
+  if (typeof window === "undefined") return "netflix";
+  return (localStorage.getItem("wm_profile") as "netflix" | "prime") || "netflix";
 }
 
 const navLinks = [
@@ -26,7 +26,7 @@ export default function Navbar() {
   const pathname = usePathname();
   const dispatch = useDispatch();
 
-  const [profile, setProfile] = useState<"netflix" | "prime">("prime");
+  const [profile, setProfile] = useState<"netflix" | "prime">("netflix");
 
   const saveProfile = (p: "netflix" | "prime") => {
     setProfile(p);
@@ -35,18 +35,18 @@ export default function Navbar() {
 
   useEffect(() => {
     if (pathname.startsWith("/prime-video")) {
-      saveProfile("netflix");
-    } else {
       saveProfile("prime");
+    } else {
+      saveProfile("netflix");
     }
   }, [pathname]);
 
   const switchProfile = () => {
-    if (profile === "prime") {
-      saveProfile("netflix");
+    if (profile === "netflix") {
+      saveProfile("prime");
       window.location.href = "/prime-video";
     } else {
-      saveProfile("prime");
+      saveProfile("netflix");
       window.location.href = "/";
     }
   };

@@ -9,6 +9,9 @@ import MuxUploadSection from "@/components/MuxUploadSection";
 
 const ADMIN_KEY = "WATCHMIRROR123";
 
+const getDefaultPrimeVideo = () =>
+  typeof window !== "undefined" && localStorage.getItem("wm_profile") === "prime";
+
 export default function AdminPage() {
   const [content, setContent] = useState<IContent[]>([]);
   const [loading, setLoading] = useState(true);
@@ -46,11 +49,10 @@ export default function AdminPage() {
   const [importing, setImporting] = useState(false);
   const [step, setStep] = useState(1);
   const [peachifyId, setPeachifyId] = useState("");
-  const [isPrimeVideo, setIsPrimeVideo] = useState(false);
+  const [isPrimeVideo, setIsPrimeVideo] = useState(getDefaultPrimeVideo);
 
   useEffect(() => {
-    const stored = localStorage.getItem("wm_profile");
-    if (stored === "prime") setIsPrimeVideo(true);
+    setIsPrimeVideo(getDefaultPrimeVideo());
   }, []);
 
   useEffect(() => {
@@ -189,7 +191,7 @@ export default function AdminPage() {
   const resetAddModal = () => {
     setTmdbQuery(""); setTmdbResults([]); setSearchError(""); setSearched(false);
     setSelectedItem(null); setSelectedDetails(null); setHlsLink(""); setEmbedLink(""); setDownloadLink(""); setSeasons("");
-    setSelectedRating("TV-MA"); setSelectedLanguage("English"); setSelectedDubLanguages([]); setSelectedAudio(["English"]); setStreamInputs([]); setPeachifyId(""); setIsPrimeVideo(false);
+    setSelectedRating("TV-MA"); setSelectedLanguage("English"); setSelectedDubLanguages([]); setSelectedAudio(["English"]); setStreamInputs([]); setPeachifyId(""); setIsPrimeVideo(getDefaultPrimeVideo());
     setStep(1);
   };
 

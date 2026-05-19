@@ -25,7 +25,7 @@ async function getCategoryContent(slug: string) {
     const db = await connectDB();
     if (!db) return [];
     const categoryName = slug.charAt(0).toUpperCase() + slug.slice(1);
-    const items = await Content.find({ tags: categoryName })
+    const items = await Content.find({ tags: categoryName, primeVideo: { $ne: true } })
       .sort({ popularity: -1 })
       .limit(50)
       .lean();

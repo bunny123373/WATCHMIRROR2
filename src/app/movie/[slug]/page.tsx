@@ -55,6 +55,7 @@ async function getMovie(slug: string) {
 
     const similar = await Content.find({
       _id: { $ne: item._id },
+      primeVideo: item.primeVideo ? true : { $ne: true },
       $or: [
         { tags: { $in: item.tags?.slice(0, 3) || [] } },
         { category: item.category },

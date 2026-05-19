@@ -21,6 +21,7 @@ async function getTrending() {
     const db = await connectDB();
     if (!db) return [];
     const items = await Content.find({
+      primeVideo: { $ne: true },
       $or: [{ popularity: { $gt: 100 } }, { rating: { $gt: 7.5 } }],
     })
       .sort({ popularity: -1 })

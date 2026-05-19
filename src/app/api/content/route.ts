@@ -27,6 +27,7 @@ export async function GET(request: NextRequest) {
     if (language) filter.language = language;
     if (search) filter.title = { $regex: search, $options: "i" };
     if (primeVideo === "true") filter.primeVideo = true;
+    if (primeVideo === "false") filter.primeVideo = { $ne: true };
 
     const skip = (page - 1) * limit;
     const [items, total] = await Promise.all([

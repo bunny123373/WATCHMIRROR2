@@ -42,6 +42,7 @@ async function getMovie(slug: string) {
       _id: { $ne: item._id },
       type: "movie",
       category: item.category,
+      primeVideo: item.primeVideo ? true : { $ne: true },
     })
       .sort({ popularity: -1 })
       .limit(10)

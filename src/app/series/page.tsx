@@ -18,7 +18,7 @@ async function getSeries() {
   try {
     const db = await connectDB();
     if (!db) return [];
-    const items = await Content.find({ type: "series" })
+    const items = await Content.find({ type: "series", primeVideo: { $ne: true } })
       .sort({ popularity: -1 })
       .limit(50)
       .lean();
