@@ -11,7 +11,9 @@ interface ContentCardProps {
 }
 
 export default function ContentCard({ item }: ContentCardProps) {
-  const href = item.type === "movie" ? `/movie/${item.slug}` : `/series/${item.slug}`;
+  const href = item.primeVideo
+    ? item.type === "movie" ? `/prime-video/movie/${item.slug}` : `/prime-video/series/${item.slug}`
+    : item.type === "movie" ? `/movie/${item.slug}` : `/series/${item.slug}`;
 
   return (
     <Link href={href} className="group block">

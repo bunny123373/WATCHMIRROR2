@@ -33,6 +33,8 @@ export default function PrimeVideoPageClient({ data }: PrimeVideoPageProps) {
   if (data.primeSeries.length > 0) sections.push({ title: "Prime Series", items: data.primeSeries });
 
   const hero = data.trending[0] || data.primeMovies[0] || data.primeSeries[0];
+  const getPrimeHref = (item: IContent) =>
+    item.type === "movie" ? `/prime-video/movie/${item.slug}` : `/prime-video/series/${item.slug}`;
 
   return (
     <main className="min-h-screen bg-[#0F171E] pt-14 md:pt-20 pb-20 md:pb-0">
@@ -49,7 +51,7 @@ export default function PrimeVideoPageClient({ data }: PrimeVideoPageProps) {
           <h1 className="text-3xl md:text-5xl font-bold text-white mb-2">{hero.title}</h1>
           <p className="text-sm md:text-base text-[#8197A4] max-w-xl line-clamp-2">{hero.description}</p>
           <div className="flex gap-3 mt-4">
-            <Link href={hero.type === "movie" ? `/movie/${hero.slug}` : `/series/${hero.slug}`}
+            <Link href={getPrimeHref(hero)}
               className="px-6 py-2.5 rounded-none bg-[#00A8E1] text-white font-semibold hover:bg-[#00A8E1]/80 transition text-sm"
             >
               Watch Now
@@ -69,7 +71,7 @@ export default function PrimeVideoPageClient({ data }: PrimeVideoPageProps) {
               {section.items.map((item) => (
                 <Link
                   key={item._id || item.slug}
-                  href={item.type === "movie" ? `/movie/${item.slug}` : `/series/${item.slug}`}
+                  href={getPrimeHref(item)}
                   className="flex-shrink-0 group relative w-[130px] sm:w-[140px] md:w-[160px]"
                 >
                   <div className="relative aspect-[2/3] rounded-none overflow-hidden bg-[#1A242D] border border-[#2D3A45] group-hover:border-[#00A8E1]/50 transition-all">

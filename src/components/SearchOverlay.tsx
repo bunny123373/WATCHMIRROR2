@@ -64,6 +64,7 @@ export default function SearchOverlay() {
           release_date: item.year?.toString(),
           first_air_date: item.year?.toString(),
           vote_average: item.rating,
+          primeVideo: item.primeVideo,
         }));
         const merged = [...(tmdbData.results || [])];
         for (const local of localItems) {
@@ -90,7 +91,12 @@ export default function SearchOverlay() {
 
   const getTitle = (r: SearchResult) => "title" in r ? r.title : "name" in r ? r.name : "";
   const getDate = (r: SearchResult) => "release_date" in r ? r.release_date : "first_air_date" in r ? r.first_air_date : "";
-  const getLink = (r: any) => r.media_type === "tv" ? `/series/${r.id}` : `/movie/${r.id}`;
+  const getLink = (r: any) => {
+    if (r.primeVideo) {
+      return r.media_type === "tv" ? `/prime-video/series/${r.id}` : `/prime-video/movie/${r.id}`;
+    }
+    return r.media_type === "tv" ? `/series/${r.id}` : `/movie/${r.id}`;
+  };
 
   return (
     <AnimatePresence>

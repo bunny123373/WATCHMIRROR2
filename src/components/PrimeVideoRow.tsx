@@ -33,7 +33,7 @@ export default function PrimeVideoRow({ title, items }: PrimeVideoRowProps) {
           entry.slug ? (
             <Link
               key={entry.slug || i}
-              href={entry.type === "movie" ? `/movie/${entry.slug}` : `/series/${entry.slug}`}
+              href={entry.type === "movie" ? `/prime-video/movie/${entry.slug}` : `/prime-video/series/${entry.slug}`}
               className="flex-shrink-0 group relative w-[90px] sm:w-[110px] md:w-[130px]"
             >
               <div className="relative aspect-[2/3] rounded-none overflow-hidden bg-[#0E1015] border border-[#1F232D] group-hover:border-[#00A8E1]/50 transition-all">
