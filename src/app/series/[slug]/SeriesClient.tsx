@@ -42,7 +42,7 @@ export default function SeriesClient({ item }: SeriesClientProps) {
   );
 
   return (
-    <div className="mt-8">
+    <div className="mt-8 p-4 md:p-6 rounded-xl border border-[#1F232D] bg-[#0E1015]">
       <h2 className="text-xl md:text-2xl font-bold text-[#F9FAFB] mb-4">
         Episodes
       </h2>
@@ -68,17 +68,20 @@ export default function SeriesClient({ item }: SeriesClientProps) {
         </div>
       )}
 
-      <SeasonSelector
-        seasons={item.seasons}
-        selectedSeason={selectedSeason}
-        onSelect={setSelectedSeason}
-      />
+      <div className="mt-4">
+        <SeasonSelector
+          seasons={item.seasons}
+          selectedSeason={selectedSeason}
+          onSelect={setSelectedSeason}
+        />
+      </div>
       <div className="mt-4">
         <EpisodeList
           episodes={currentSeason?.episodes || []}
           slug={item.slug}
           seasonNumber={selectedSeason}
           audio={selectedAudio}
+          banner={item.banner}
         />
       </div>
     </div>

@@ -7,6 +7,7 @@ export interface Cast {
 export interface Episode {
   episodeNumber: number;
   episodeTitle: string;
+  thumbnail?: string;
   hlsLink?: string;
   embedIframeLink?: string;
   peachifyId?: string;

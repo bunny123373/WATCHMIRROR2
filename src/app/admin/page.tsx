@@ -974,7 +974,7 @@ export default function AdminPage() {
                     </div>
                     <div className="space-y-4">
                       {editData.seasons.map((season: any, si: number) => (
-                        <div key={si} className="p-4 rounded-none bg-[#050608] border border-[#1F232D]">
+                        <div key={si} className="p-4 rounded-xl bg-[#0E1015] border border-[#1F232D]">
                           <div className="flex items-center justify-between mb-3">
                             <p className="text-sm font-medium text-[#F5C542]">Season {season.seasonNumber}</p>
                             <button onClick={() => {
@@ -984,7 +984,7 @@ export default function AdminPage() {
                                 ...updated[si],
                                 episodes: [
                                   ...(updated[si].episodes || []),
-                                  { episodeNumber: nextNum, episodeTitle: `Episode ${nextNum}`, hlsLink: "", embedIframeLink: "", peachifyId: editItem?.peachifyId || "", downloadLink: "", quality: "1080p" },
+                                  { episodeNumber: nextNum, episodeTitle: `Episode ${nextNum}`, thumbnail: "", hlsLink: "", embedIframeLink: "", peachifyId: editItem?.peachifyId || "", downloadLink: "", quality: "1080p" },
                                 ],
                               };
                               setEditData({ ...editData, seasons: updated });
@@ -995,9 +995,10 @@ export default function AdminPage() {
                           <div className="space-y-2">
                             {season.episodes?.map((ep: any, ei: number) => (
                               <div key={ei} className="flex flex-col gap-2 p-2 rounded-none bg-[#0E1015] border border-[#1F232D]">
-                                <div className="flex items-center gap-2">
+                                  <div className="flex items-center gap-2">
                                   <span className="text-[10px] text-[#9CA3AF] font-mono w-6 flex-shrink-0">E{ep.episodeNumber}</span>
                                   <input type="text" value={ep.episodeTitle} onChange={(e) => updateEpisode(si, ei, "episodeTitle", e.target.value)} placeholder="Episode title" className="flex-1 h-9 px-3 rounded-none bg-[#050608] border border-[#1F232D] text-[#F9FAFB] text-xs focus:outline-none focus:border-[#F5C542]" />
+                                  <input type="text" value={ep.thumbnail || ""} onChange={(e) => updateEpisode(si, ei, "thumbnail", e.target.value)} placeholder="Thumbnail URL" className="w-28 h-9 px-2 rounded-none bg-[#050608] border border-[#1F232D] text-[#F9FAFB] placeholder-[#9CA3AF] text-[9px] focus:outline-none focus:border-[#F5C542]" />
                                   <div className="flex items-center gap-1">
                                     <div className="flex items-center gap-2 border border-[#1F232D] px-2 py-1.5">
                                       <span className="text-[9px] text-[#9CA3AF] whitespace-nowrap">Peachify</span>

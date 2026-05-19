@@ -192,7 +192,7 @@ export default async function MovieDetailPage({ params }: Props) {
 
               {/* Tags */}
               {item.tags && item.tags.length > 0 && (
-                <div className="flex flex-wrap gap-2 mt-6">
+                <div className="flex flex-wrap gap-2 mt-6 p-4 rounded-xl border border-[#1F232D] bg-[#0E1015]">
                   {item.tags.map((tag: string) => (
                     <Link
                       key={tag}

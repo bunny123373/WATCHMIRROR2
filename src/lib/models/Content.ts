@@ -52,6 +52,7 @@ const CastSchema = new Schema({
 const EpisodeSchema = new Schema({
   episodeNumber: { type: Number, required: true },
   episodeTitle: { type: String, required: true },
+  thumbnail: { type: String },
   hlsLink: { type: String },
   embedIframeLink: { type: String },
   peachifyId: { type: String },

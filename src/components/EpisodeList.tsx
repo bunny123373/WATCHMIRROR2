@@ -9,9 +9,10 @@ interface EpisodeListProps {
   slug: string;
   seasonNumber: number;
   audio?: string;
+  banner?: string;
 }
 
-export default function EpisodeList({ episodes, slug, seasonNumber, audio }: EpisodeListProps) {
+export default function EpisodeList({ episodes, slug, seasonNumber, audio, banner }: EpisodeListProps) {
   if (!episodes.length) {
     return (
       <div className="text-center py-8 text-[#9CA3AF]">
@@ -21,37 +22,50 @@ export default function EpisodeList({ episodes, slug, seasonNumber, audio }: Epi
   }
 
   return (
-    <div className="space-y-2">
-      {episodes.map((episode) => (
-        <Link
-          key={episode.episodeNumber}
-          href={`/series/watch/${slug}?season=${seasonNumber}&episode=${episode.episodeNumber}${audio ? `&audio=${encodeURIComponent(audio)}` : ""}`}
-          className="flex items-center gap-4 p-4 rounded-xl bg-[#0E1015] border border-[#1F232D] hover:border-[#F5C542]/30 transition-all group"
-        >
-          <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-[#1F232D] flex items-center justify-center group-hover:bg-[#F5C542] transition-colors">
-            <Play className="w-4 h-4 text-[#9CA3AF] group-hover:text-[#050608] transition-colors" />
-          </div>
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2">
-              <span className="text-xs text-[#F5C542] font-medium">
-                E{episode.episodeNumber}
-              </span>
-              <span className="text-[#9CA3AF] text-xs">{episode.quality}</span>
+    <div className="overflow-x-auto scrollbar-thin pb-2 -mx-4 px-4">
+      <div className="flex gap-3 min-w-max">
+        {episodes.map((episode) => (
+          <Link
+            key={episode.episodeNumber}
+            href={`/series/watch/${slug}?season=${seasonNumber}&episode=${episode.episodeNumber}${audio ? `&audio=${encodeURIComponent(audio)}` : ""}`}
+            className="group flex-shrink-0 w-40 md:w-48"
+          >
+            <div className="relative aspect-[16/9] rounded-lg overflow-hidden bg-[#1F232D] border border-[#1F232D] group-hover:border-[#F5C542]/50 transition-all">
+              {episode.thumbnail ? (
+                <img src={episode.thumbnail} alt={episode.episodeTitle} className="w-full h-full object-cover" />
+              ) : banner ? (
+                <img src={banner} alt="" className="w-full h-full object-cover" />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-[#1F232D] to-[#0E1015]">
+                  <div className="text-center">
+                    <Play className="w-8 h-8 text-[#9CA3AF] mx-auto mb-1" />
+                    <span className="text-[10px] text-[#9CA3AF] font-mono block">E{episode.episodeNumber}</span>
+                  </div>
+                </div>
+              )}
+              <div className="absolute inset-0 bg-gradient-to-t from-[#050608]/90 via-transparent to-transparent" />
+              <div className="absolute bottom-0 left-0 right-0 p-2">
+                <div className="flex items-center gap-1.5">
+                  <div className="w-6 h-6 rounded-full bg-[#F5C542]/90 flex items-center justify-center group-hover:bg-[#F5C542] transition-colors">
+                    <Play className="w-3 h-3 text-[#050608] ml-0.5" />
+                  </div>
+                  <span className="text-[10px] font-medium text-white">
+                    E{episode.episodeNumber}
+                  </span>
+                  {episode.hlsLink && (
+                    <span className="text-[8px] px-1 py-0.5 rounded bg-[#22C55E]/30 text-[#22C55E] font-medium ml-auto">
+                      HD
+                    </span>
+                  )}
+                </div>
+              </div>
             </div>
-            <p className="text-sm font-medium text-[#F9FAFB] truncate">
+            <p className="text-xs text-[#F9FAFB] mt-1.5 truncate font-medium">
               {episode.episodeTitle}
             </p>
-          </div>
-          <div className="flex items-center gap-2">
-            {episode.hlsLink && (
-              <span className="text-[10px] px-1.5 py-0.5 rounded bg-[#22C55E]/20 text-[#22C55E] font-medium">
-                HD
-              </span>
-            )}
-            <Play className="w-4 h-4 text-[#F5C542] opacity-0 group-hover:opacity-100 transition-opacity" />
-          </div>
-        </Link>
-      ))}
+          </Link>
+        ))}
+      </div>
     </div>
   );
 }
