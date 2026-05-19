@@ -30,6 +30,9 @@ interface SeriesWatchClientProps {
   currentEpisodeNum: number;
   seasons: Season[];
   audio?: string;
+  variant?: "default" | "prime";
+  detailsHref?: string;
+  watchBasePath?: string;
 }
 
 export default function SeriesWatchClient({
@@ -39,9 +42,16 @@ export default function SeriesWatchClient({
   currentEpisodeNum,
   seasons,
   audio,
+  variant = "default",
+  detailsHref,
+  watchBasePath = "/series/watch",
 }: SeriesWatchClientProps) {
   const dispatch = useDispatch();
   const router = useRouter();
+  const isPrime = variant === "prime";
+  const accentText = isPrime ? "text-[#00A8E1]" : "text-[#F5C542]";
+  const accentHover = isPrime ? "hover:text-[#00A8E1]" : "hover:text-[#F5C542]";
+  const detailsUrl = detailsHref || `/series/${item.slug}`;
   const watched = useSelector((s: RootState) => s.episodeProgress.watched);
   const [autoPlayCountdown, setAutoPlayCountdown] = useState<number | null>(null);
 
@@ -124,27 +134,28 @@ export default function SeriesWatchClient({
     if (autoPlayCountdown <= 0) {
       setAutoPlayCountdown(null);
       if (nextEpisode) {
-        router.push(`/series/watch/${item.slug}?season=${nextEpisode.seasonNumber}&episode=${nextEpisode.episodeNumber}${audio ? `&audio=${encodeURIComponent(audio)}` : ""}`);
+        router.push(`${watchBasePath}/${item.slug}?season=${nextEpisode.seasonNumber}&episode=${nextEpisode.episodeNumber}${audio ? `&audio=${encodeURIComponent(audio)}` : ""}`);
       }
       return;
     }
     const timer = setTimeout(() => setAutoPlayCountdown(autoPlayCountdown - 1), 1000);
     return () => clearTimeout(timer);
-  }, [autoPlayCountdown, nextEpisode, item.slug, audio, router]);
+  }, [autoPlayCountdown, nextEpisode, item.slug, audio, router, watchBasePath]);
 
   const cancelAutoPlay = () => setAutoPlayCountdown(null);
 
   return (
-    <main className="min-h-screen pt-14 md:pt-28 pb-20 md:pb-0 bg-[#050608]">
+    <main className={`min-h-screen pt-14 md:pt-28 pb-20 md:pb-0 ${isPrime ? "bg-[#0F171E]" : "bg-[#050608]"}`}>
       <div className="max-w-[1800px] mx-auto px-4 md:px-8 py-6">
         <Link
-          href={`/series/${item.slug}`}
-          className="inline-flex items-center gap-2 text-[#9CA3AF] hover:text-[#F5C542] transition-colors mb-4"
+          href={detailsUrl}
+          className={`inline-flex items-center gap-2 text-[#9CA3AF] ${accentHover} transition-colors mb-4`}
         >
           <ArrowLeft className="w-4 h-4" />
           Back to series
         </Link>
 
+        {isPrime && <p className="text-xs font-bold tracking-wide text-[#00A8E1] mb-2">PRIME VIDEO</p>}
         <h1 className="text-2xl font-bold text-[#F9FAFB] mb-2">{item.title}</h1>
         {currentEpisode && (
           <p className="text-[#9CA3AF] mb-4">
@@ -153,7 +164,7 @@ export default function SeriesWatchClient({
           </p>
         )}
         {audio && (
-          <p className="text-xs text-[#F5C542] mb-3 flex items-center gap-1">
+          <p className={`text-xs ${accentText} mb-3 flex items-center gap-1`}>
             <Headphones className="w-3 h-3" /> Audio: {audio}
           </p>
         )}
@@ -161,7 +172,7 @@ export default function SeriesWatchClient({
           {canStream ? (
           hasHls ? (
             <>
-              <HLSPlayer src={episodeHlsSrc} poster={item.banner} autoPlay audioTrack={audio || undefined} onProgress={saveProgress} onEnded={handleEnded} />
+              <HLSPlayer src={episodeHlsSrc} poster={item.banner} autoPlay audioTrack={audio || undefined} onProgress={saveProgress} onEnded={handleEnded} variant={variant} />
               <div className="mt-3">
                 <DownloadButton slug={`${item.slug}-s${currentSeason}e${currentEpisodeNum}`} label="Download Episode" />
               </div>
@@ -172,10 +183,10 @@ export default function SeriesWatchClient({
             <IframePlayer src={currentEpisode?.streams?.find((s) => s.language === audio)?.embedIframeLink || currentEpisode!.embedIframeLink!} />
           )
         ) : (
-          <div className="w-full aspect-video rounded-2xl bg-[#0E1015] border border-[#1F232D] flex items-center justify-center">
+          <div className={`w-full aspect-video rounded-2xl flex items-center justify-center ${isPrime ? "bg-[#1A242D] border border-[#2D3A45]" : "bg-[#0E1015] border border-[#1F232D]"}`}>
             <div className="text-center">
               <Film className="w-12 h-12 text-[#9CA3AF] mx-auto mb-3" />
-              <p className="text-[#F5C542] text-lg font-semibold">Streaming Not Available</p>
+              <p className={`${accentText} text-lg font-semibold`}>Streaming Not Available</p>
               <p className="text-[#9CA3AF] text-sm mt-1">
                 This episode does not have a stream source yet.
               </p>
@@ -184,15 +195,15 @@ export default function SeriesWatchClient({
         )}
 
         {autoPlayCountdown !== null && nextEpisode && (
-          <div className="flex items-center justify-between mt-3 p-3 rounded-none bg-[#0E1015] border border-[#1F232D]">
+          <div className={`flex items-center justify-between mt-3 p-3 rounded-none border ${isPrime ? "bg-[#1A242D] border-[#2D3A45]" : "bg-[#0E1015] border-[#1F232D]"}`}>
             <p className="text-sm text-[#F9FAFB]">
-              Next episode in <span className="text-[#F5C542] font-bold">{autoPlayCountdown}s</span>
+              Next episode in <span className={`${accentText} font-bold`}>{autoPlayCountdown}s</span>
             </p>
             <div className="flex items-center gap-2">
               <button onClick={cancelAutoPlay} className="text-xs text-[#9CA3AF] hover:text-[#F9FAFB] transition-colors">Cancel</button>
               <Link
-                href={`/series/watch/${item.slug}?season=${nextEpisode.seasonNumber}&episode=${nextEpisode.episodeNumber}${audio ? `&audio=${encodeURIComponent(audio)}` : ""}`}
-                className="text-xs text-[#F5C542] hover:underline"
+                href={`${watchBasePath}/${item.slug}?season=${nextEpisode.seasonNumber}&episode=${nextEpisode.episodeNumber}${audio ? `&audio=${encodeURIComponent(audio)}` : ""}`}
+                className={`text-xs ${accentText} hover:underline`}
               >
                 Play now &rarr;
               </Link>
@@ -203,8 +214,8 @@ export default function SeriesWatchClient({
         <div className="flex items-center justify-between mt-4 gap-4">
           {prevEpisode ? (
             <Link
-              href={`/series/watch/${item.slug}?season=${prevEpisode.seasonNumber}&episode=${prevEpisode.episodeNumber}${audio ? `&audio=${encodeURIComponent(audio)}` : ""}`}
-              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[#0E1015] border border-[#1F232D] text-[#F9FAFB] hover:border-[#F5C542]/30 transition-all text-sm"
+              href={`${watchBasePath}/${item.slug}?season=${prevEpisode.seasonNumber}&episode=${prevEpisode.episodeNumber}${audio ? `&audio=${encodeURIComponent(audio)}` : ""}`}
+              className={`flex items-center gap-2 px-4 py-2 rounded-xl border text-[#F9FAFB] transition-all text-sm ${isPrime ? "bg-[#1A242D] border-[#2D3A45] hover:border-[#00A8E1]/40" : "bg-[#0E1015] border-[#1F232D] hover:border-[#F5C542]/30"}`}
             >
               <ChevronLeft className="w-4 h-4" />
               {prevEpisode.episodeTitle}
@@ -214,8 +225,8 @@ export default function SeriesWatchClient({
           )}
           {nextEpisode ? (
             <Link
-              href={`/series/watch/${item.slug}?season=${nextEpisode.seasonNumber}&episode=${nextEpisode.episodeNumber}${audio ? `&audio=${encodeURIComponent(audio)}` : ""}`}
-              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[#0E1015] border border-[#1F232D] text-[#F9FAFB] hover:border-[#F5C542]/30 transition-all text-sm"
+              href={`${watchBasePath}/${item.slug}?season=${nextEpisode.seasonNumber}&episode=${nextEpisode.episodeNumber}${audio ? `&audio=${encodeURIComponent(audio)}` : ""}`}
+              className={`flex items-center gap-2 px-4 py-2 rounded-xl border text-[#F9FAFB] transition-all text-sm ${isPrime ? "bg-[#1A242D] border-[#2D3A45] hover:border-[#00A8E1]/40" : "bg-[#0E1015] border-[#1F232D] hover:border-[#F5C542]/30"}`}
             >
               {nextEpisode.episodeTitle}
               <ChevronRight className="w-4 h-4" />
@@ -231,20 +242,20 @@ export default function SeriesWatchClient({
             <div className="space-y-2 max-h-96 overflow-y-auto">
               {seasons.map((season) => (
                 <div key={season.seasonNumber}>
-                  <p className="text-sm font-medium text-[#F5C542] mb-2 mt-4 first:mt-0">
+                  <p className={`text-sm font-medium ${accentText} mb-2 mt-4 first:mt-0`}>
                     Season {season.seasonNumber}
                   </p>
                   {season.episodes.map((ep) => (
                     <Link
                       key={`${season.seasonNumber}-${ep.episodeNumber}`}
-                      href={`/series/watch/${item.slug}?season=${season.seasonNumber}&episode=${ep.episodeNumber}${audio ? `&audio=${encodeURIComponent(audio)}` : ""}`}
+                      href={`${watchBasePath}/${item.slug}?season=${season.seasonNumber}&episode=${ep.episodeNumber}${audio ? `&audio=${encodeURIComponent(audio)}` : ""}`}
                       className={`flex items-center gap-3 p-3 border transition-all ${
                         currentSeason === season.seasonNumber &&
                         currentEpisodeNum === ep.episodeNumber
-                          ? "bg-[#F5C542]/10 border-[#F5C542]"
+                          ? isPrime ? "bg-[#00A8E1]/10 border-[#00A8E1]" : "bg-[#F5C542]/10 border-[#F5C542]"
                           : isWatched(season.seasonNumber, ep.episodeNumber)
                           ? "bg-[#22C55E]/5 border-[#22C55E]/30"
-                          : "bg-[#0E1015] border-[#1F232D] hover:border-[#F5C542]/30"
+                          : isPrime ? "bg-[#1A242D] border-[#2D3A45] hover:border-[#00A8E1]/40" : "bg-[#0E1015] border-[#1F232D] hover:border-[#F5C542]/30"
                       }`}
                     >
                       <span className={`flex-shrink-0 w-8 h-8 flex items-center justify-center text-xs ${

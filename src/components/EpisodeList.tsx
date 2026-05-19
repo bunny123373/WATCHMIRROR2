@@ -10,9 +10,11 @@ interface EpisodeListProps {
   seasonNumber: number;
   audio?: string;
   banner?: string;
+  watchBasePath?: string;
+  variant?: "default" | "prime";
 }
 
-export default function EpisodeList({ episodes, slug, seasonNumber, audio, banner }: EpisodeListProps) {
+export default function EpisodeList({ episodes, slug, seasonNumber, audio, banner, watchBasePath = "/series/watch", variant = "default" }: EpisodeListProps) {
   if (!episodes.length) {
     return (
       <div className="text-center py-8 text-[#9CA3AF]">
@@ -27,10 +29,10 @@ export default function EpisodeList({ episodes, slug, seasonNumber, audio, banne
         {episodes.map((episode) => (
           <Link
             key={episode.episodeNumber}
-            href={`/series/watch/${slug}?season=${seasonNumber}&episode=${episode.episodeNumber}${audio ? `&audio=${encodeURIComponent(audio)}` : ""}`}
+            href={`${watchBasePath}/${slug}?season=${seasonNumber}&episode=${episode.episodeNumber}${audio ? `&audio=${encodeURIComponent(audio)}` : ""}`}
             className="group flex-shrink-0 w-40 md:w-48"
           >
-            <div className="relative aspect-[16/9] rounded-lg overflow-hidden bg-[#1F232D] border border-[#1F232D] group-hover:border-[#F5C542]/50 transition-all">
+            <div className={`relative aspect-[16/9] rounded-lg overflow-hidden bg-[#1F232D] border border-[#1F232D] transition-all ${variant === "prime" ? "group-hover:border-[#00A8E1]/50" : "group-hover:border-[#F5C542]/50"}`}>
               {episode.thumbnail ? (
                 <img src={episode.thumbnail} alt={episode.episodeTitle} className="w-full h-full object-cover" />
               ) : banner ? (
@@ -46,8 +48,8 @@ export default function EpisodeList({ episodes, slug, seasonNumber, audio, banne
               <div className="absolute inset-0 bg-gradient-to-t from-[#050608]/90 via-transparent to-transparent" />
               <div className="absolute bottom-0 left-0 right-0 p-2">
                 <div className="flex items-center gap-1.5">
-                  <div className="w-6 h-6 rounded-full bg-[#F5C542]/90 flex items-center justify-center group-hover:bg-[#F5C542] transition-colors">
-                    <Play className="w-3 h-3 text-[#050608] ml-0.5" />
+                  <div className={`w-6 h-6 rounded-full flex items-center justify-center transition-colors ${variant === "prime" ? "bg-[#00A8E1]/90 group-hover:bg-[#00A8E1]" : "bg-[#F5C542]/90 group-hover:bg-[#F5C542]"}`}>
+                    <Play className={`w-3 h-3 ml-0.5 ${variant === "prime" ? "text-white" : "text-[#050608]"}`} />
                   </div>
                   <span className="text-[10px] font-medium text-white">
                     E{episode.episodeNumber}

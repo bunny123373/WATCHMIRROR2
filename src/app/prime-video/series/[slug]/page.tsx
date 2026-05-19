@@ -137,7 +137,7 @@ export default async function PrimeSeriesDetailPage({ params }: Props) {
           </div>
         </div>
 
-        <SeriesClient item={item} />
+        <SeriesClient item={item} watchBasePath="/prime-video/series/watch" variant="prime" />
 
         <div className="mt-8">
           <CastCarousel cast={item.cast || []} />

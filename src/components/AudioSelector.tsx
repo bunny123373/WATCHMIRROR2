@@ -14,9 +14,11 @@ interface AudioSelectorProps {
   audioAvailable?: string[];
   dubLanguage?: string[];
   hasPeachify?: boolean;
+  watchBasePath?: string;
+  variant?: "default" | "prime";
 }
 
-export default function AudioSelector({ slug, streams, audioAvailable, dubLanguage, hasPeachify }: AudioSelectorProps) {
+export default function AudioSelector({ slug, streams, audioAvailable, dubLanguage, hasPeachify, watchBasePath = "/watch", variant = "default" }: AudioSelectorProps) {
   const allLanguages = streams && streams.length > 0
     ? streams.map((s) => s.language)
     : (() => {
@@ -32,13 +34,23 @@ export default function AudioSelector({ slug, streams, audioAvailable, dubLangua
       })();
 
   const [selectedAudio, setSelectedAudio] = useState(allLanguages[0] || "");
+  const watchHref = `${watchBasePath}/${slug}`;
+  const buttonClass = variant === "prime"
+    ? "inline-flex items-center gap-2 px-8 py-3 rounded-none bg-[#00A8E1] text-white font-semibold hover:bg-[#00A8E1]/80 transition-opacity text-lg"
+    : "inline-flex items-center gap-2 px-8 py-3 rounded-none gold-gradient text-[#050608] font-semibold hover:opacity-90 transition-opacity text-lg";
+  const activeClass = variant === "prime"
+    ? "bg-[#00A8E1] text-white border-[#00A8E1]"
+    : "bg-[#F5C542] text-[#050608] border-[#F5C542]";
+  const idleClass = variant === "prime"
+    ? "bg-[#0F171E] text-[#8197A4] border-[#2D3A45] hover:border-[#00A8E1]/50"
+    : "bg-[#050608] text-[#9CA3AF] border-[#1F232D] hover:border-[#F5C542]/50";
 
   if (allLanguages.length === 0) {
     return (
       <div className="flex items-center gap-3">
         <Link
-          href={`/watch/${slug}`}
-          className="inline-flex items-center gap-2 px-8 py-3 rounded-none gold-gradient text-[#050608] font-semibold hover:opacity-90 transition-opacity text-lg"
+          href={watchHref}
+          className={buttonClass}
         >
           <Play className="w-5 h-5" />
           Watch Now
@@ -57,9 +69,7 @@ export default function AudioSelector({ slug, streams, audioAvailable, dubLangua
             key={lang}
             onClick={() => setSelectedAudio(lang)}
             className={`px-3 py-1.5 rounded-none text-xs font-medium border transition-all ${
-              selectedAudio === lang
-                ? "bg-[#F5C542] text-[#050608] border-[#F5C542]"
-                : "bg-[#050608] text-[#9CA3AF] border-[#1F232D] hover:border-[#F5C542]/50"
+              selectedAudio === lang ? activeClass : idleClass
             }`}
           >
             {lang}
@@ -68,8 +78,8 @@ export default function AudioSelector({ slug, streams, audioAvailable, dubLangua
       </div>
       <div className="flex items-center gap-3">
         <Link
-          href={`/watch/${slug}?audio=${encodeURIComponent(selectedAudio)}`}
-          className="inline-flex items-center gap-2 px-8 py-3 rounded-none gold-gradient text-[#050608] font-semibold hover:opacity-90 transition-opacity text-lg"
+          href={`${watchHref}?audio=${encodeURIComponent(selectedAudio)}`}
+          className={buttonClass}
         >
           <Play className="w-5 h-5" />
           Watch Now

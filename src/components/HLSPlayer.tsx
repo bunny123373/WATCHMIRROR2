@@ -16,6 +16,7 @@ interface HLSPlayerProps {
   subtitleLang?: string;
   autoPlay?: boolean;
   audioTrack?: string;
+  variant?: "default" | "prime";
   onProgress?: (currentTime: number, duration: number) => void;
   onEnded?: () => void;
 }
@@ -31,7 +32,7 @@ function formatTime(seconds: number): string {
 
 export default function HLSPlayer({
   src, poster, subtitleUrl, subtitleLang,
-  autoPlay = true, audioTrack: initialAudioTrack,
+  autoPlay = true, audioTrack: initialAudioTrack, variant = "default",
   onProgress, onEnded,
 }: HLSPlayerProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -63,6 +64,10 @@ export default function HLSPlayer({
   const settingsMenuRef = useRef<HTMLDivElement>(null);
 
   const canStream = !!src?.trim();
+  const accent = variant === "prime" ? "#00A8E1" : "#F5C542";
+  const accentTextClass = variant === "prime" ? "text-[#00A8E1]" : "text-[#F5C542]";
+  const accentBgClass = variant === "prime" ? "bg-[#00A8E1]" : "bg-[#F5C542]";
+  const accentSoftClass = variant === "prime" ? "bg-[#00A8E1]/10" : "bg-[#F5C542]/10";
 
   const bufferedPercent = useMemo(() => {
     if (!buffered || !duration) return 0;
@@ -429,7 +434,7 @@ export default function HLSPlayer({
     return (
       <div className="w-full aspect-video rounded-none bg-[#0E1015] border border-[#1F232D] flex items-center justify-center">
         <div className="text-center">
-          <p className="text-[#F5C542] text-lg font-semibold">Stream Error</p>
+          <p className={`${accentTextClass} text-lg font-semibold`}>Stream Error</p>
           <p className="text-[#9CA3AF] text-sm mt-1">Unable to load stream</p>
         </div>
       </div>
@@ -466,7 +471,7 @@ export default function HLSPlayer({
       {/* Loading overlay */}
       {loading && (
         <div className="absolute inset-0 flex items-center justify-center bg-black/40 pointer-events-none">
-          <Loader2 className="w-10 h-10 text-[#F5C542] animate-spin" />
+          <Loader2 className={`w-10 h-10 ${accentTextClass} animate-spin`} />
         </div>
       )}
 
@@ -474,7 +479,7 @@ export default function HLSPlayer({
       {error && (
         <div className="absolute inset-0 flex items-center justify-center bg-black/60">
           <div className="text-center px-6">
-            <p className="text-[#F5C542] text-lg font-semibold">Playback Error</p>
+            <p className={`${accentTextClass} text-lg font-semibold`}>Playback Error</p>
             <p className="text-[#9CA3AF] text-sm mt-1">{error}</p>
           </div>
         </div>
@@ -533,7 +538,7 @@ export default function HLSPlayer({
             />
             {/* Played */}
             <div
-              className="absolute inset-y-0 left-0 rounded-full bg-[#F5C542] pointer-events-none"
+              className={`absolute inset-y-0 left-0 rounded-full ${accentBgClass} pointer-events-none`}
               style={{ width: `${progressPercent}%` }}
             />
             {/* Hover preview */}
@@ -545,7 +550,7 @@ export default function HLSPlayer({
             )}
             {/* Thumb */}
             <div
-              className={`absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-3 h-3 md:w-4 md:h-4 rounded-full bg-[#F5C542] shadow-lg pointer-events-none transition-opacity ${
+              className={`absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-3 h-3 md:w-4 md:h-4 rounded-full ${accentBgClass} shadow-lg pointer-events-none transition-opacity ${
                 hovering || seeking ? "opacity-100" : "opacity-0 group-hover/progress:opacity-100"
               }`}
               style={{ left: `${progressPercent}%` }}
@@ -652,11 +657,11 @@ export default function HLSPlayer({
                           onClick={() => switchQuality(-1)}
                           className={`w-full text-left px-3 py-2 text-xs transition flex items-center gap-2 ${
                             currentQuality === -1
-                              ? "text-[#F5C542] bg-[#F5C542]/10"
+                              ? `${accentTextClass} ${accentSoftClass}`
                               : "text-[#F9FAFB] hover:bg-white/5"
                           }`}
                         >
-                          <span className={`w-1.5 h-1.5 rounded-full ${currentQuality === -1 ? "bg-[#F5C542]" : "bg-white/20"}`} />
+                          <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: currentQuality === -1 ? accent : "rgba(255,255,255,0.2)" }} />
                           Auto
                         </button>
                         {qualityLevels.map((level) => (
@@ -665,11 +670,11 @@ export default function HLSPlayer({
                             onClick={() => switchQuality(level.index)}
                             className={`w-full text-left px-3 py-2 text-xs transition flex items-center gap-2 ${
                               currentQuality === level.index
-                                ? "text-[#F5C542] bg-[#F5C542]/10"
+                                ? `${accentTextClass} ${accentSoftClass}`
                                 : "text-[#F9FAFB] hover:bg-white/5"
                             }`}
                           >
-                            <span className={`w-1.5 h-1.5 rounded-full ${currentQuality === level.index ? "bg-[#F5C542]" : "bg-white/20"}`} />
+                            <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: currentQuality === level.index ? accent : "rgba(255,255,255,0.2)" }} />
                             {level.height >= 2160 ? "4K" : level.height >= 1440 ? "2K" : level.height >= 1080 ? "1080p" : level.height >= 720 ? "720p" : level.height >= 480 ? "480p" : level.height >= 360 ? "360p" : `${level.height}p`}
                           </button>
                         ))}
@@ -686,11 +691,11 @@ export default function HLSPlayer({
                             onClick={() => switchAudioTrack(track.index)}
                             className={`w-full text-left px-3 py-2 text-xs transition flex items-center gap-2 ${
                               selectedAudioTrack === track.index
-                                ? "text-[#F5C542] bg-[#F5C542]/10"
+                                ? `${accentTextClass} ${accentSoftClass}`
                                 : "text-[#F9FAFB] hover:bg-white/5"
                             }`}
                           >
-                            <span className={`w-1.5 h-1.5 rounded-full ${selectedAudioTrack === track.index ? "bg-[#F5C542]" : "bg-white/20"}`} />
+                            <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: selectedAudioTrack === track.index ? accent : "rgba(255,255,255,0.2)" }} />
                             {track.name}
                           </button>
                         ))}
