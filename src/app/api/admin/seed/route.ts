@@ -17,7 +17,7 @@ export async function POST(request: NextRequest) {
     const db = await connectDB();
     if (!db) return NextResponse.json({ error: "Database not connected" }, { status: 500 });
     const body = await request.json();
-    const { tmdbId, type, hlsLink, embedIframeLink, peachifyId, downloadLink, seasons, language, dubLanguages, audioAvailable, streams, contentRating } = body;
+    const { tmdbId, type, hlsLink, embedIframeLink, peachifyId, downloadLink, seasons, language, dubLanguages, audioAvailable, streams, contentRating, isPrimeVideo } = body;
 
     let data;
     try {
@@ -82,6 +82,7 @@ export async function POST(request: NextRequest) {
     contentData.downloadLink = downloadLink || "";
     contentData.streams = streams || [];
     contentData.peachifyId = peachifyId || String(tmdbId);
+    if (isPrimeVideo) contentData.primeVideo = true;
 
     if (type === "movie") {
       contentData.hlsLink = hlsLink || "";

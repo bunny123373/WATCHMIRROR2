@@ -7,6 +7,7 @@ import ContinueWatchingRow from "@/components/ContinueWatchingRow";
 import ContentRow from "@/components/ContentRow";
 import TrendingRow from "@/components/TrendingRow";
 import MyListRow from "@/components/MyListRow";
+import NetflixTop10Row from "@/components/NetflixTop10Row";
 
 export const dynamic = "force-dynamic";
 
@@ -33,7 +34,7 @@ async function getHomeData() {
     const db = await connectDB();
     if (!db) return null;
 
-    const [trending, latest, movies, series, action, drama, comedy, horror, english, hindi, korean] =
+    const [trending, latest, movies, series, action, drama, comedy, horror, english, hindi, korean, , trendingSeries] =
       await Promise.all([
         Content.find({
           $or: [{ popularity: { $gt: 100 } }, { rating: { $gt: 7.5 } }],
@@ -52,7 +53,19 @@ async function getHomeData() {
         Content.find({ language: "Hindi" }).sort({ popularity: -1 }).limit(20).lean(),
         Content.find({ language: "Korean" }).sort({ popularity: -1 }).limit(20).lean(),
         Content.find({ language: "Hindi" }).sort({ popularity: -1 }).limit(10).lean(),
+        Content.find({ type: "series", $or: [{ popularity: { $gt: 50 } }, { rating: { $gt: 7 } }] })
+          .sort({ popularity: -1 })
+          .limit(10)
+          .lean(),
       ]);
+
+    // Top content from our database styled as "Top 10"
+    const netflixMoviesWithContent = movies.slice(0, 10).map((item: any, i: number) => ({
+      rank: i + 1, title: item.title, poster: item.poster, slug: item.slug, type: "movie" as const,
+    }));
+    const trendingSeriesWithContent = trendingSeries.slice(0, 10).map((item: any, i: number) => ({
+      rank: i + 1, title: item.title, poster: item.poster, slug: item.slug, type: "series" as const,
+    }));
 
     return {
       trending: JSON.parse(JSON.stringify(trending)),
@@ -66,7 +79,10 @@ async function getHomeData() {
       english: JSON.parse(JSON.stringify(english)),
       hindi: JSON.parse(JSON.stringify(hindi)),
       korean: JSON.parse(JSON.stringify(korean)),
+      netflixMovies: netflixMoviesWithContent,
+      trendingSeries: trendingSeriesWithContent,
     };
+
   } catch {
     return null;
   }
@@ -124,21 +140,38 @@ export default async function HomePage() {
         <ContinueWatchingRow />
         <MyListRow />
 
-        {sections.map((section) =>
+        {/* Sections before Movies */}
+        {sections.slice(0, sections.findIndex((s) => s.title === "Movies") + 1).map((section) =>
           section.trending ? (
-            <TrendingRow
-              key={section.title}
-              title={section.title}
-              items={section.items}
-              viewAllHref={section.href}
-            />
+            <TrendingRow key={section.title} title={section.title} items={section.items} viewAllHref={section.href} />
           ) : (
-            <ContentRow
-              key={section.title}
-              title={section.title}
-              items={section.items}
-              viewAllHref={section.href}
-            />
+            <ContentRow key={section.title} title={section.title} items={section.items} viewAllHref={section.href} />
+          )
+        )}
+
+        {data.netflixMovies && data.netflixMovies.length > 0 && (
+          <NetflixTop10Row title="Top 10 Movies on Netflix Today" items={data.netflixMovies} accentColor="#F5C542" />
+        )}
+
+        {/* Sections from Series to Action */}
+        {sections.slice(sections.findIndex((s) => s.title === "Series"), sections.findIndex((s) => s.title === "Action") + 1).map((section) =>
+          section.trending ? (
+            <TrendingRow key={section.title} title={section.title} items={section.items} viewAllHref={section.href} />
+          ) : (
+            <ContentRow key={section.title} title={section.title} items={section.items} viewAllHref={section.href} />
+          )
+        )}
+
+        {data.trendingSeries && data.trendingSeries.length > 0 && (
+          <NetflixTop10Row title="Trending Series" items={data.trendingSeries} accentColor="#F5C542" />
+        )}
+
+        {/* Sections after Action */}
+        {sections.slice(sections.findIndex((s) => s.title === "Action") + 1).map((section) =>
+          section.trending ? (
+            <TrendingRow key={section.title} title={section.title} items={section.items} viewAllHref={section.href} />
+          ) : (
+            <ContentRow key={section.title} title={section.title} items={section.items} viewAllHref={section.href} />
           )
         )}
       </div>

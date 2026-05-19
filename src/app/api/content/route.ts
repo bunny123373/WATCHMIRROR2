@@ -19,12 +19,14 @@ export async function GET(request: NextRequest) {
     const page = Number(searchParams.get("page")) || 1;
     const sort = searchParams.get("sort") || "-popularity";
     const search = searchParams.get("search");
+    const primeVideo = searchParams.get("primeVideo");
 
     const filter: Record<string, any> = {};
     if (type) filter.type = type;
     if (category) filter.category = category;
     if (language) filter.language = language;
     if (search) filter.title = { $regex: search, $options: "i" };
+    if (primeVideo === "true") filter.primeVideo = true;
 
     const skip = (page - 1) * limit;
     const [items, total] = await Promise.all([

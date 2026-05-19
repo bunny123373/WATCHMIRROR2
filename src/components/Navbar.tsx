@@ -1,10 +1,12 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useDispatch } from "react-redux";
 import { openSearch } from "@/store/slices/searchSlice";
-import { Home, Search, Film, Grid2X2 } from "lucide-react";
+import { Home, Search, Film } from "lucide-react";
+import Image from "next/image";
 import { WatchMirrorLogo } from "./LogoMark";
 import MaturitySettings from "./MaturitySettings";
 
@@ -18,6 +20,26 @@ const navLinks = [
 export default function Navbar() {
   const pathname = usePathname();
   const dispatch = useDispatch();
+
+  const [profile, setProfile] = useState<"netflix" | "prime">("prime");
+
+  useEffect(() => {
+    if (pathname.startsWith("/prime-video")) {
+      setProfile("netflix");
+    } else if (pathname === "/") {
+      setProfile("prime");
+    }
+  }, [pathname]);
+
+  const switchProfile = () => {
+    if (profile === "prime") {
+      setProfile("netflix");
+      window.location.href = "/prime-video";
+    } else {
+      setProfile("prime");
+      window.location.href = "/";
+    }
+  };
 
   const isActive = (href: string) => {
     if (href === "/") return pathname === "/";
@@ -69,6 +91,21 @@ export default function Navbar() {
 
             {/* Maturity Settings */}
             <MaturitySettings className="w-8 h-8" iconClassName="w-3.5 h-3.5" />
+
+            {/* Profile Switcher */}
+            <button
+              onClick={switchProfile}
+              className="ml-1 px-2.5 py-1.5 rounded-full hover:bg-white/5 transition cursor-pointer"
+              title={profile === "netflix" ? "Switch to Prime Video" : "Switch to Netflix"}
+            >
+              <Image
+                src={profile === "netflix" ? "/netflix.png" : "/primevideo.svg"}
+                alt={profile === "netflix" ? "Netflix" : "Prime Video"}
+                width={52}
+                height={13}
+                className="w-11 h-auto"
+              />
+            </button>
           </div>
         </div>
       </nav>
@@ -129,11 +166,19 @@ export default function Navbar() {
             <span className={`text-[11px] font-medium ${pathname.startsWith("/movies") ? "text-violet-500" : "text-zinc-300"}`}>Movies</span>
           </Link>
 
-          {/* More */}
-          <Link href="/trending" className="flex flex-col items-center gap-0.5 relative z-10">
-            <Grid2X2 size={22} strokeWidth={2.5} className={pathname.startsWith("/trending") ? "text-violet-500" : "text-zinc-300"} />
-            <span className={`text-[11px] font-medium ${pathname.startsWith("/trending") ? "text-violet-500" : "text-zinc-300"}`}>More</span>
-          </Link>
+          {/* Profile Switcher */}
+          <button onClick={switchProfile} className="flex flex-col items-center gap-0.5 relative z-10 cursor-pointer">
+            <Image
+              src={profile === "netflix" ? "/netflix.png" : "/primevideo.svg"}
+              alt={profile === "netflix" ? "Netflix" : "Prime Video"}
+              width={profile === "netflix" ? 32 : 28}
+              height={8}
+              className="mt-1"
+            />
+            <span className={`text-[11px] font-medium ${profile === "netflix" ? (pathname === "/" ? "text-violet-500" : "text-zinc-300") : (pathname.startsWith("/prime-video") ? "text-violet-500" : "text-zinc-300")}`}>
+              {profile === "netflix" ? "Netflix" : "Prime"}
+            </span>
+          </button>
         </div>
       </nav>
     </>

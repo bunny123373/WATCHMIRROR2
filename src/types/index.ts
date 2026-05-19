@@ -50,6 +50,7 @@ export interface IContent {
   cast: Cast[];
   metaTitle: string;
   metaDescription: string;
+  primeVideo?: boolean;
   tmdbId?: number;
   hlsLink?: string;
   embedIframeLink?: string;

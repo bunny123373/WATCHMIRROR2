@@ -46,6 +46,7 @@ export default function AdminPage() {
   const [importing, setImporting] = useState(false);
   const [step, setStep] = useState(1);
   const [peachifyId, setPeachifyId] = useState("");
+  const [isPrimeVideo, setIsPrimeVideo] = useState(false);
 
   useEffect(() => {
     if (selectedItem?.id) {
@@ -165,7 +166,7 @@ export default function AdminPage() {
       const res = await fetch("/api/admin/seed", {
         method: "POST",
         headers: { "Content-Type": "application/json", "x-admin-key": ADMIN_KEY },
-        body: JSON.stringify({ tmdbId: selectedItem.id, type: importType, hlsLink, embedIframeLink: embedLink, downloadLink, peachifyId, streams: streamInputs.filter((s) => s.hlsLink || s.embedIframeLink), seasons: parsedSeasons, language: selectedLanguage, dubLanguages: selectedDubLanguages, audioAvailable: selectedAudio, contentRating: selectedRating }),
+        body: JSON.stringify({ tmdbId: selectedItem.id, type: importType, hlsLink, embedIframeLink: embedLink, downloadLink, peachifyId, streams: streamInputs.filter((s) => s.hlsLink || s.embedIframeLink), seasons: parsedSeasons, language: selectedLanguage, dubLanguages: selectedDubLanguages, audioAvailable: selectedAudio, contentRating: selectedRating, isPrimeVideo }),
       });
       if (res.ok) {
         setShowAddModal(false); resetAddModal(); fetchContent();
@@ -181,7 +182,7 @@ export default function AdminPage() {
   const resetAddModal = () => {
     setTmdbQuery(""); setTmdbResults([]); setSearchError(""); setSearched(false);
     setSelectedItem(null); setSelectedDetails(null); setHlsLink(""); setEmbedLink(""); setDownloadLink(""); setSeasons("");
-    setSelectedRating("TV-MA"); setSelectedLanguage("English"); setSelectedDubLanguages([]); setSelectedAudio(["English"]); setStreamInputs([]); setPeachifyId("");
+    setSelectedRating("TV-MA"); setSelectedLanguage("English"); setSelectedDubLanguages([]); setSelectedAudio(["English"]); setStreamInputs([]); setPeachifyId(""); setIsPrimeVideo(false);
     setStep(1);
   };
 
@@ -309,6 +310,7 @@ export default function AdminPage() {
                         <span className={`px-1 py-0.5 md:px-1.5 md:py-0.5 text-[9px] md:text-[10px] font-medium rounded ${item.type === "movie" ? "bg-[#8B5CF6]/20 text-[#8B5CF6]" : "bg-[#22C55E]/20 text-[#22C55E]"}`}>
                           {item.type === "movie" ? "MOVIE" : "SERIES"}
                         </span>
+                        {(item as any).primeVideo && <span className="px-1 py-0.5 text-[9px] md:text-[10px] font-medium rounded bg-[#00A8E1]/20 text-[#00A8E1]">PRIME</span>}
                         <p className="text-xs md:text-sm font-medium text-[#F9FAFB] truncate">{item.title}</p>
                       </div>
                       <div className="flex items-center flex-wrap gap-x-2 md:gap-x-3 gap-y-0.5 mt-0.5 text-[10px] md:text-[11px] text-[#9CA3AF]">
@@ -391,6 +393,17 @@ export default function AdminPage() {
                       <button onClick={() => setImportType("series")} className={`flex-1 py-2 md:py-3 rounded-none text-xs md:text-sm font-medium transition-all ${importType === "series" ? "bg-[#22C55E] text-white shadow-lg shadow-[#22C55E]/20" : "bg-[#1F232D] text-[#9CA3AF]"}`}>
                         <Tv className="w-3.5 h-3.5 md:w-4 md:h-4 inline mr-1" /> Series
                       </button>
+                    </div>
+
+                    <div className="flex items-center gap-3 px-1">
+                      <span className="text-xs text-[#9CA3AF] font-medium">Add to Prime Video:</span>
+                      <button
+                        onClick={() => setIsPrimeVideo(!isPrimeVideo)}
+                        className={`relative w-11 h-6 rounded-full transition-colors ${isPrimeVideo ? "bg-[#00A8E1]" : "bg-[#1F232D]"}`}
+                      >
+                        <span className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white transition-transform ${isPrimeVideo ? "translate-x-5" : ""}`} />
+                      </button>
+                      {isPrimeVideo && <span className="text-xs text-[#00A8E1] font-medium">Yes</span>}
                     </div>
 
                     <div className="flex gap-2">
@@ -534,7 +547,19 @@ export default function AdminPage() {
                       </div>
                     </div>
 
-                    {/* Audio Available */}
+                {/* Prime Video toggle */}
+                <div className="flex items-center gap-3 px-1">
+                  <label className="text-xs text-[#9CA3AF] font-medium">Prime Video Content:</label>
+                  <button
+                    onClick={() => setEditData({ ...editData, primeVideo: !editData.primeVideo })}
+                    className={`relative w-11 h-6 rounded-full transition-colors ${editData.primeVideo ? "bg-[#00A8E1]" : "bg-[#1F232D]"}`}
+                  >
+                    <span className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white transition-transform ${editData.primeVideo ? "translate-x-5" : ""}`} />
+                  </button>
+                  {editData.primeVideo && <span className="text-xs text-[#00A8E1] font-medium">Yes</span>}
+                </div>
+
+                {/* Audio Available */}
                     <div>
                       <label className="block text-xs text-[#9CA3AF] mb-2 font-medium">Audio Available</label>
                       <div className="flex flex-wrap gap-2">
@@ -662,8 +687,9 @@ export default function AdminPage() {
                               <Film className="w-12 h-12 text-[#9CA3AF]" />
                             </div>
                           )}
-                          <div className="absolute top-2 left-2 px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-[#F5C542] text-[#050608]">
-                            {importType}
+                          <div className="absolute top-2 left-2 flex gap-1">
+                            <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-[#F5C542] text-[#050608]">{importType}</span>
+                            {isPrimeVideo && <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-[#00A8E1] text-white">PRIME</span>}
                           </div>
                         </div>
                         {/* Info */}

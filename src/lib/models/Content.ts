@@ -21,6 +21,7 @@ export interface IContentDocument extends Document {
   cast: { name: string; character: string; profileImage: string }[];
   metaTitle: string;
   metaDescription: string;
+  primeVideo?: boolean;
   tmdbId?: number;
   hlsLink?: string;
   embedIframeLink?: string;
@@ -90,6 +91,7 @@ const ContentSchema = new Schema({
   hlsLink: { type: String },
   embedIframeLink: { type: String },
   tmdbId: { type: Number },
+  primeVideo: { type: Boolean, default: false },
   peachifyId: { type: String },
   downloadLink: { type: String },
   streams: [{ type: Object }],
