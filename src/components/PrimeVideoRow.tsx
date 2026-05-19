@@ -4,6 +4,7 @@ import Image from "next/image";
 interface PrimeEntry {
   title: string;
   poster?: string;
+  banner?: string;
   slug?: string;
   type?: "movie" | "series";
 }
@@ -29,33 +30,35 @@ export default function PrimeVideoRow({ title, items }: PrimeVideoRowProps) {
         </div>
       </div>
       <div className="flex gap-2 md:gap-4 overflow-x-auto px-4 md:px-8 pb-2" style={{ scrollbarWidth: "none" }}>
-        {items.map((entry, i) => (
-          entry.slug ? (
+        {items.map((entry, i) => {
+          const imageSrc = entry.banner || entry.poster;
+          return entry.slug ? (
             <Link
               key={entry.slug || i}
               href={entry.type === "movie" ? `/prime-video/movie/${entry.slug}` : `/prime-video/series/${entry.slug}`}
-              className="flex-shrink-0 group relative w-[90px] sm:w-[110px] md:w-[130px]"
+              className="flex-shrink-0 group relative w-[220px] sm:w-[260px] md:w-[320px]"
             >
-              <div className="relative aspect-[2/3] rounded-none overflow-hidden bg-[#0E1015] border border-[#1F232D] group-hover:border-[#00A8E1]/50 transition-all">
-                {entry.poster ? (
+              <div className="relative aspect-video rounded-none overflow-hidden bg-[#0E1015] border border-[#1F232D] group-hover:border-[#00A8E1]/50 transition-all">
+                {imageSrc ? (
                   <Image
-                    src={entry.poster}
+                    src={imageSrc}
                     alt={entry.title}
                     fill
                     className="object-cover transition-transform duration-300 group-hover:scale-105"
-                    sizes="130px"
+                    sizes="(max-width: 640px) 220px, (max-width: 768px) 260px, 320px"
                   />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center p-2">
                     <p className="text-[10px] text-[#9CA3AF] text-center">{entry.title}</p>
                   </div>
                 )}
-                <div className="absolute inset-0 bg-gradient-to-t from-[#050608]/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#050608]/90 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                <div className="absolute left-2 top-2 px-2 py-0.5 text-[9px] font-bold tracking-wide bg-[#00A8E1] text-white">PRIME</div>
               </div>
-              <p className="text-[11px] text-[#F9FAFB] mt-1.5 truncate font-medium">{entry.title}</p>
+              <p className="text-sm text-[#F9FAFB] mt-2 truncate font-medium">{entry.title}</p>
             </Link>
-          ) : null
-        ))}
+          ) : null;
+        })}
       </div>
     </section>
   );

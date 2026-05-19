@@ -72,25 +72,26 @@ export default function PrimeVideoPageClient({ data }: PrimeVideoPageProps) {
                 <Link
                   key={item._id || item.slug}
                   href={getPrimeHref(item)}
-                  className="flex-shrink-0 group relative w-[130px] sm:w-[140px] md:w-[160px]"
+                  className="flex-shrink-0 group relative w-[220px] sm:w-[260px] md:w-[320px]"
                 >
-                  <div className="relative aspect-[2/3] rounded-none overflow-hidden bg-[#1A242D] border border-[#2D3A45] group-hover:border-[#00A8E1]/50 transition-all">
-                    {item.poster ? (
+                  <div className="relative aspect-video rounded-none overflow-hidden bg-[#1A242D] border border-[#2D3A45] group-hover:border-[#00A8E1]/50 transition-all">
+                    {item.banner || item.poster ? (
                       <Image
-                        src={item.poster}
+                        src={item.banner || item.poster}
                         alt={item.title}
                         fill
                         className="object-cover transition-transform duration-300 group-hover:scale-105"
-                        sizes="160px"
+                        sizes="(max-width: 640px) 220px, (max-width: 768px) 260px, 320px"
                       />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center p-2">
                         <p className="text-[10px] text-[#8197A4] text-center">{item.title}</p>
                       </div>
                     )}
-                    <div className="absolute inset-0 bg-gradient-to-t from-[#0F171E]/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-[#0F171E]/90 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                    <div className="absolute left-2 top-2 px-2 py-0.5 text-[9px] font-bold tracking-wide bg-[#00A8E1] text-white">PRIME</div>
                   </div>
-                  <p className="text-xs text-[#F9FAFB] mt-1.5 truncate font-medium">{item.title}</p>
+                  <p className="text-sm text-[#F9FAFB] mt-2 truncate font-medium">{item.title}</p>
                   <p className="text-[10px] text-[#8197A4]">{item.year} · {item.language}</p>
                 </Link>
               ))}
