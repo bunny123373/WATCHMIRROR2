@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Monitor, Plus, Search, Trash2, Edit3, Film, Tv, Loader2, X, Save, Eye, Hash, Star, Globe, Calendar, Check, ChevronRight, ChevronLeft } from "lucide-react";
+import { Monitor, Plus, Search, Trash2, Edit3, Film, Tv, Loader2, X, Save, Eye, Hash, Star, Globe, Calendar, Check, ChevronRight, ChevronLeft, Cloud, Copy, ExternalLink } from "lucide-react";
 import AdminGuard from "@/components/AdminGuard";
 import { IContent, SearchResult } from "@/types";
 import { TMDB_IMAGE_W500, LANGUAGES, LANGUAGES_GROUPED, CONTENT_RATINGS } from "@/lib/constants";
@@ -45,11 +45,18 @@ export default function AdminPage() {
   const [streamInputs, setStreamInputs] = useState<{ language: string; hlsLink: string; embedIframeLink: string; subtitles: { language: string; url: string }[] }[]>([]);
   const [importing, setImporting] = useState(false);
   const [step, setStep] = useState(1);
+  const [peachifyId, setPeachifyId] = useState("");
 
   // Edit modal
   const [editItem, setEditItem] = useState<IContent | null>(null);
   const [editData, setEditData] = useState<any>(null);
   const [saving, setSaving] = useState(false);
+
+  // Abyss browser
+  const [showAbyssBrowser, setShowAbyssBrowser] = useState(false);
+  const [abyssFiles, setAbyssFiles] = useState<any[]>([]);
+  const [abyssLoading, setAbyssLoading] = useState(false);
+  const [abyssSearch, setAbyssSearch] = useState("");
 
   const fetchContent = async () => {
     setLoading(true);
@@ -145,7 +152,7 @@ export default function AdminPage() {
       const res = await fetch("/api/admin/seed", {
         method: "POST",
         headers: { "Content-Type": "application/json", "x-admin-key": ADMIN_KEY },
-        body: JSON.stringify({ tmdbId: selectedItem.id, type: importType, hlsLink, embedIframeLink: embedLink, downloadLink, streams: streamInputs.filter((s) => s.hlsLink || s.embedIframeLink), seasons: parsedSeasons, language: selectedLanguage, dubLanguages: selectedDubLanguages, audioAvailable: selectedAudio, contentRating: selectedRating }),
+        body: JSON.stringify({ tmdbId: selectedItem.id, type: importType, hlsLink, embedIframeLink: embedLink, downloadLink, peachifyId, streams: streamInputs.filter((s) => s.hlsLink || s.embedIframeLink), seasons: parsedSeasons, language: selectedLanguage, dubLanguages: selectedDubLanguages, audioAvailable: selectedAudio, contentRating: selectedRating }),
       });
       if (res.ok) {
         setShowAddModal(false); resetAddModal(); fetchContent();
@@ -161,7 +168,7 @@ export default function AdminPage() {
   const resetAddModal = () => {
     setTmdbQuery(""); setTmdbResults([]); setSearchError(""); setSearched(false);
     setSelectedItem(null); setSelectedDetails(null); setHlsLink(""); setEmbedLink(""); setDownloadLink(""); setSeasons("");
-    setSelectedRating("TV-MA"); setSelectedLanguage("English"); setSelectedDubLanguages([]); setSelectedAudio(["English"]); setStreamInputs([]);
+    setSelectedRating("TV-MA"); setSelectedLanguage("English"); setSelectedDubLanguages([]); setSelectedAudio(["English"]); setStreamInputs([]); setPeachifyId("");
     setStep(1);
   };
 
@@ -171,6 +178,7 @@ export default function AdminPage() {
     const d = JSON.parse(JSON.stringify(item));
     if (!d.audioAvailable) d.audioAvailable = [];
     if (!d.dubLanguage) d.dubLanguage = [];
+    if (!d.seasons) d.seasons = [];
     setEditData(d);
   };
 
@@ -212,14 +220,19 @@ export default function AdminPage() {
         <div className="max-w-[1800px] mx-auto px-4 md:px-8 py-6">
 
           {/* Header */}
-          <div className="flex items-center justify-between mb-6">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-6">
             <div>
-              <h1 className="text-2xl font-bold text-[#F9FAFB]">WATCHMIRROR Admin Panel</h1>
-              <p className="text-[#9CA3AF] text-sm mt-1">Manage your content library</p>
+              <h1 className="text-xl md:text-2xl font-bold text-[#F9FAFB]">WATCHMIRROR Admin Panel</h1>
+              <p className="text-[#9CA3AF] text-xs md:text-sm mt-1">Manage your content library</p>
             </div>
-            <button onClick={() => setShowAddModal(true)} className="flex items-center gap-2 px-4 py-2 rounded-none gold-gradient text-[#050608] font-semibold hover:opacity-90 transition-opacity">
-              <Plus className="w-4 h-4" /> Add Content
-            </button>
+            <div className="flex items-center gap-2 w-full sm:w-auto">
+              <button onClick={() => { setShowAbyssBrowser(true); setAbyssLoading(true); setAbyssSearch(""); fetch("/api/abyss/files").then(r => r.json()).then(d => { setAbyssFiles(d.files || []); setAbyssLoading(false); }).catch(() => setAbyssLoading(false)); }} className="flex items-center justify-center gap-2 flex-1 sm:flex-none px-3 md:px-4 py-2 rounded-none bg-[#1F232D] text-[#F9FAFB] font-medium hover:bg-[#1F232D]/80 transition-all text-xs md:text-sm">
+                <Cloud className="w-3.5 h-3.5 md:w-4 md:h-4" /> Browse Abyss
+              </button>
+              <button onClick={() => setShowAddModal(true)} className="flex items-center justify-center gap-2 flex-1 sm:flex-none px-3 md:px-4 py-2 rounded-none gold-gradient text-[#050608] font-semibold hover:opacity-90 transition-opacity text-xs md:text-sm">
+                <Plus className="w-3.5 h-3.5 md:w-4 md:h-4" /> Add Content
+              </button>
+            </div>
           </div>
 
           {/* Stats */}
@@ -274,37 +287,37 @@ export default function AdminPage() {
               <p className="text-xs text-[#9CA3AF] mb-3">{filtered.length} result{filtered.length !== 1 ? "s" : ""}</p>
               <div className="grid gap-2">
                 {filtered.map((item) => (
-                  <div key={item._id} className="flex items-center gap-3 p-3 rounded-none bg-[#0E1015] border border-[#1F232D] hover:border-[#1F232D]/80 transition-colors">
-                    <div className="relative w-10 h-14 rounded-none overflow-hidden bg-[#1F232D] flex-shrink-0">
+                  <div key={item._id} className="flex items-center gap-2 md:gap-3 p-2 md:p-3 rounded-none bg-[#0E1015] border border-[#1F232D] hover:border-[#1F232D]/80 transition-colors">
+                    <div className="relative w-8 h-12 md:w-10 md:h-14 rounded-none overflow-hidden bg-[#1F232D] flex-shrink-0">
                       {item.poster && <img src={item.poster} alt="" className="w-full h-full object-cover" />}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2">
-                        <span className={`px-1.5 py-0.5 text-[10px] font-medium rounded ${item.type === "movie" ? "bg-[#8B5CF6]/20 text-[#8B5CF6]" : "bg-[#22C55E]/20 text-[#22C55E]"}`}>
+                      <div className="flex items-center gap-1.5 md:gap-2">
+                        <span className={`px-1 py-0.5 md:px-1.5 md:py-0.5 text-[9px] md:text-[10px] font-medium rounded ${item.type === "movie" ? "bg-[#8B5CF6]/20 text-[#8B5CF6]" : "bg-[#22C55E]/20 text-[#22C55E]"}`}>
                           {item.type === "movie" ? "MOVIE" : "SERIES"}
                         </span>
-                        <p className="text-sm font-medium text-[#F9FAFB] truncate">{item.title}</p>
+                        <p className="text-xs md:text-sm font-medium text-[#F9FAFB] truncate">{item.title}</p>
                       </div>
-                      <div className="flex items-center gap-3 mt-0.5 text-[11px] text-[#9CA3AF]">
+                      <div className="flex items-center flex-wrap gap-x-2 md:gap-x-3 gap-y-0.5 mt-0.5 text-[10px] md:text-[11px] text-[#9CA3AF]">
                         <span>{item.year}</span>
                         {item.contentRating && (
-                          <span className="px-1.5 py-0.5 text-[10px] font-bold bg-[#1F232D] text-[#9CA3AF]">
+                          <span className="px-1 py-0.5 md:px-1.5 md:py-0.5 text-[9px] md:text-[10px] font-bold bg-[#1F232D] text-[#9CA3AF]">
                             {item.contentRating}
                           </span>
                         )}
-                        <span className="capitalize">{item.category}</span>
-                        <span>{item.language}</span>
+                        <span className="hidden xs:inline capitalize">{item.category}</span>
+                        <span className="hidden sm:inline">{item.language}</span>
                         {item.rating > 0 && <span className="text-[#F5C542]">★ {item.rating.toFixed(1)}</span>}
                         {item.hlsLink && <span className="text-[#22C55E]">HLS</span>}
                         {item.embedIframeLink && !item.hlsLink && <span className="text-[#8B5CF6]">Embed</span>}
                       </div>
                     </div>
-                    <div className="flex items-center gap-1">
-                      <button onClick={() => openEdit(item)} className="p-2 rounded-none text-[#9CA3AF] hover:text-[#F5C542] hover:bg-[#F5C542]/10 transition-all" title="Edit">
-                        <Edit3 className="w-4 h-4" />
+                    <div className="flex items-center gap-0.5 md:gap-1 flex-shrink-0">
+                      <button onClick={() => openEdit(item)} className="p-1.5 md:p-2 rounded-none text-[#9CA3AF] hover:text-[#F5C542] hover:bg-[#F5C542]/10 transition-all" title="Edit">
+                        <Edit3 className="w-3.5 h-3.5 md:w-4 md:h-4" />
                       </button>
-                      <button onClick={() => handleDelete(item._id!)} className="p-2 rounded-none text-[#9CA3AF] hover:text-red-400 hover:bg-red-400/10 transition-all" title="Delete">
-                        <Trash2 className="w-4 h-4" />
+                      <button onClick={() => handleDelete(item._id!)} className="p-1.5 md:p-2 rounded-none text-[#9CA3AF] hover:text-red-400 hover:bg-red-400/10 transition-all" title="Delete">
+                        <Trash2 className="w-3.5 h-3.5 md:w-4 md:h-4" />
                       </button>
                     </div>
                   </div>
@@ -321,58 +334,58 @@ export default function AdminPage() {
 
         {/* ADD MODAL — Multi-step wizard */}
         {showAddModal && (
-          <div className="fixed inset-0 z-50 bg-[#050608]/80 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="fixed inset-0 z-50 bg-[#050608]/80 backdrop-blur-sm flex items-center justify-center p-2 md:p-4">
             <div className="w-full max-w-3xl bg-[#0E1015] rounded-none border border-[#1F232D] max-h-[90vh] overflow-y-auto">
               {/* Header */}
-              <div className="flex items-center justify-between p-6 border-b border-[#1F232D]">
-                <h2 className="text-lg font-bold text-[#F9FAFB]">Add Content</h2>
+              <div className="flex items-center justify-between p-4 md:p-6 border-b border-[#1F232D]">
+                <h2 className="text-base md:text-lg font-bold text-[#F9FAFB]">Add Content</h2>
                 <button onClick={() => { setShowAddModal(false); resetAddModal(); }} className="p-1 rounded-none hover:bg-[#1F232D] transition-colors">
-                  <X className="w-5 h-5 text-[#9CA3AF]" />
+                  <X className="w-4 md:w-5 h-4 md:h-5 text-[#9CA3AF]" />
                 </button>
               </div>
 
               {/* Step indicator */}
-              <div className="flex items-center justify-center gap-2 px-6 pt-6">
+              <div className="flex items-center justify-center gap-1 md:gap-2 px-4 md:px-6 pt-4 md:pt-6 overflow-x-auto">
                 {[
                   { num: 1, label: "Search" },
                   { num: 2, label: "Details" },
                   { num: 3, label: "Review" },
                 ].map((s, i) => (
-                  <div key={s.num} className="flex items-center gap-2">
-                    <div className={`flex items-center gap-2 px-3 py-1.5 rounded-none text-xs font-medium transition-all ${
+                  <div key={s.num} className="flex items-center gap-1 md:gap-2 flex-shrink-0">
+                    <div className={`flex items-center gap-1 md:gap-2 px-2 md:px-3 py-1 md:py-1.5 rounded-none text-[10px] md:text-xs font-medium whitespace-nowrap transition-all ${
                       step === s.num
                         ? "bg-[#F5C542] text-[#050608]"
                         : step > s.num
                         ? "bg-[#22C55E]/20 text-[#22C55E]"
                         : "bg-[#1F232D] text-[#9CA3AF]"
                     }`}>
-                      {step > s.num ? <Check className="w-3.5 h-3.5" /> : <span>{s.num}</span>}
-                      <span>{s.label}</span>
+                      {step > s.num ? <Check className="w-3 h-3" /> : <span>{s.num}</span>}
+                      <span className="hidden sm:inline">{s.label}</span>
                     </div>
-                    {i < 2 && <div className={`w-8 h-px ${step > s.num ? "bg-[#22C55E]" : "bg-[#1F232D]"}`} />}
+                    {i < 2 && <div className={`w-4 md:w-8 h-px ${step > s.num ? "bg-[#22C55E]" : "bg-[#1F232D]"}`} />}
                   </div>
                 ))}
               </div>
 
-              <div className="p-6 space-y-5">
+              <div className="p-4 md:p-6 space-y-4 md:space-y-5">
                 {/* ====== STEP 1: SEARCH ====== */}
                 {step === 1 && (
                   <>
                     <div className="flex gap-2">
-                      <button onClick={() => setImportType("movie")} className={`flex-1 py-3 rounded-none text-sm font-medium transition-all ${importType === "movie" ? "bg-[#8B5CF6] text-white shadow-lg shadow-[#8B5CF6]/20" : "bg-[#1F232D] text-[#9CA3AF]"}`}>
-                        <Film className="w-4 h-4 inline mr-1" /> Movie
+                      <button onClick={() => setImportType("movie")} className={`flex-1 py-2 md:py-3 rounded-none text-xs md:text-sm font-medium transition-all ${importType === "movie" ? "bg-[#8B5CF6] text-white shadow-lg shadow-[#8B5CF6]/20" : "bg-[#1F232D] text-[#9CA3AF]"}`}>
+                        <Film className="w-3.5 h-3.5 md:w-4 md:h-4 inline mr-1" /> Movie
                       </button>
-                      <button onClick={() => setImportType("series")} className={`flex-1 py-3 rounded-none text-sm font-medium transition-all ${importType === "series" ? "bg-[#22C55E] text-white shadow-lg shadow-[#22C55E]/20" : "bg-[#1F232D] text-[#9CA3AF]"}`}>
-                        <Tv className="w-4 h-4 inline mr-1" /> Series
+                      <button onClick={() => setImportType("series")} className={`flex-1 py-2 md:py-3 rounded-none text-xs md:text-sm font-medium transition-all ${importType === "series" ? "bg-[#22C55E] text-white shadow-lg shadow-[#22C55E]/20" : "bg-[#1F232D] text-[#9CA3AF]"}`}>
+                        <Tv className="w-3.5 h-3.5 md:w-4 md:h-4 inline mr-1" /> Series
                       </button>
                     </div>
 
                     <div className="flex gap-2">
                       <div className="relative flex-1">
-                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#9CA3AF]" />
-                        <input type="text" value={tmdbQuery} onChange={(e) => setTmdbQuery(e.target.value)} onKeyDown={(e) => e.key === "Enter" && handleTmdbSearch()} placeholder="Search TMDB for movies or series..." className="w-full h-12 pl-11 pr-4 rounded-none bg-[#050608] border border-[#1F232D] text-[#F9FAFB] placeholder-[#9CA3AF] focus:outline-none focus:border-[#F5C542]" />
+                        <Search className="absolute left-3 md:left-4 top-1/2 -translate-y-1/2 w-3.5 h-3.5 md:w-4 md:h-4 text-[#9CA3AF]" />
+                        <input type="text" value={tmdbQuery} onChange={(e) => setTmdbQuery(e.target.value)} onKeyDown={(e) => e.key === "Enter" && handleTmdbSearch()} placeholder="Search TMDB..." className="w-full h-10 md:h-12 pl-10 md:pl-11 pr-3 md:pr-4 rounded-none bg-[#050608] border border-[#1F232D] text-[#F9FAFB] placeholder-[#9CA3AF] text-sm focus:outline-none focus:border-[#F5C542]" />
                       </div>
-                      <button onClick={handleTmdbSearch} className="px-5 h-12 rounded-none gold-gradient text-[#050608] font-semibold hover:opacity-90 transition-opacity"><Search className="w-4 h-4" /></button>
+                      <button onClick={handleTmdbSearch} className="px-3 md:px-5 h-10 md:h-12 rounded-none gold-gradient text-[#050608] font-semibold hover:opacity-90 transition-opacity"><Search className="w-3.5 h-3.5 md:w-4 md:h-4" /></button>
                     </div>
 
                     {tmdbLoading && <div className="flex justify-center py-4"><Loader2 className="w-5 h-5 text-[#F5C542] animate-spin" /></div>}
@@ -550,13 +563,24 @@ export default function AdminPage() {
                                 copy[idx] = { ...copy[idx], embedIframeLink: e.target.value };
                                 setStreamInputs(copy);
                               }} placeholder="Embed Iframe URL (fallback)" className="w-full h-10 px-3 rounded-none bg-[#050608] border border-[#1F232D] text-[#F9FAFB] placeholder-[#9CA3AF] text-xs focus:outline-none focus:border-[#F5C542]" />
-                              <div className="flex gap-2">
+                              <div className="flex items-center gap-2 border border-[#1F232D] px-2 py-1.5">
+                                <span className="text-[9px] text-[#9CA3AF] font-medium whitespace-nowrap">Abyss ID</span>
+                                <input type="text" placeholder="sXceKo-r4" onChange={(e) => {
+                                  const id = e.target.value.trim();
+                                  if (id) {
+                                    const copy = [...streamInputs];
+                                    copy[idx] = { ...copy[idx], embedIframeLink: `https://abyssplayer.com/${id}` };
+                                    setStreamInputs(copy);
+                                  }
+                                }} className="flex-1 h-7 px-2 rounded-none bg-[#050608] border border-[#1F232D] text-[#F9FAFB] placeholder-[#9CA3AF] text-[10px] focus:outline-none focus:border-[#F5C542]" />
+                              </div>
+                              <div className="flex flex-col sm:flex-row gap-2">
                                 <select value={si.subtitles?.[0]?.language || ""} onChange={(e) => {
                                   const copy = [...streamInputs];
                                   const subs = e.target.value ? [{ language: e.target.value, url: copy[idx].subtitles?.[0]?.url || "" }] : [];
                                   copy[idx] = { ...copy[idx], subtitles: subs };
                                   setStreamInputs(copy);
-                                }} className="w-28 h-9 px-2 rounded-none bg-[#050608] border border-[#1F232D] text-[#F9FAFB] text-[10px] focus:outline-none focus:border-[#F5C542] appearance-none cursor-pointer">
+                                }} className="w-full sm:w-28 h-9 px-2 rounded-none bg-[#050608] border border-[#1F232D] text-[#F9FAFB] text-[10px] focus:outline-none focus:border-[#F5C542] appearance-none cursor-pointer">
                                   <option value="" className="bg-[#0E1015]">No subs</option>
                                   {LANGUAGES.map((l) => (
                                     <option key={l} value={l} className="bg-[#0E1015]">{l}</option>
@@ -574,6 +598,13 @@ export default function AdminPage() {
                         ))}
                       </div>
                     )}
+
+                    {/* Peachify */}
+                    <div className="p-4 rounded-none bg-[#050608] border border-[#1F232D]">
+                      <label className="block text-xs text-[#9CA3AF] mb-2 font-medium">Peachify ID <span className="text-[#9CA3AF]/50">(alternative embed source)</span></label>
+                      <p className="text-[10px] text-[#9CA3AF] mb-2">Peachify media ID — used as fallback if no HLS source.</p>
+                      <input type="text" value={peachifyId} onChange={(e) => setPeachifyId(e.target.value)} placeholder="e.g. 255661" className="w-full h-11 px-4 rounded-none bg-[#0E1015] border border-[#1F232D] text-[#F9FAFB] placeholder-[#9CA3AF] text-sm focus:outline-none focus:border-[#F5C542]" />
+                    </div>
 
                     {/* Download Link */}
                     <div className="p-4 rounded-none bg-[#050608] border border-[#1F232D]">
@@ -593,11 +624,11 @@ export default function AdminPage() {
 
                     {/* Navigation */}
                     <div className="flex items-center justify-between pt-2">
-                      <button onClick={() => setStep(1)} className="flex items-center gap-2 px-5 h-12 rounded-none bg-[#1F232D] text-[#F9FAFB] font-medium hover:bg-[#1F232D]/80 transition-all">
-                        <ChevronLeft className="w-4 h-4" /> Back
+                      <button onClick={() => setStep(1)} className="flex items-center gap-2 px-4 md:px-5 h-10 md:h-12 rounded-none bg-[#1F232D] text-[#F9FAFB] font-medium hover:bg-[#1F232D]/80 transition-all text-xs md:text-sm">
+                        <ChevronLeft className="w-3.5 h-3.5 md:w-4 md:h-4" /> Back
                       </button>
-                      <button onClick={() => setStep(3)} className="flex items-center gap-2 px-6 h-12 rounded-none gold-gradient text-[#050608] font-semibold hover:opacity-90 transition-opacity">
-                        Next <ChevronRight className="w-4 h-4" />
+                      <button onClick={() => setStep(3)} className="flex items-center gap-2 px-5 md:px-6 h-10 md:h-12 rounded-none gold-gradient text-[#050608] font-semibold hover:opacity-90 transition-opacity text-xs md:text-sm">
+                        Next <ChevronRight className="w-3.5 h-3.5 md:w-4 md:h-4" />
                       </button>
                     </div>
                   </>
@@ -666,11 +697,11 @@ export default function AdminPage() {
 
                     {/* Navigation */}
                     <div className="flex items-center justify-between pt-2">
-                      <button onClick={() => setStep(2)} className="flex items-center gap-2 px-5 h-12 rounded-none bg-[#1F232D] text-[#F9FAFB] font-medium hover:bg-[#1F232D]/80 transition-all">
-                        <ChevronLeft className="w-4 h-4" /> Back
+                      <button onClick={() => setStep(2)} className="flex items-center gap-2 px-4 md:px-5 h-10 md:h-12 rounded-none bg-[#1F232D] text-[#F9FAFB] font-medium hover:bg-[#1F232D]/80 transition-all text-xs md:text-sm">
+                        <ChevronLeft className="w-3.5 h-3.5 md:w-4 md:h-4" /> Back
                       </button>
-                      <button onClick={handleImport} disabled={importing} className="flex items-center gap-2 px-8 h-12 rounded-none gold-gradient text-[#050608] font-semibold disabled:opacity-50 disabled:cursor-not-allowed hover:opacity-90 transition-opacity">
-                        {importing ? <Loader2 className="w-5 h-5 animate-spin" /> : <><Check className="w-4 h-4" /> Import Content</>}
+                      <button onClick={handleImport} disabled={importing} className="flex items-center gap-2 px-5 md:px-8 h-10 md:h-12 rounded-none gold-gradient text-[#050608] font-semibold disabled:opacity-50 disabled:cursor-not-allowed hover:opacity-90 transition-opacity text-xs md:text-sm">
+                        {importing ? <Loader2 className="w-4 md:w-5 h-4 md:h-5 animate-spin" /> : <><Check className="w-3.5 h-3.5 md:w-4 md:h-4" /> Import</>}
                       </button>
                     </div>
                   </>
@@ -682,17 +713,17 @@ export default function AdminPage() {
 
         {/* EDIT MODAL */}
         {editItem && editData && (
-          <div className="fixed inset-0 z-50 bg-[#050608]/80 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="fixed inset-0 z-50 bg-[#050608]/80 backdrop-blur-sm flex items-center justify-center p-2 md:p-4">
             <div className="w-full max-w-3xl bg-[#0E1015] rounded-none border border-[#1F232D] max-h-[90vh] overflow-y-auto">
-              <div className="flex items-center justify-between p-6 border-b border-[#1F232D]">
-                <h2 className="text-lg font-bold text-[#F9FAFB]">Edit: {editItem.title}</h2>
-                <button onClick={() => { setEditItem(null); setEditData(null); }} className="p-1 rounded-none hover:bg-[#1F232D] transition-colors">
-                  <X className="w-5 h-5 text-[#9CA3AF]" />
+              <div className="flex items-center justify-between p-4 md:p-6 border-b border-[#1F232D]">
+                <h2 className="text-base md:text-lg font-bold text-[#F9FAFB] truncate mr-2">Edit: {editItem.title}</h2>
+                <button onClick={() => { setEditItem(null); setEditData(null); }} className="p-1 rounded-none hover:bg-[#1F232D] transition-colors flex-shrink-0">
+                  <X className="w-4 md:w-5 h-4 md:h-5 text-[#9CA3AF]" />
                 </button>
               </div>
-              <div className="p-6 space-y-5">
+              <div className="p-4 md:p-6 space-y-4 md:space-y-5">
                 {/* Basic fields */}
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
                     <label className="block text-xs text-[#9CA3AF] mb-1">Title</label>
                     <input type="text" value={editData.title || ""} onChange={(e) => setEditData({ ...editData, title: e.target.value })} className="w-full h-10 px-3 rounded-none bg-[#050608] border border-[#1F232D] text-[#F9FAFB] text-sm focus:outline-none focus:border-[#F5C542]" />
@@ -831,7 +862,24 @@ export default function AdminPage() {
                                 }
                                 setEditData({ ...editData, streams: updated });
                               }} placeholder="Embed Iframe URL (fallback)" className="w-full h-9 px-3 rounded-none bg-[#050608] border border-[#1F232D] text-[#F9FAFB] placeholder-[#9CA3AF] text-xs focus:outline-none focus:border-[#F5C542]" />
-                              <div className="flex gap-2">
+                              <div className="flex items-center gap-2 border border-[#1F232D] px-2 py-1.5">
+                                <span className="text-[9px] text-[#9CA3AF] font-medium whitespace-nowrap">Abyss ID</span>
+                                <input type="text" placeholder="sXceKo-r4" onChange={(e) => {
+                                  const id = e.target.value.trim();
+                                  if (id) {
+                                    const updated = [...(editData.streams || [])];
+                                    const streamObj = idx >= 0 ? updated[idx] : { ...stream };
+                                    streamObj.embedIframeLink = `https://abyssplayer.com/${id}`;
+                                    if (idx >= 0) {
+                                      updated[idx] = streamObj;
+                                    } else {
+                                      updated.push(streamObj);
+                                    }
+                                    setEditData({ ...editData, streams: updated });
+                                  }
+                                }} className="flex-1 h-7 px-2 rounded-none bg-[#050608] border border-[#1F232D] text-[#F9FAFB] placeholder-[#9CA3AF] text-[10px] focus:outline-none focus:border-[#F5C542]" />
+                              </div>
+                              <div className="flex flex-col sm:flex-row gap-2">
                                 <select value={stream.subtitles?.[0]?.language || ""} onChange={(e) => {
                                   const updated = [...(editData.streams || [])];
                                   const subs = e.target.value ? [{ language: e.target.value, url: updated[idx]?.subtitles?.[0]?.url || "" }] : [];
@@ -841,7 +889,7 @@ export default function AdminPage() {
                                     updated.push({ ...stream, subtitles: subs });
                                   }
                                   setEditData({ ...editData, streams: updated });
-                                }} className="w-28 h-8 px-2 rounded-none bg-[#050608] border border-[#1F232D] text-[#F9FAFB] text-[10px] focus:outline-none focus:border-[#F5C542] appearance-none cursor-pointer">
+                                }} className="w-full sm:w-28 h-8 px-2 rounded-none bg-[#050608] border border-[#1F232D] text-[#F9FAFB] text-[10px] focus:outline-none focus:border-[#F5C542] appearance-none cursor-pointer">
                                   <option value="" className="bg-[#0E1015]">No subs</option>
                                   {LANGUAGES.map((l) => (
                                     <option key={l} value={l} className="bg-[#0E1015]">{l}</option>
@@ -870,6 +918,13 @@ export default function AdminPage() {
                         <p className="text-xs text-[#F5C542] mb-2">Default Stream</p>
                         <input type="text" value={editData.hlsLink || ""} onChange={(e) => setEditData({ ...editData, hlsLink: e.target.value })} placeholder="HLS Stream URL (.m3u8)" className="w-full h-9 px-3 rounded-none bg-[#050608] border border-[#1F232D] text-[#F9FAFB] placeholder-[#9CA3AF] text-xs focus:outline-none focus:border-[#F5C542] mb-2" />
                         <input type="text" value={editData.embedIframeLink || ""} onChange={(e) => setEditData({ ...editData, embedIframeLink: e.target.value })} placeholder="Embed Iframe URL (fallback)" className="w-full h-9 px-3 rounded-none bg-[#050608] border border-[#1F232D] text-[#F9FAFB] placeholder-[#9CA3AF] text-xs focus:outline-none focus:border-[#F5C542]" />
+                        <div className="flex items-center gap-2 border border-[#1F232D] px-2 py-1.5 mt-2">
+                          <span className="text-[9px] text-[#9CA3AF] font-medium whitespace-nowrap">Abyss ID</span>
+                          <input type="text" placeholder="sXceKo-r4" onChange={(e) => {
+                            const id = e.target.value.trim();
+                            if (id) setEditData({ ...editData, embedIframeLink: `https://abyssplayer.com/${id}` });
+                          }} className="flex-1 h-7 px-2 rounded-none bg-[#050608] border border-[#1F232D] text-[#F9FAFB] placeholder-[#9CA3AF] text-[10px] focus:outline-none focus:border-[#F5C542]" />
+                        </div>
                       </div>
                     )}
                     {/* Download Link */}
@@ -877,30 +932,88 @@ export default function AdminPage() {
                       <label className="block text-xs text-[#9CA3AF] mb-1">Direct Download MP4</label>
                       <input type="text" value={editData.downloadLink || ""} onChange={(e) => setEditData({ ...editData, downloadLink: e.target.value })} placeholder="https://example.com/video.mp4" className="w-full h-9 px-3 rounded-none bg-[#050608] border border-[#1F232D] text-[#F9FAFB] placeholder-[#9CA3AF] text-xs focus:outline-none focus:border-[#F5C542]" />
                     </div>
+                    {/* Peachify */}
+                    <div className="mt-4">
+                      <label className="block text-xs text-[#9CA3AF] mb-1">Peachify ID</label>
+                      <p className="text-[10px] text-[#9CA3AF] mb-2">Peachify media ID — used as fallback if no HLS source.</p>
+                      <input type="text" value={editData.peachifyId || ""} onChange={(e) => setEditData({ ...editData, peachifyId: e.target.value })} placeholder="e.g. 255661" className="w-full h-9 px-3 rounded-none bg-[#050608] border border-[#1F232D] text-[#F9FAFB] placeholder-[#9CA3AF] text-xs focus:outline-none focus:border-[#F5C542]" />
+                    </div>
                   </div>
                 )}
 
                 {/* Series seasons/episodes */}
-                {editItem.type === "series" && editData.seasons && (
+                {editItem.type === "series" && (
                   <div>
-                    <label className="block text-xs text-[#9CA3AF] mb-3">Seasons & Episodes</label>
+                    <div className="flex items-center justify-between mb-3">
+                      <label className="block text-xs text-[#9CA3AF]">Seasons & Episodes</label>
+                      <button onClick={() => {
+                        const maxSeason = Math.max(0, ...editData.seasons.map((s: any) => s.seasonNumber));
+                        setEditData({
+                          ...editData,
+                          seasons: [
+                            ...editData.seasons,
+                            { seasonNumber: maxSeason + 1, episodes: [] },
+                          ],
+                        });
+                      }} className="px-3 py-1.5 rounded-none bg-[#22C55E]/20 text-[#22C55E] text-xs font-medium hover:bg-[#22C55E]/30 transition-all">
+                        + Add Season
+                      </button>
+                    </div>
                     <div className="space-y-4">
                       {editData.seasons.map((season: any, si: number) => (
                         <div key={si} className="p-4 rounded-none bg-[#050608] border border-[#1F232D]">
-                          <p className="text-sm font-medium text-[#F5C542] mb-3">Season {season.seasonNumber}</p>
+                          <div className="flex items-center justify-between mb-3">
+                            <p className="text-sm font-medium text-[#F5C542]">Season {season.seasonNumber}</p>
+                            <button onClick={() => {
+                              const nextNum = (season.episodes?.length || 0) + 1;
+                              const updated = [...editData.seasons];
+                              updated[si] = {
+                                ...updated[si],
+                                episodes: [
+                                  ...(updated[si].episodes || []),
+                                  { episodeNumber: nextNum, episodeTitle: `Episode ${nextNum}`, hlsLink: "", embedIframeLink: "", downloadLink: "", quality: "1080p" },
+                                ],
+                              };
+                              setEditData({ ...editData, seasons: updated });
+                            }} className="px-2.5 py-1 rounded-none bg-[#F5C542]/20 text-[#F5C542] text-[10px] font-medium hover:bg-[#F5C542]/30 transition-all">
+                              + Add Episode
+                            </button>
+                          </div>
                           <div className="space-y-2">
-                            {season.episodes.map((ep: any, ei: number) => (
+                            {season.episodes?.map((ep: any, ei: number) => (
                               <div key={ei} className="flex flex-col sm:flex-row gap-2 p-2 rounded-none bg-[#0E1015] border border-[#1F232D]">
-                                <div className="flex-1">
+                                <div className="flex-1 flex items-center gap-2">
+                                  <span className="text-[10px] text-[#9CA3AF] font-mono w-6">E{ep.episodeNumber}</span>
                                   <input type="text" value={ep.episodeTitle} onChange={(e) => updateEpisode(si, ei, "episodeTitle", e.target.value)} placeholder="Episode title" className="w-full h-9 px-3 rounded-none bg-[#050608] border border-[#1F232D] text-[#F9FAFB] text-xs focus:outline-none focus:border-[#F5C542]" />
                                 </div>
-                                <div className="flex gap-2">
-                                  <input type="text" value={ep.hlsLink || ""} onChange={(e) => updateEpisode(si, ei, "hlsLink", e.target.value)} placeholder="HLS URL" className="w-36 h-9 px-3 rounded-none bg-[#050608] border border-[#1F232D] text-[#F9FAFB] text-xs focus:outline-none focus:border-[#F5C542]" />
-                                  <input type="text" value={ep.embedIframeLink || ""} onChange={(e) => updateEpisode(si, ei, "embedIframeLink", e.target.value)} placeholder="Embed URL" className="w-36 h-9 px-3 rounded-none bg-[#050608] border border-[#1F232D] text-[#F9FAFB] text-xs focus:outline-none focus:border-[#F5C542]" />
-                                  <input type="text" value={ep.downloadLink || ""} onChange={(e) => updateEpisode(si, ei, "downloadLink", e.target.value)} placeholder="Direct MP4 URL" className="w-36 h-9 px-3 rounded-none bg-[#050608] border border-[#1F232D] text-[#F9FAFB] text-xs focus:outline-none focus:border-[#F5C542]" />
+                                <div className="flex flex-col gap-2">
+                                  <div className="flex flex-col sm:flex-row gap-2">
+                                    <input type="text" value={ep.hlsLink || ""} onChange={(e) => updateEpisode(si, ei, "hlsLink", e.target.value)} placeholder="HLS URL" className="w-full sm:w-32 md:w-36 h-9 px-3 rounded-none bg-[#050608] border border-[#1F232D] text-[#F9FAFB] text-xs focus:outline-none focus:border-[#F5C542]" />
+                                    <input type="text" value={ep.embedIframeLink || ""} onChange={(e) => updateEpisode(si, ei, "embedIframeLink", e.target.value)} placeholder="Embed URL" className="w-full sm:w-32 md:w-36 h-9 px-3 rounded-none bg-[#050608] border border-[#1F232D] text-[#F9FAFB] text-xs focus:outline-none focus:border-[#F5C542]" />
+                                    <input type="text" value={ep.downloadLink || ""} onChange={(e) => updateEpisode(si, ei, "downloadLink", e.target.value)} placeholder="Direct MP4 URL" className="w-full sm:w-32 md:w-36 h-9 px-3 rounded-none bg-[#050608] border border-[#1F232D] text-[#F9FAFB] text-xs focus:outline-none focus:border-[#F5C542]" />
+                                  </div>
+                                  <div className="flex flex-col sm:flex-row gap-2">
+                                    <div className="flex items-center gap-2 border border-[#1F232D] px-2 py-1 flex-1">
+                                      <span className="text-[9px] text-[#9CA3AF] font-medium whitespace-nowrap">Abyss ID</span>
+                                      <input type="text" placeholder="sXceKo-r4" onChange={(e) => {
+                                        const id = e.target.value.trim();
+                                        if (id) updateEpisode(si, ei, "embedIframeLink", `https://abyssplayer.com/${id}`);
+                                      }} className="flex-1 h-7 px-2 rounded-none bg-[#050608] border border-[#1F232D] text-[#F9FAFB] placeholder-[#9CA3AF] text-[10px] focus:outline-none focus:border-[#F5C542]" />
+                                    </div>
+                                    <div className="flex items-center gap-2 border border-[#1F232D] px-2 py-1 flex-1">
+                                      <span className="text-[9px] text-[#9CA3AF] font-medium whitespace-nowrap">Peachify ID</span>
+                                      <input type="text" placeholder="255661" onChange={(e) => {
+                                        const id = e.target.value.trim();
+                                        if (id) updateEpisode(si, ei, "peachifyId", id);
+                                      }} className="flex-1 h-7 px-2 rounded-none bg-[#050608] border border-[#1F232D] text-[#F9FAFB] placeholder-[#9CA3AF] text-[10px] focus:outline-none focus:border-[#F5C542]" />
+                                    </div>
+                                  </div>
                                 </div>
                               </div>
                             ))}
+                            {(!season.episodes || season.episodes.length === 0) && (
+                              <p className="text-xs text-[#9CA3AF] text-center py-3">No episodes in this season yet.</p>
+                            )}
                           </div>
                         </div>
                       ))}
@@ -916,6 +1029,64 @@ export default function AdminPage() {
           </div>
         )}
       </div>
+
+      {/* Abyss Browser Modal */}
+      {showAbyssBrowser && (
+        <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/80 p-2 md:p-4">
+          <div className="w-full max-w-2xl max-h-[80vh] bg-[#0E1015] border border-[#1F232D] flex flex-col">
+            <div className="flex items-center justify-between p-3 md:p-4 border-b border-[#1F232D]">
+              <h2 className="text-sm font-bold text-[#F9FAFB]">Your Abyss.to Files</h2>
+              <button onClick={() => setShowAbyssBrowser(false)} className="p-1 rounded-none text-[#9CA3AF] hover:text-[#F9FAFB] transition-colors">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            <div className="p-2 md:p-3 border-b border-[#1F232D]">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[#9CA3AF]" />
+                <input type="text" value={abyssSearch} onChange={(e) => setAbyssSearch(e.target.value)} placeholder="Filter files..." className="w-full h-9 pl-9 pr-3 rounded-none bg-[#050608] border border-[#1F232D] text-[#F9FAFB] placeholder-[#9CA3AF] text-xs focus:outline-none focus:border-[#F5C542]" />
+              </div>
+            </div>
+            <div className="flex-1 overflow-y-auto p-2 md:p-3 space-y-1">
+              {abyssLoading ? (
+                <div className="flex justify-center py-10"><Loader2 className="w-5 h-5 text-[#F5C542] animate-spin" /></div>
+              ) : (
+                (() => {
+                  const filtered = abyssFiles.filter((f: any) => !abyssSearch || f.name.toLowerCase().includes(abyssSearch.toLowerCase()));
+                  if (filtered.length === 0) {
+                    return <p className="text-xs text-[#9CA3AF] text-center py-10">No files found.</p>;
+                  }
+                  return filtered.map((file: any) => (
+                    <div key={file.id} className="flex items-center gap-2 md:gap-3 p-2 md:p-2.5 rounded-none bg-[#050608] border border-[#1F232D] hover:border-[#F5C542]/50 transition-all group">
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs text-[#F9FAFB] truncate">{file.name}</p>
+                        <div className="flex items-center flex-wrap gap-x-2 gap-y-0.5 mt-0.5">
+                          <span className="text-[10px] text-[#9CA3AF] font-mono">{file.id}</span>
+                          <span className="text-[10px] text-[#9CA3AF]">{(file.size / 1073741824).toFixed(1)} GB</span>
+                          {(file.resolutions || []).length > 0 && (
+                            <span className="text-[10px] text-[#F5C542]">{file.resolutions.join(", ")}</span>
+                          )}
+                        </div>
+                      </div>
+                      <button onClick={() => { navigator.clipboard.writeText(file.id); setShowAbyssBrowser(false); }} className="flex items-center gap-1 px-2 py-1.5 md:px-2.5 md:py-1.5 rounded-none bg-[#F5C542]/10 text-[#F5C542] text-[10px] font-medium hover:bg-[#F5C542]/20 transition-all opacity-100 md:opacity-0 md:group-hover:opacity-100">
+                        <Copy className="w-3 h-3" /> Copy ID
+                      </button>
+                      <a href={`https://abyssplayer.com/${file.id}`} target="_blank" rel="noopener noreferrer" className="p-1.5 rounded-none text-[#9CA3AF] hover:text-[#F5C542] transition-colors">
+                        <ExternalLink className="w-3.5 h-3.5" />
+                      </a>
+                    </div>
+                  ));
+                })()
+              )}
+            </div>
+            <div className="p-2 md:p-3 border-t border-[#1F232D] flex justify-between items-center">
+              <p className="text-[10px] text-[#9CA3AF]">{abyssFiles.length} file{abyssFiles.length !== 1 ? "s" : ""} total</p>
+              <button onClick={() => setShowAbyssBrowser(false)} className="px-3 md:px-4 h-8 md:h-9 rounded-none bg-[#1F232D] text-[#F9FAFB] text-xs font-medium hover:bg-[#1F232D]/80 transition-all">
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </AdminGuard>
   );
 }

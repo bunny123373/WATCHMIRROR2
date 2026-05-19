@@ -7,6 +7,7 @@ import { useDispatch } from "react-redux";
 import { addContinueWatching } from "@/store/slices/continueSlice";
 import HLSPlayer from "@/components/HLSPlayer";
 import IframePlayer from "@/components/IframePlayer";
+import { PeachifyPlayer } from "@/components/PeachifyPlayer";
 import DownloadButton from "@/components/DownloadButton";
 import ContentRow from "@/components/ContentRow";
 import { IContent } from "@/types";
@@ -33,9 +34,11 @@ export default function WatchClient({ item, related, audio }: WatchClientProps) 
 
   const hlsSrc = stream?.hlsLink || item.hlsLink || "";
   const embedSrc = stream?.embedIframeLink || item.embedIframeLink || "";
+  const peachifySrc = item.peachifyId || "";
   const hasHls = !!hlsSrc.trim();
   const hasEmbed = !!embedSrc.trim();
-  const canStream = hasHls || hasEmbed;
+  const hasPeachify = !!peachifySrc.trim();
+  const canStream = hasHls || hasPeachify || hasEmbed;
 
   const saveProgress = useCallback((currentTime: number, duration: number) => {
     if (duration > 0 && currentTime / duration > 0.9) return;
@@ -87,11 +90,13 @@ export default function WatchClient({ item, related, audio }: WatchClientProps) 
           {canStream ? (
             hasHls ? (
               <>
-                <HLSPlayer src={hlsSrc} poster={item.banner} subtitleUrl={subUrl} subtitleLang={subLang} onProgress={saveProgress} />
+                <HLSPlayer src={hlsSrc} poster={item.banner} subtitleUrl={subUrl} subtitleLang={subLang} autoPlay audioTrack={audio || undefined} onProgress={saveProgress} />
                 <div className="mt-3">
                   <DownloadButton slug={item.slug} />
                 </div>
               </>
+            ) : hasPeachify ? (
+              <PeachifyPlayer type="movie" mediaId={peachifySrc} />
             ) : (
               <IframePlayer src={embedSrc} />
             )

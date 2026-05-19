@@ -10,6 +10,7 @@ import { markEpisodeWatched, setWatchedEpisodes } from "@/store/slices/episodePr
 import { RootState } from "@/store/store";
 import HLSPlayer from "@/components/HLSPlayer";
 import IframePlayer from "@/components/IframePlayer";
+import { PeachifyPlayer } from "@/components/PeachifyPlayer";
 import DownloadButton from "@/components/DownloadButton";
 import { IContent, Season } from "@/types";
 
@@ -20,6 +21,7 @@ interface SeriesWatchClientProps {
     episodeTitle: string;
     hlsLink?: string;
     embedIframeLink?: string;
+    peachifyId?: string;
     downloadLink?: string;
     quality: string;
   } | null;
@@ -57,7 +59,8 @@ export default function SeriesWatchClient({
 
   const hasHls = !!currentEpisode?.hlsLink?.trim();
   const hasEmbed = !!currentEpisode?.embedIframeLink?.trim();
-  const canStream = hasHls || hasEmbed;
+  const hasPeachify = !!currentEpisode?.peachifyId?.trim();
+  const canStream = hasHls || hasPeachify || hasEmbed;
 
   const allEpisodes = seasons.flatMap((s) =>
     s.episodes.map((e) => ({
@@ -154,11 +157,13 @@ export default function SeriesWatchClient({
           {canStream ? (
           hasHls ? (
             <>
-              <HLSPlayer src={currentEpisode!.hlsLink!} poster={item.banner} onProgress={saveProgress} onEnded={handleEnded} />
+              <HLSPlayer src={currentEpisode!.hlsLink!} poster={item.banner} autoPlay audioTrack={audio || undefined} onProgress={saveProgress} onEnded={handleEnded} />
               <div className="mt-3">
                 <DownloadButton slug={`${item.slug}-s${currentSeason}e${currentEpisodeNum}`} label="Download Episode" />
               </div>
             </>
+          ) : hasPeachify ? (
+            <PeachifyPlayer type="tv" mediaId={currentEpisode!.peachifyId!} season={currentSeason} episode={currentEpisodeNum} />
           ) : (
             <IframePlayer src={currentEpisode!.embedIframeLink!} />
           )

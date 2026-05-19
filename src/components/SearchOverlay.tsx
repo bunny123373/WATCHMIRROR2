@@ -40,12 +40,32 @@ export default function SearchOverlay() {
     debounceRef.current = setTimeout(async () => {
       setLoading(true);
       try {
-        const params = new URLSearchParams({ query });
-        if (filterType !== "all") params.set("type", filterType);
-        if (filterYear) params.set("year", filterYear);
-        const res = await fetch(`/api/tmdb/search?${params}`);
-        const data = await res.json();
-        setResults(data.results || []);
+        const tmdbParams = new URLSearchParams({ query });
+        if (filterType !== "all") tmdbParams.set("type", filterType === "tv" ? "tv" : "movie");
+        if (filterYear) tmdbParams.set("year", filterYear);
+        const [tmdbRes, localRes] = await Promise.all([
+          fetch(`/api/tmdb/search?${tmdbParams}`),
+          fetch(`/api/content?search=${encodeURIComponent(query)}&limit=10`),
+        ]);
+        const tmdbData = await tmdbRes.json();
+        const localData = await localRes.json();
+        const localItems = (localData.items || []).map((item: any) => ({
+          id: item.slug,
+          title: item.title,
+          name: item.title,
+          poster_path: item.poster?.replace(/^https?:\/\/[^\/]+/, ""),
+          media_type: item.type === "series" ? "tv" : item.type,
+          release_date: item.year?.toString(),
+          first_air_date: item.year?.toString(),
+          vote_average: item.rating,
+        }));
+        const merged = [...(tmdbData.results || [])];
+        for (const local of localItems) {
+          if (!merged.some((m: any) => m.id === local.id)) {
+            merged.push(local);
+          }
+        }
+        setResults(merged);
       } catch {
         setResults([]);
       } finally {
@@ -64,7 +84,7 @@ export default function SearchOverlay() {
 
   const getTitle = (r: SearchResult) => "title" in r ? r.title : "name" in r ? r.name : "";
   const getDate = (r: SearchResult) => "release_date" in r ? r.release_date : "first_air_date" in r ? r.first_air_date : "";
-  const getLink = (r: SearchResult) => r.media_type === "tv" ? `/series/${r.id}` : `/movie/${r.id}`;
+  const getLink = (r: any) => r.media_type === "tv" ? `/series/${r.id}` : `/movie/${r.id}`;
 
   return (
     <AnimatePresence>
@@ -131,7 +151,7 @@ export default function SearchOverlay() {
                       <div className="relative w-12 h-16 rounded-none overflow-hidden flex-shrink-0 bg-[#1F232D]">
                         {result.poster_path && (
                           <Image
-                            src={`${TMDB_IMAGE_W500}${result.poster_path}`}
+                            src={result.poster_path.startsWith("http") ? result.poster_path : `${TMDB_IMAGE_W500}${result.poster_path}`}
                             alt={getTitle(result)}
                             fill
                             className="object-cover"

@@ -1,8 +1,7 @@
 import { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
-import { Suspense } from "react";
-import { Play, Star, Calendar, Globe, Clock, Headphones } from "lucide-react";
+import { Star, Calendar, Globe, Clock, Headphones } from "lucide-react";
 import { notFound } from "next/navigation";
 import { connectDB } from "@/lib/db";
 import { Content } from "@/lib/models/Content";
